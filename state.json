@@ -546,242 +546,242 @@
       ],
       "participants": {
         "p1": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p2": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p3": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p4": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p5": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p6": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p7": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p8": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p9": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p10": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p11": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p12": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p13": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p14": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p15": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p16": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p17": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p18": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p19": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p20": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p21": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p22": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p23": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p24": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p25": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p26": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p27": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p28": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p29": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p30": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p31": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p32": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p33": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p34": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         }
       },
       "teams": [
@@ -1690,242 +1690,242 @@
       ],
       "participants": {
         "p1": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p2": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p3": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p4": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p5": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p6": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p7": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p8": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p9": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p10": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p11": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p12": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p13": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p14": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p15": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p16": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p17": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p18": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p19": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p20": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p21": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p22": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p23": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p24": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p25": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p26": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p27": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p28": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p29": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p30": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p31": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p32": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p33": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p34": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         }
       },
       "teams": [],
@@ -1992,242 +1992,242 @@
       ],
       "participants": {
         "p1": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p2": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p3": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p4": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p5": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p6": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p7": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p8": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p9": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p10": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p11": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p12": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p13": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p14": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p15": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p16": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p17": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p18": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p19": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p20": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p21": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p22": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p23": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p24": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p25": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p26": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p27": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p28": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p29": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p30": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p31": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p32": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p33": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p34": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         }
       },
       "teams": [],
@@ -2294,242 +2294,242 @@
       ],
       "participants": {
         "p1": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p2": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p3": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p4": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p5": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p6": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p7": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p8": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p9": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p10": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p11": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p12": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p13": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p14": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p15": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p16": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p17": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p18": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p19": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p20": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p21": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p22": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p23": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p24": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p25": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p26": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p27": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p28": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p29": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p30": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p31": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p32": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p33": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p34": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         }
       },
       "teams": [],
@@ -2596,242 +2596,242 @@
       ],
       "participants": {
         "p1": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p2": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p3": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p4": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p5": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p6": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p7": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p8": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p9": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p10": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p11": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p12": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p13": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p14": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p15": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p16": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p17": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p18": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p19": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p20": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p21": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p22": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p23": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p24": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p25": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p26": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p27": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p28": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p29": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p30": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p31": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p32": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p33": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         },
         "p34": {
+          "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true,
-          "paid": false
+          "inBestBall": true
         }
       },
       "teams": [],
