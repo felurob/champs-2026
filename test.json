@@ -1,0 +1,2681 @@
+{
+  "tournament": {
+    "name": "Champs Utah 2026"
+  },
+  "tripBuyIn": {
+    "amountPerPlayer": 150,
+    "payments": {
+      "p1": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p2": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p3": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p4": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p5": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p6": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p7": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p8": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p9": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p10": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p11": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p12": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p13": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p14": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p15": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p16": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p17": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p18": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p19": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p20": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p21": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p22": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p23": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p24": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p25": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p26": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p27": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p28": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p29": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p30": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p31": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p32": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p33": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p34": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      }
+    }
+  },
+  "players": [
+    {
+      "id": "p1",
+      "name": "Jose Said Mella Barjan",
+      "handicapIndex": 7.7,
+      "notes": "",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p2",
+      "name": "Ricardo Luis Mateo",
+      "handicapIndex": 15.6,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p3",
+      "name": "Felix Olivo",
+      "handicapIndex": 12.1,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p4",
+      "name": "Jay Gonzalez",
+      "handicapIndex": 4.3,
+      "notes": "",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p5",
+      "name": "Juan Carlos Pichardo",
+      "handicapIndex": 6.4,
+      "notes": "",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p6",
+      "name": "Jhonnatan Liriano",
+      "handicapIndex": 12.9,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p7",
+      "name": "Ian Toro",
+      "handicapIndex": 19.9,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p8",
+      "name": "Olived Gonzalez",
+      "handicapIndex": 8,
+      "notes": "",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p9",
+      "name": "Renato Liriano",
+      "handicapIndex": 9.2,
+      "notes": "",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p10",
+      "name": "Billy Wilson Santos Calderon",
+      "handicapIndex": 10.4,
+      "notes": "",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p11",
+      "name": "Priamo Lopez",
+      "handicapIndex": 18.5,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p12",
+      "name": "Oswaldo Rodriguez",
+      "handicapIndex": 9.3,
+      "notes": "",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p13",
+      "name": "Joan Jiménez",
+      "handicapIndex": 18.3,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p14",
+      "name": "Ernesto Jose Julian",
+      "handicapIndex": 25.6,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p15",
+      "name": "Raymundo Reyes",
+      "handicapIndex": 14.7,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p16",
+      "name": "Jose Luis Castillo López",
+      "handicapIndex": 27,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p17",
+      "name": "Cesar Rojas",
+      "handicapIndex": 28,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p18",
+      "name": "Marx Toro",
+      "handicapIndex": 16.7,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p19",
+      "name": "Yovanny Marte",
+      "handicapIndex": 11.2,
+      "notes": "",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p20",
+      "name": "Francisco Amauris Martinez",
+      "handicapIndex": 4.7,
+      "notes": "",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p21",
+      "name": "Rafael Zorrilla (Pichu)",
+      "handicapIndex": 9,
+      "notes": "",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p22",
+      "name": "Edgar Alma",
+      "handicapIndex": -1.8,
+      "notes": "Plus handicap",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p23",
+      "name": "Ramón Villanueva",
+      "handicapIndex": 13,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p24",
+      "name": "Eduardo Ferreiro",
+      "handicapIndex": 14.8,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p25",
+      "name": "Elcris Matias",
+      "handicapIndex": 14.7,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p26",
+      "name": "Magin Ferreiro",
+      "handicapIndex": 11,
+      "notes": "",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p27",
+      "name": "Rafael Rubiera",
+      "handicapIndex": 19.8,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p28",
+      "name": "Fernando Rodriguez",
+      "handicapIndex": 5.2,
+      "notes": "",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p29",
+      "name": "Roberto Rodríguez",
+      "handicapIndex": 9.6,
+      "notes": "",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p30",
+      "name": "Jorge Rojas",
+      "handicapIndex": 17,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p31",
+      "name": "Fermin Enrique Moore Perez",
+      "handicapIndex": 7.9,
+      "notes": "",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p32",
+      "name": "Luis Carlo Rodriguez",
+      "handicapIndex": 6.8,
+      "notes": "",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p33",
+      "name": "Ramses Atallah",
+      "handicapIndex": 15,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p34",
+      "name": "Rene Castillo",
+      "handicapIndex": 22.1,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    }
+  ],
+  "rounds": [
+    {
+      "id": "r1",
+      "number": 1,
+      "courseName": "Ledges Golf Club",
+      "date": "2026-05-18",
+      "teeTime": "10:10 AM MT",
+      "teesByCategory": {
+        "A": {
+          "name": "Blue",
+          "slopeRating": 122,
+          "courseRating": 70.3
+        },
+        "B": {
+          "name": "White",
+          "slopeRating": 117,
+          "courseRating": 68.1
+        }
+      },
+      "holeIndexes": [
+        11,
+        13,
+        7,
+        1,
+        15,
+        5,
+        9,
+        17,
+        3,
+        16,
+        6,
+        18,
+        14,
+        12,
+        8,
+        2,
+        10,
+        4
+      ],
+      "pars": [
+        4,
+        3,
+        5,
+        4,
+        3,
+        4,
+        5,
+        4,
+        4,
+        3,
+        3,
+        4,
+        4,
+        4,
+        4,
+        5,
+        4,
+        5
+      ],
+      "participants": {
+        "p1": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p2": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p3": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p4": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p5": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p6": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p7": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p8": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p9": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p10": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p11": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p12": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p13": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p14": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p15": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p16": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p17": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p18": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p19": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p20": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p21": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p22": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p23": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p24": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p25": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p26": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p27": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p28": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p29": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p30": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p31": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p32": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p33": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p34": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        }
+      },
+      "teams": [],
+      "scores": {
+        "p1": [
+          4,
+          3,
+          5,
+          5,
+          3,
+          5,
+          5,
+          4,
+          4,
+          3,
+          4,
+          4,
+          4,
+          4,
+          5,
+          7,
+          4,
+          5
+        ],
+        "p2": [
+          4,
+          3,
+          6,
+          5,
+          3,
+          6,
+          6,
+          5,
+          5,
+          3,
+          4,
+          4,
+          5,
+          5,
+          5,
+          6,
+          5,
+          6
+        ],
+        "p3": [
+          5,
+          3,
+          6,
+          5,
+          3,
+          4,
+          6,
+          4,
+          6,
+          3,
+          4,
+          4,
+          3,
+          4,
+          5,
+          6,
+          4,
+          6
+        ],
+        "p4": [
+          4,
+          3,
+          5,
+          4,
+          3,
+          3,
+          5,
+          4,
+          4,
+          3,
+          3,
+          4,
+          5,
+          4,
+          3,
+          5,
+          4,
+          6
+        ],
+        "p5": [
+          4,
+          3,
+          6,
+          5,
+          3,
+          5,
+          4,
+          4,
+          5,
+          3,
+          3,
+          4,
+          3,
+          4,
+          5,
+          6,
+          4,
+          6
+        ],
+        "p6": [
+          5,
+          3,
+          5,
+          5,
+          3,
+          5,
+          5,
+          4,
+          5,
+          2,
+          4,
+          3,
+          4,
+          5,
+          4,
+          6,
+          4,
+          6
+        ],
+        "p7": [
+          5,
+          4,
+          5,
+          5,
+          4,
+          5,
+          5,
+          5,
+          5,
+          3,
+          5,
+          4,
+          5,
+          5,
+          5,
+          6,
+          5,
+          6
+        ],
+        "p8": [
+          3,
+          3,
+          6,
+          5,
+          3,
+          5,
+          5,
+          4,
+          5,
+          3,
+          4,
+          3,
+          4,
+          4,
+          6,
+          6,
+          5,
+          6
+        ],
+        "p9": [
+          4,
+          3,
+          7,
+          5,
+          2,
+          5,
+          5,
+          4,
+          5,
+          3,
+          4,
+          4,
+          4,
+          4,
+          3,
+          7,
+          4,
+          6
+        ],
+        "p10": [
+          5,
+          3,
+          6,
+          5,
+          3,
+          4,
+          6,
+          4,
+          5,
+          4,
+          5,
+          4,
+          4,
+          3,
+          5,
+          6,
+          5,
+          6
+        ],
+        "p11": [
+          5,
+          3,
+          6,
+          5,
+          5,
+          5,
+          6,
+          5,
+          5,
+          4,
+          4,
+          4,
+          6,
+          5,
+          5,
+          5,
+          5,
+          6
+        ],
+        "p12": [
+          4,
+          4,
+          5,
+          5,
+          3,
+          5,
+          6,
+          5,
+          5,
+          3,
+          4,
+          4,
+          3,
+          4,
+          5,
+          6,
+          4,
+          6
+        ],
+        "p13": [
+          4,
+          4,
+          6,
+          5,
+          3,
+          6,
+          6,
+          4,
+          5,
+          3,
+          4,
+          5,
+          4,
+          5,
+          4,
+          6,
+          5,
+          6
+        ],
+        "p14": [
+          6,
+          4,
+          7,
+          6,
+          4,
+          6,
+          7,
+          4,
+          7,
+          3,
+          5,
+          5,
+          5,
+          5,
+          6,
+          7,
+          6,
+          7
+        ],
+        "p15": [
+          4,
+          3,
+          6,
+          5,
+          3,
+          5,
+          5,
+          4,
+          5,
+          3,
+          5,
+          4,
+          3,
+          4,
+          5,
+          6,
+          5,
+          7
+        ],
+        "p16": [
+          5,
+          4,
+          6,
+          7,
+          4,
+          4,
+          6,
+          5,
+          5,
+          4,
+          4,
+          5,
+          5,
+          5,
+          5,
+          7,
+          5,
+          7
+        ],
+        "p17": [
+          6,
+          4,
+          7,
+          7,
+          4,
+          5,
+          7,
+          5,
+          6,
+          3,
+          5,
+          5,
+          5,
+          5,
+          6,
+          7,
+          7,
+          7
+        ],
+        "p18": [
+          5,
+          4,
+          6,
+          5,
+          5,
+          5,
+          7,
+          3,
+          5,
+          3,
+          3,
+          4,
+          5,
+          5,
+          5,
+          6,
+          5,
+          6
+        ],
+        "p19": [
+          4,
+          4,
+          6,
+          5,
+          5,
+          5,
+          6,
+          4,
+          5,
+          3,
+          4,
+          4,
+          5,
+          5,
+          5,
+          5,
+          5,
+          7
+        ],
+        "p20": [
+          4,
+          3,
+          5,
+          4,
+          3,
+          3,
+          5,
+          4,
+          5,
+          3,
+          3,
+          4,
+          4,
+          4,
+          5,
+          5,
+          3,
+          5
+        ],
+        "p21": [
+          5,
+          3,
+          6,
+          4,
+          3,
+          5,
+          6,
+          4,
+          5,
+          3,
+          4,
+          5,
+          4,
+          4,
+          5,
+          6,
+          4,
+          7
+        ],
+        "p22": [
+          3,
+          2,
+          4,
+          4,
+          2,
+          4,
+          5,
+          3,
+          4,
+          2,
+          4,
+          3,
+          3,
+          5,
+          4,
+          5,
+          4,
+          5
+        ],
+        "p23": [
+          4,
+          3,
+          5,
+          4,
+          3,
+          5,
+          5,
+          5,
+          5,
+          3,
+          3,
+          4,
+          4,
+          3,
+          4,
+          6,
+          4,
+          7
+        ],
+        "p24": [
+          5,
+          3,
+          6,
+          5,
+          3,
+          6,
+          6,
+          4,
+          5,
+          3,
+          4,
+          4,
+          4,
+          5,
+          4,
+          7,
+          5,
+          6
+        ],
+        "p25": [
+          4,
+          4,
+          6,
+          5,
+          4,
+          5,
+          5,
+          4,
+          5,
+          4,
+          4,
+          5,
+          5,
+          5,
+          5,
+          6,
+          5,
+          6
+        ],
+        "p26": [
+          5,
+          3,
+          6,
+          5,
+          3,
+          5,
+          6,
+          4,
+          4,
+          3,
+          4,
+          4,
+          5,
+          5,
+          4,
+          7,
+          5,
+          6
+        ],
+        "p27": [
+          5,
+          4,
+          6,
+          5,
+          4,
+          5,
+          6,
+          5,
+          4,
+          4,
+          4,
+          5,
+          5,
+          6,
+          5,
+          6,
+          4,
+          7
+        ],
+        "p28": [
+          5,
+          4,
+          4,
+          5,
+          3,
+          4,
+          5,
+          4,
+          5,
+          3,
+          3,
+          4,
+          4,
+          4,
+          4,
+          6,
+          4,
+          4
+        ],
+        "p29": [
+          4,
+          4,
+          6,
+          5,
+          3,
+          5,
+          4,
+          4,
+          5,
+          3,
+          4,
+          3,
+          4,
+          4,
+          4,
+          6,
+          4,
+          7
+        ],
+        "p30": [
+          6,
+          4,
+          6,
+          5,
+          4,
+          6,
+          6,
+          3,
+          4,
+          4,
+          4,
+          4,
+          5,
+          5,
+          5,
+          6,
+          5,
+          6
+        ],
+        "p31": [
+          4,
+          2,
+          6,
+          4,
+          4,
+          5,
+          5,
+          4,
+          6,
+          3,
+          4,
+          4,
+          4,
+          4,
+          4,
+          6,
+          4,
+          6
+        ],
+        "p32": [
+          4,
+          3,
+          5,
+          6,
+          3,
+          5,
+          5,
+          4,
+          5,
+          2,
+          3,
+          4,
+          3,
+          4,
+          4,
+          6,
+          4,
+          7
+        ],
+        "p33": [
+          5,
+          2,
+          6,
+          5,
+          3,
+          5,
+          6,
+          4,
+          5,
+          2,
+          5,
+          5,
+          4,
+          4,
+          5,
+          6,
+          5,
+          6
+        ],
+        "p34": [
+          5,
+          4,
+          6,
+          5,
+          3,
+          5,
+          6,
+          5,
+          5,
+          5,
+          3,
+          4,
+          5,
+          5,
+          5,
+          6,
+          6,
+          6
+        ]
+      },
+      "locked": false
+    },
+    {
+      "id": "r2",
+      "number": 2,
+      "courseName": "Conestoga Golf Club",
+      "date": "2026-05-19",
+      "teeTime": "12:10 PM PT",
+      "teesByCategory": {
+        "A": {
+          "name": "Gold",
+          "slopeRating": 132,
+          "courseRating": 72.3
+        },
+        "B": {
+          "name": "Silver/Copper combo",
+          "slopeRating": 120,
+          "courseRating": 69.3
+        }
+      },
+      "holeIndexes": [
+        5,
+        15,
+        9,
+        1,
+        13,
+        3,
+        17,
+        7,
+        11,
+        14,
+        2,
+        16,
+        10,
+        18,
+        8,
+        12,
+        6,
+        4
+      ],
+      "pars": [
+        4,
+        3,
+        4,
+        4,
+        3,
+        5,
+        4,
+        4,
+        5,
+        3,
+        4,
+        5,
+        4,
+        3,
+        4,
+        4,
+        5,
+        4
+      ],
+      "participants": {
+        "p1": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p2": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p3": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p4": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p5": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p6": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p7": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p8": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p9": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p10": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p11": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p12": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p13": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p14": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p15": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p16": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p17": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p18": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p19": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p20": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p21": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p22": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p23": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p24": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p25": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p26": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p27": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p28": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p29": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p30": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p31": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p32": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p33": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p34": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        }
+      },
+      "teams": [],
+      "scores": {},
+      "locked": false
+    },
+    {
+      "id": "r3",
+      "number": 3,
+      "courseName": "Wolf Creek Golf Club",
+      "date": "2026-05-21",
+      "teeTime": "12:00 PM PT",
+      "teesByCategory": {
+        "A": {
+          "name": "Champions",
+          "slopeRating": 138,
+          "courseRating": 70.9
+        },
+        "B": {
+          "name": "Masters",
+          "slopeRating": 134,
+          "courseRating": 68.2
+        }
+      },
+      "holeIndexes": [
+        9,
+        1,
+        7,
+        15,
+        3,
+        11,
+        13,
+        5,
+        17,
+        2,
+        16,
+        8,
+        14,
+        4,
+        18,
+        10,
+        6,
+        12
+      ],
+      "pars": [
+        5,
+        4,
+        3,
+        4,
+        5,
+        4,
+        4,
+        3,
+        4,
+        4,
+        3,
+        5,
+        4,
+        4,
+        3,
+        4,
+        5,
+        4
+      ],
+      "participants": {
+        "p1": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p2": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p3": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p4": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p5": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p6": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p7": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p8": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p9": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p10": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p11": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p12": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p13": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p14": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p15": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p16": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p17": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p18": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p19": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p20": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p21": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p22": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p23": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p24": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p25": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p26": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p27": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p28": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p29": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p30": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p31": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p32": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p33": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p34": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        }
+      },
+      "teams": [],
+      "scores": {},
+      "locked": false
+    },
+    {
+      "id": "r4",
+      "number": 4,
+      "courseName": "Copper Rock Golf Course",
+      "date": "2026-05-22",
+      "teeTime": "10:24 AM MT",
+      "teesByCategory": {
+        "A": {
+          "name": "Black",
+          "slopeRating": 130,
+          "courseRating": 72.1
+        },
+        "B": {
+          "name": "Gold",
+          "slopeRating": 125,
+          "courseRating": 69.2
+        }
+      },
+      "holeIndexes": [
+        16,
+        2,
+        12,
+        14,
+        8,
+        18,
+        4,
+        6,
+        10,
+        7,
+        9,
+        13,
+        1,
+        3,
+        17,
+        11,
+        15,
+        5
+      ],
+      "pars": [
+        5,
+        4,
+        4,
+        3,
+        5,
+        4,
+        3,
+        4,
+        4,
+        4,
+        4,
+        5,
+        4,
+        4,
+        3,
+        5,
+        3,
+        4
+      ],
+      "participants": {
+        "p1": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p2": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p3": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p4": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p5": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p6": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p7": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p8": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p9": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p10": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p11": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p12": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p13": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p14": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p15": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p16": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p17": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p18": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p19": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p20": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p21": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p22": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p23": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p24": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p25": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p26": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p27": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p28": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p29": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p30": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p31": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p32": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p33": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p34": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        }
+      },
+      "teams": [],
+      "scores": {},
+      "locked": false
+    },
+    {
+      "id": "r5",
+      "number": 5,
+      "courseName": "Sand Hollow Championship",
+      "date": "2026-05-23",
+      "teeTime": "10:49 AM MT",
+      "teesByCategory": {
+        "A": {
+          "name": "Championship",
+          "slopeRating": 132,
+          "courseRating": 72.2
+        },
+        "B": {
+          "name": "Fought-Combo",
+          "slopeRating": 116,
+          "courseRating": 67.5
+        }
+      },
+      "holeIndexes": [
+        15,
+        7,
+        17,
+        5,
+        13,
+        1,
+        3,
+        11,
+        9,
+        10,
+        16,
+        2,
+        14,
+        4,
+        8,
+        18,
+        12,
+        6
+      ],
+      "pars": [
+        4,
+        5,
+        3,
+        4,
+        4,
+        4,
+        5,
+        3,
+        4,
+        5,
+        3,
+        4,
+        4,
+        4,
+        3,
+        4,
+        5,
+        4
+      ],
+      "participants": {
+        "p1": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p2": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p3": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p4": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p5": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p6": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p7": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p8": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p9": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p10": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p11": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p12": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p13": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p14": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p15": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p16": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p17": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p18": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p19": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p20": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p21": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p22": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p23": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p24": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p25": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p26": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p27": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p28": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p29": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p30": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p31": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p32": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p33": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        },
+        "p34": {
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "paid": false
+        }
+      },
+      "teams": [],
+      "scores": {},
+      "locked": false
+    }
+  ]
+}
