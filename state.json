@@ -231,9 +231,9 @@
     {
       "id": "p3",
       "name": "Felix Olivo",
-      "handicapIndex": 12.1,
+      "handicapIndex": 12,
       "notes": "",
-      "category": "B",
+      "category": "A",
       "categoryOverride": false
     },
     {
@@ -255,7 +255,7 @@
     {
       "id": "p6",
       "name": "Jhonnatan Liriano",
-      "handicapIndex": 12.9,
+      "handicapIndex": 13.6,
       "notes": "",
       "category": "B",
       "categoryOverride": false
@@ -263,7 +263,7 @@
     {
       "id": "p7",
       "name": "Ian Toro",
-      "handicapIndex": 19.9,
+      "handicapIndex": 20,
       "notes": "",
       "category": "B",
       "categoryOverride": false
@@ -391,7 +391,7 @@
     {
       "id": "p23",
       "name": "Ramón Villanueva",
-      "handicapIndex": 13,
+      "handicapIndex": 12.9,
       "notes": "",
       "category": "B",
       "categoryOverride": false
@@ -407,7 +407,7 @@
     {
       "id": "p25",
       "name": "Elcris Matias",
-      "handicapIndex": 14.7,
+      "handicapIndex": 16,
       "notes": "",
       "category": "B",
       "categoryOverride": false
@@ -415,7 +415,7 @@
     {
       "id": "p26",
       "name": "Magin Ferreiro",
-      "handicapIndex": 11,
+      "handicapIndex": 11.8,
       "notes": "",
       "category": "A",
       "categoryOverride": false
@@ -784,7 +784,168 @@
           "paid": false
         }
       },
-      "teams": [],
+      "teams": [
+        {
+          "id": "tA-f9w",
+          "name": "Team A1",
+          "playerIds": [
+            "p1",
+            "p3"
+          ],
+          "flight": "A"
+        },
+        {
+          "id": "tB-j18",
+          "name": "Team B1",
+          "playerIds": [
+            "p2",
+            "p6"
+          ],
+          "flight": "B"
+        },
+        {
+          "id": "tA-mrw",
+          "name": "Team A2",
+          "playerIds": [
+            "p4",
+            "p5"
+          ],
+          "flight": "A"
+        },
+        {
+          "id": "tA-vqo",
+          "name": "Team A3",
+          "playerIds": [
+            "p8",
+            "p9"
+          ],
+          "flight": "A"
+        },
+        {
+          "id": "tA-1ml",
+          "name": "Team A4",
+          "playerIds": [
+            "p10",
+            "p12"
+          ],
+          "flight": "A"
+        },
+        {
+          "id": "tA-7yc",
+          "name": "Team A5",
+          "playerIds": [
+            "p19",
+            "p20"
+          ],
+          "flight": "A"
+        },
+        {
+          "id": "tA-f4q",
+          "name": "Team A6",
+          "playerIds": [
+            "p21",
+            "p22"
+          ],
+          "flight": "A"
+        },
+        {
+          "id": "tA-p2h",
+          "name": "Team A7",
+          "playerIds": [
+            "p26"
+          ],
+          "flight": "A"
+        },
+        {
+          "id": "tA-xgy",
+          "name": "Team A8",
+          "playerIds": [
+            "p29",
+            "p31"
+          ],
+          "flight": "A"
+        },
+        {
+          "id": "tA-5rb",
+          "name": "Team A9",
+          "playerIds": [
+            "p32",
+            "p28"
+          ],
+          "flight": "A"
+        },
+        {
+          "id": "tB-f5w",
+          "name": "Team B2",
+          "playerIds": [
+            "p11"
+          ],
+          "flight": "B"
+        },
+        {
+          "id": "tB-i6j",
+          "name": "Team B3",
+          "playerIds": [
+            "p13",
+            "p14"
+          ],
+          "flight": "B"
+        },
+        {
+          "id": "tB-mbb",
+          "name": "Team B4",
+          "playerIds": [
+            "p15",
+            "p16"
+          ],
+          "flight": "B"
+        },
+        {
+          "id": "tB-rf2",
+          "name": "Team B5",
+          "playerIds": [
+            "p17",
+            "p18"
+          ],
+          "flight": "B"
+        },
+        {
+          "id": "tB-ya8",
+          "name": "Team B6",
+          "playerIds": [
+            "p23",
+            "p24"
+          ],
+          "flight": "B"
+        },
+        {
+          "id": "tB-49t",
+          "name": "Team B7",
+          "playerIds": [
+            "p25",
+            "p27"
+          ],
+          "flight": "B"
+        },
+        {
+          "id": "tB-are",
+          "name": "Team B8",
+          "playerIds": [
+            "p30",
+            "p33"
+          ],
+          "flight": "B"
+        },
+        {
+          "id": "tB-h3n",
+          "name": "Team B9",
+          "playerIds": [
+            "p34",
+            "p7"
+          ],
+          "flight": "B"
+        }
+      ],
       "scores": {
         "p1": [
           4,
