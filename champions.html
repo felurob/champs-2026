@@ -1,0 +1,2317 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Champs — Payout Manager</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  html, body { margin: 0; padding: 0; background: #F7F5F0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+  #root { min-height: 100vh; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+  const { useState, useMemo, useRef, useEffect } = React;
+  const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
+  const categoryFromIndex = (h) => Number(h) <= 12 ? "A" : "B";
+  function courseHandicap(index, slopeRating, courseRating, coursePar) {
+    const idx = Number(index);
+    if (!isFinite(idx)) return 0;
+    const slope = Number(slopeRating) > 0 ? Number(slopeRating) : 113;
+    const base = Math.round(idx * slope / 113);
+    const cr = Number(courseRating);
+    const par = Number(coursePar);
+    if (!isFinite(cr) || !isFinite(par)) return base;
+    return base + Math.round(cr - par);
+  }
+  const sumPars = (pars) => Array.isArray(pars) ? pars.reduce((a, b) => a + (Number(b) || 0), 0) : 0;
+  function teeForPlayer(round, category) {
+    const t = round.teesByCategory?.[category];
+    if (t && (t.slopeRating != null || t.courseRating != null)) return t;
+    return {
+      name: "",
+      slopeRating: round.slopeRating ?? 113,
+      courseRating: round.courseRating ?? null
+    };
+  }
+  function flightForRound(round, player) {
+    const f = round?.participants?.[player?.id]?.flight;
+    if (f === "A" || f === "B") return f;
+    return player?.category;
+  }
+  function chForPlayer(player, round) {
+    const tee = teeForPlayer(round, flightForRound(round, player));
+    return courseHandicap(
+      player?.handicapIndex,
+      tee.slopeRating,
+      tee.courseRating,
+      sumPars(round.pars)
+    );
+  }
+  const skinsHcp = (h) => clamp(Math.round(0.75 * Number(h)), -18, 18);
+  function strokesOnHole(hcp, holeStrokeIndex) {
+    const SI = holeStrokeIndex;
+    if (hcp >= 0) {
+      const base = Math.floor(hcp / 18);
+      const extra = hcp % 18;
+      return base + (SI <= extra ? 1 : 0);
+    } else {
+      const give = -hcp;
+      const base = -Math.floor(give / 18);
+      const extra = give % 18;
+      return base + (SI >= 19 - extra ? -1 : 0);
+    }
+  }
+  const netOnHole = (gross, hcp, SI) => gross - strokesOnHole(hcp, SI);
+  function countBackTuple(scoresArr, courseHcp) {
+    const grossRange = (from) => {
+      let s = 0;
+      for (let i = from - 1; i < 18; i++) s += Number(scoresArr[i]) || 0;
+      return s;
+    };
+    const ch = Number(courseHcp) || 0;
+    return [
+      grossRange(10) - ch * (9 / 18),
+      grossRange(13) - ch * (6 / 18),
+      grossRange(16) - ch * (3 / 18),
+      (Number(scoresArr[17]) || 0) - ch * (1 / 18)
+    ];
+  }
+  function compareTuples(a, b) {
+    for (let i = 0; i < a.length; i++) {
+      const d = a[i] - b[i];
+      if (Math.abs(d) > 1e-9) return d;
+    }
+    return 0;
+  }
+  const allScored = (scoresArr) => Array.isArray(scoresArr) && scoresArr.length === 18 && scoresArr.every((s) => s !== null && s !== void 0 && s !== "");
+  const sumGross = (scoresArr) => scoresArr.reduce((a, b) => a + (Number(b) || 0), 0);
+  const fmt$ = (n) => {
+    const num = n == null || isNaN(n) ? 0 : Number(n);
+    const isInt = num === Math.floor(num);
+    return num.toLocaleString("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: isInt ? 0 : 2,
+      maximumFractionDigits: isInt ? 0 : 2
+    });
+  };
+  const dollarFloor = (n) => Math.floor(Number(n) || 0);
+  function computeSkinsForCategory(catPlayers, round) {
+    const pot = catPlayers.length * 18;
+    if (catPlayers.length === 0) {
+      return { players: [], pot: 0, holes: [], skinsByPlayer: {}, totalAwarded: 0, skinValue: 0, payouts: {} };
+    }
+    const net = {};
+    for (const p of catPlayers) {
+      const sH = skinsHcp(p.courseHcp);
+      const scores = round.scores[p.id] || [];
+      net[p.id] = round.holeIndexes.map(
+        (SI, i) => scores[i] === "" || scores[i] == null ? null : netOnHole(Number(scores[i]), sH, SI)
+      );
+    }
+    let carryover = 0;
+    const holes = [];
+    const skinsByPlayer = Object.fromEntries(catPlayers.map((p) => [p.id, 0]));
+    for (let h = 0; h < 18; h++) {
+      let lowest = null;
+      let winnerId = null;
+      let tied = false;
+      let anyData = false;
+      for (const p of catPlayers) {
+        const v = net[p.id][h];
+        if (v == null) continue;
+        anyData = true;
+        if (lowest == null || v < lowest) {
+          lowest = v;
+          winnerId = p.id;
+          tied = false;
+        } else if (v === lowest) {
+          tied = true;
+        }
+      }
+      const value = 1 + carryover;
+      if (!anyData) {
+        holes.push({ hole: h + 1, value, winnerId: null, status: "no-data" });
+        carryover = value;
+      } else if (tied) {
+        holes.push({ hole: h + 1, value, winnerId: null, status: "tied-carry" });
+        carryover = value;
+      } else {
+        holes.push({ hole: h + 1, value, winnerId, status: "won" });
+        skinsByPlayer[winnerId] += value;
+        carryover = 0;
+      }
+    }
+    const totalAwarded = Object.values(skinsByPlayer).reduce((a, b) => a + b, 0);
+    const skinValueFloat = totalAwarded > 0 ? pot / totalAwarded : 0;
+    const skinValue = dollarFloor(skinValueFloat);
+    const payouts = {};
+    for (const p of catPlayers) payouts[p.id] = skinsByPlayer[p.id] * skinValue;
+    if (totalAwarded === 0 && catPlayers.length > 0) {
+      const each = dollarFloor(pot / catPlayers.length);
+      for (const p of catPlayers) payouts[p.id] = each;
+    }
+    const allocated = Object.values(payouts).reduce((a, b) => a + b, 0);
+    const houseLeftover = pot - allocated;
+    return {
+      players: catPlayers.map((p) => p.id),
+      pot,
+      holes,
+      skinsByPlayer,
+      totalAwarded,
+      skinValue,
+      payouts,
+      houseLeftover
+    };
+  }
+  function computeIndividualNet(eligible, round) {
+    const N = eligible.length;
+    const pot = N * 5;
+    if (N === 0) return { eligibleIds: [], pot: 0, ranking: [], payouts: {}, positions: {} };
+    const ranking = eligible.map((p) => {
+      const scores = round.scores[p.id] || [];
+      if (!allScored(scores)) return null;
+      const gross = sumGross(scores);
+      return {
+        playerId: p.id,
+        gross,
+        net: gross - Number(p.courseHcp),
+        scores,
+        courseHcp: Number(p.courseHcp),
+        countBack: countBackTuple(scores, Number(p.courseHcp))
+      };
+    }).filter(Boolean);
+    ranking.sort((a, b) => {
+      if (a.net !== b.net) return a.net - b.net;
+      return compareTuples(a.countBack, b.countBack);
+    });
+    ranking.forEach((r, i) => {
+      r.position = i + 1;
+    });
+    let pay = { 1: 0, 2: 0, 3: 0 };
+    if (N === 1) pay[1] = pot;
+    else if (N === 2) {
+      pay[1] = dollarFloor(0.65 * pot);
+      pay[2] = dollarFloor(0.35 * pot);
+    } else {
+      pay[3] = 5;
+      const rem = pot - 5;
+      pay[1] = dollarFloor(0.65 * rem);
+      pay[2] = dollarFloor(0.35 * rem);
+    }
+    const payouts = Object.fromEntries(eligible.map((p) => [p.id, 0]));
+    for (const r of ranking) {
+      payouts[r.playerId] = pay[r.position] || 0;
+    }
+    const allocated = Object.values(payouts).reduce((a, b) => a + b, 0);
+    const houseLeftover = pot - allocated;
+    return { eligibleIds: eligible.map((p) => p.id), pot, ranking, payouts, positions: pay, houseLeftover };
+  }
+  function computeBestBallForFlight(playersAll, round, flight) {
+    const eligibleIds = new Set(
+      playersAll.filter(
+        (p) => flightForRound(round, p) === flight && round.participants[p.id]?.active && round.participants[p.id]?.inBestBall
+      ).map((p) => p.id)
+    );
+    if (eligibleIds.size === 0)
+      return {
+        flight,
+        eligibleIds: [],
+        pot: 0,
+        teamResults: [],
+        teamPayouts: {},
+        playerPayouts: {},
+        positions: {}
+      };
+    const pot = eligibleIds.size * 5;
+    const flightTeams = round.teams.filter((t) => {
+      if (t.flight) return t.flight === flight;
+      const cats = t.playerIds.map((pid) => {
+        const p = playersAll.find((pp) => pp.id === pid);
+        return p ? flightForRound(round, p) : null;
+      }).filter(Boolean);
+      return cats.length > 0 && cats.every((c) => c === flight);
+    });
+    const teamResults = [];
+    for (const team of flightTeams) {
+      const members = team.playerIds.filter((pid) => eligibleIds.has(pid));
+      if (members.length === 0) continue;
+      const perHole = [];
+      let valid = true;
+      for (let h = 0; h < 18; h++) {
+        let bestNet = null;
+        for (const pid of members) {
+          const player = playersAll.find((pp) => pp.id === pid);
+          const g = (round.scores[pid] || [])[h];
+          if (g === "" || g == null) continue;
+          const n = netOnHole(Number(g), Number(player.courseHcp), round.holeIndexes[h]);
+          if (bestNet == null || n < bestNet) bestNet = n;
+        }
+        if (bestNet == null) {
+          valid = false;
+          break;
+        }
+        perHole.push(bestNet);
+      }
+      const teamTotal = valid ? perHole.reduce((a, b) => a + b, 0) : null;
+      const cbTuple = valid ? [
+        perHole.slice(9, 18).reduce((a, b) => a + b, 0),
+        perHole.slice(12, 18).reduce((a, b) => a + b, 0),
+        perHole.slice(15, 18).reduce((a, b) => a + b, 0),
+        perHole[17]
+      ] : null;
+      teamResults.push({
+        teamId: team.id,
+        teamName: team.name,
+        members,
+        total: teamTotal,
+        countBack: cbTuple
+      });
+    }
+    const ranked = teamResults.filter((t) => t.total != null).sort((a, b) => {
+      if (a.total !== b.total) return a.total - b.total;
+      return compareTuples(a.countBack || [0, 0, 0, 0], b.countBack || [0, 0, 0, 0]);
+    });
+    ranked.forEach((r, i) => {
+      r.position = i + 1;
+    });
+    let pay = { 1: 0, 2: 0 };
+    if (ranked.length === 1) pay[1] = pot;
+    else if (ranked.length >= 2) {
+      pay[1] = dollarFloor(0.65 * pot);
+      pay[2] = dollarFloor(0.35 * pot);
+    }
+    const teamPayouts = {};
+    const playerPayouts = {};
+    for (const id of eligibleIds) playerPayouts[id] = 0;
+    let houseLeftover = pot - ((pay[1] || 0) + (pay[2] || 0));
+    for (const t of ranked) {
+      const eachTeam = pay[t.position] || 0;
+      teamPayouts[t.teamId] = eachTeam;
+      if (t.members.length > 0 && eachTeam > 0) {
+        const perMember = dollarFloor(eachTeam / t.members.length);
+        for (const pid of t.members) playerPayouts[pid] += perMember;
+        houseLeftover += eachTeam - perMember * t.members.length;
+      }
+    }
+    return {
+      flight,
+      eligibleIds: Array.from(eligibleIds),
+      pot,
+      teamResults: ranked.concat(teamResults.filter((t) => t.total == null)),
+      teamPayouts,
+      playerPayouts,
+      positions: pay,
+      houseLeftover
+    };
+  }
+  function computeBestBall(playersAll, round) {
+    const a = computeBestBallForFlight(playersAll, round, "A");
+    const b = computeBestBallForFlight(playersAll, round, "B");
+    const playerPayouts = { ...a.playerPayouts, ...b.playerPayouts };
+    return {
+      A: a,
+      B: b,
+      pot: a.pot + b.pot,
+      teamResults: [...a.teamResults, ...b.teamResults],
+      teamPayouts: { ...a.teamPayouts, ...b.teamPayouts },
+      playerPayouts,
+      positions: { A: a.positions, B: b.positions },
+      eligibleIds: [...a.eligibleIds, ...b.eligibleIds],
+      houseLeftover: a.houseLeftover + b.houseLeftover
+    };
+  }
+  function computeRoundResults(round, players) {
+    const playersCH = players.map((p) => ({
+      ...p,
+      flight: flightForRound(round, p),
+      courseHcp: chForPlayer(p, round)
+    }));
+    const activePlayers = playersCH.filter((p) => round.participants[p.id]?.active);
+    const inSkins = (cat) => activePlayers.filter(
+      (p) => round.participants[p.id]?.inSkins && p.flight === cat
+    );
+    const inIN = (cat) => activePlayers.filter(
+      (p) => round.participants[p.id]?.inIndividualNet && p.flight === cat
+    );
+    const skinsA = computeSkinsForCategory(inSkins("A"), round);
+    const skinsB = computeSkinsForCategory(inSkins("B"), round);
+    const indNetA = computeIndividualNet(inIN("A"), round);
+    const indNetB = computeIndividualNet(inIN("B"), round);
+    const indNet = {
+      eligibleIds: [...indNetA.eligibleIds, ...indNetB.eligibleIds],
+      pot: indNetA.pot + indNetB.pot,
+      ranking: [...indNetA.ranking, ...indNetB.ranking],
+      payouts: { ...indNetA.payouts, ...indNetB.payouts },
+      positions: { A: indNetA.positions, B: indNetB.positions }
+    };
+    const bb = computeBestBall(playersCH, round);
+    const houseAmount = activePlayers.length * 2 + (skinsA.houseLeftover || 0) + (skinsB.houseLeftover || 0) + (indNetA.houseLeftover || 0) + (indNetB.houseLeftover || 0) + (bb.houseLeftover || 0);
+    const ledger = {};
+    for (const p of playersCH) {
+      const part = round.participants[p.id] || {};
+      if (!part.active) continue;
+      const contrib = (part.inSkins ? 20 : 0) + (part.inIndividualNet ? 5 : 0) + (part.inBestBall ? 5 : 0);
+      const winSkins = (skinsA.payouts[p.id] || 0) + (skinsB.payouts[p.id] || 0);
+      const winIN = indNet.payouts[p.id] || 0;
+      const winBB = bb.playerPayouts[p.id] || 0;
+      const won = winSkins + winIN + winBB;
+      ledger[p.id] = {
+        contrib,
+        winSkins,
+        winIN,
+        winBB,
+        won,
+        net: won - contrib,
+        courseHcp: p.courseHcp
+      };
+    }
+    return {
+      activePlayerIds: activePlayers.map((p) => p.id),
+      coursePar: sumPars(round.pars),
+      courseHcps: Object.fromEntries(playersCH.map((p) => [p.id, p.courseHcp])),
+      potBreakdown: {
+        skinsA: skinsA.pot,
+        skinsB: skinsB.pot,
+        individualNet: indNet.pot,
+        bestBall: bb.pot,
+        house: houseAmount,
+        total: skinsA.pot + skinsB.pot + indNet.pot + bb.pot + houseAmount
+      },
+      skinsA,
+      skinsB,
+      indNet,
+      indNetA,
+      indNetB,
+      bestBall: bb,
+      bestBallA: bb.A,
+      bestBallB: bb.B,
+      houseAmount,
+      ledger
+    };
+  }
+  function validateRound(round, players) {
+    const warnings = [];
+    for (const cat of ["A", "B"]) {
+      const t = round.teesByCategory?.[cat];
+      if (!t || !t.slopeRating) {
+        warnings.push(`Flight ${cat}: slope rating not set \u2014 course handicaps will use neutral 113.`);
+      }
+      if (!t || t.courseRating == null || t.courseRating === "") {
+        warnings.push(`Flight ${cat}: course rating not set \u2014 will skip the (rating \u2212 par) adjustment.`);
+      }
+    }
+    for (const p of players) {
+      const part = round.participants[p.id];
+      if (part?.active && !flightForRound(round, p)) {
+        warnings.push(`${p.name} is active but has no flight assigned for this round.`);
+      }
+      if (part?.active) {
+        const sc = round.scores[p.id] || [];
+        const filled = sc.filter((s) => s !== "" && s != null).length;
+        if (filled > 0 && filled < 18) {
+          warnings.push(`${p.name}: scores incomplete (${filled}/18).`);
+        }
+      }
+    }
+    const bbPlayers = players.filter(
+      (p) => round.participants[p.id]?.active && round.participants[p.id]?.inBestBall
+    );
+    const inTeam = /* @__PURE__ */ new Set();
+    for (const t of round.teams) for (const pid of t.playerIds) inTeam.add(pid);
+    for (const p of bbPlayers) {
+      if (!inTeam.has(p.id))
+        warnings.push(`${p.name} is in best ball but not on any team.`);
+    }
+    for (const t of round.teams) {
+      if (t.playerIds.length !== 2) {
+        warnings.push(`${t.name}: should have exactly 2 players (currently ${t.playerIds.length}).`);
+      }
+      const cats = new Set(
+        t.playerIds.map((pid) => {
+          const pl = players.find((p) => p.id === pid);
+          return pl ? flightForRound(round, pl) : null;
+        }).filter(Boolean)
+      );
+      if (cats.size > 1) {
+        warnings.push(`${t.name}: mixes Flight A and Flight B players. Best-ball teams must be same flight.`);
+      }
+      if (t.flight && cats.size === 1 && !cats.has(t.flight)) {
+        warnings.push(`${t.name}: tagged Flight ${t.flight} but contains Flight ${[...cats][0]} player(s).`);
+      }
+    }
+    return warnings;
+  }
+  function makeSeed() {
+    const players = [
+      { id: "p1", name: "Jose Said Mella Barjan", handicapIndex: 7.7, notes: "" },
+      { id: "p2", name: "Ricardo Luis Mateo", handicapIndex: 15.6, notes: "" },
+      { id: "p3", name: "Felix Olivo", handicapIndex: 12, notes: "" },
+      { id: "p4", name: "Jay Gonzalez", handicapIndex: 4.3, notes: "" },
+      { id: "p5", name: "Juan Carlos Pichardo", handicapIndex: 6.4, notes: "" },
+      { id: "p6", name: "Jhonnatan Liriano", handicapIndex: 13.6, notes: "" },
+      { id: "p7", name: "Ian Toro", handicapIndex: 20, notes: "" },
+      { id: "p8", name: "Olived Gonzalez", handicapIndex: 8, notes: "" },
+      { id: "p9", name: "Renato Liriano", handicapIndex: 9.2, notes: "" },
+      { id: "p10", name: "Billy Wilson Santos Calderon", handicapIndex: 10.4, notes: "" },
+      { id: "p11", name: "Priamo Lopez", handicapIndex: 18.5, notes: "" },
+      { id: "p12", name: "Oswaldo Rodriguez", handicapIndex: 9.3, notes: "" },
+      { id: "p13", name: "Joan Jim\xE9nez", handicapIndex: 18.3, notes: "" },
+      { id: "p14", name: "Ernesto Jose Julian", handicapIndex: 25.6, notes: "" },
+      { id: "p15", name: "Raymundo Reyes", handicapIndex: 14.7, notes: "" },
+      { id: "p16", name: "Jose Luis Castillo L\xF3pez", handicapIndex: 27, notes: "" },
+      { id: "p17", name: "Cesar Rojas", handicapIndex: 28, notes: "" },
+      { id: "p18", name: "Marx Toro", handicapIndex: 16.7, notes: "" },
+      { id: "p19", name: "Yovanny Marte", handicapIndex: 11.2, notes: "" },
+      { id: "p20", name: "Francisco Amauris Martinez", handicapIndex: 4.7, notes: "" },
+      { id: "p21", name: "Rafael Zorrilla (Pichu)", handicapIndex: 9, notes: "" },
+      { id: "p22", name: "Edgar Alma", handicapIndex: -1.8, notes: "Plus handicap" },
+      { id: "p23", name: "Ram\xF3n Villanueva", handicapIndex: 12.9, notes: "" },
+      { id: "p24", name: "Eduardo Ferreiro", handicapIndex: 14.8, notes: "" },
+      { id: "p25", name: "Elcris Matias", handicapIndex: 16, notes: "" },
+      { id: "p26", name: "Magin Ferreiro", handicapIndex: 11.8, notes: "" },
+      { id: "p27", name: "Rafael Rubiera", handicapIndex: 19.8, notes: "" },
+      { id: "p28", name: "Fernando Rodriguez", handicapIndex: 5.2, notes: "" },
+      { id: "p29", name: "Roberto Rodr\xEDguez", handicapIndex: 9.6, notes: "" },
+      { id: "p30", name: "Jorge Rojas", handicapIndex: 17, notes: "" },
+      { id: "p31", name: "Fermin Enrique Moore Perez", handicapIndex: 7.9, notes: "" },
+      { id: "p32", name: "Luis Carlo Rodriguez", handicapIndex: 6.8, notes: "" },
+      { id: "p33", name: "Ramses Atallah", handicapIndex: 15, notes: "" },
+      { id: "p34", name: "Rene Castillo", handicapIndex: 22.1, notes: "" }
+    ].map((p) => ({
+      ...p,
+      category: categoryFromIndex(p.handicapIndex),
+      categoryOverride: false
+    }));
+    const courses = [
+      {
+        courseName: "Ledges Golf Club",
+        date: "2026-05-18",
+        teeTime: "10:10 AM MT",
+        pars: [4, 3, 5, 4, 3, 4, 5, 4, 4, 3, 3, 4, 4, 4, 4, 5, 4, 5],
+        holeIndexes: [11, 13, 7, 1, 15, 5, 9, 17, 3, 16, 6, 18, 14, 12, 8, 2, 10, 4],
+        teesByCategory: {
+          A: { name: "Blue", slopeRating: 122, courseRating: 70.3 },
+          B: { name: "White", slopeRating: 117, courseRating: 68.1 }
+        }
+      },
+      {
+        courseName: "Conestoga Golf Club",
+        date: "2026-05-19",
+        teeTime: "12:10 PM PT",
+        pars: [4, 3, 4, 4, 3, 5, 4, 4, 5, 3, 4, 5, 4, 3, 4, 4, 5, 4],
+        holeIndexes: [5, 15, 9, 1, 13, 3, 17, 7, 11, 14, 2, 16, 10, 18, 8, 12, 6, 4],
+        teesByCategory: {
+          A: { name: "Gold", slopeRating: 132, courseRating: 72.3 },
+          B: { name: "Silver/Copper combo", slopeRating: 120, courseRating: 69.3 }
+        }
+      },
+      {
+        courseName: "Wolf Creek Golf Club",
+        date: "2026-05-21",
+        teeTime: "12:00 PM PT",
+        pars: [5, 4, 3, 4, 5, 4, 4, 3, 4, 4, 3, 5, 4, 4, 3, 4, 5, 4],
+        holeIndexes: [9, 1, 7, 15, 3, 11, 13, 5, 17, 2, 16, 8, 14, 4, 18, 10, 6, 12],
+        teesByCategory: {
+          A: { name: "Champions", slopeRating: 138, courseRating: 70.9 },
+          B: { name: "Masters", slopeRating: 134, courseRating: 68.2 }
+        }
+      },
+      {
+        courseName: "Copper Rock Golf Course",
+        date: "2026-05-22",
+        teeTime: "10:24 AM MT",
+        pars: [5, 4, 4, 3, 5, 4, 3, 4, 4, 4, 4, 5, 4, 4, 3, 5, 3, 4],
+        holeIndexes: [16, 2, 12, 14, 8, 18, 4, 6, 10, 7, 9, 13, 1, 3, 17, 11, 15, 5],
+        teesByCategory: {
+          A: { name: "Black", slopeRating: 130, courseRating: 72.1 },
+          B: { name: "Gold", slopeRating: 125, courseRating: 69.2 }
+        }
+      },
+      {
+        courseName: "Sand Hollow Championship",
+        date: "2026-05-23",
+        teeTime: "10:49 AM MT",
+        pars: [4, 5, 3, 4, 4, 4, 5, 3, 4, 5, 3, 4, 4, 4, 3, 4, 5, 4],
+        holeIndexes: [15, 7, 17, 5, 13, 1, 3, 11, 9, 10, 16, 2, 14, 4, 8, 18, 12, 6],
+        teesByCategory: {
+          A: { name: "Championship", slopeRating: 132, courseRating: 72.2 },
+          B: { name: "Fought-Combo", slopeRating: 116, courseRating: 67.5 }
+        }
+      }
+    ];
+    const buildParticipants = (ids) => Object.fromEntries(
+      ids.map((id) => [id, { active: true, inSkins: true, inIndividualNet: true, inBestBall: true, paid: false }])
+    );
+    const allIds = players.map((p) => p.id);
+    const rounds = courses.map((c, i) => ({
+      id: `r${i + 1}`,
+      number: i + 1,
+      courseName: c.courseName,
+      date: c.date,
+      teeTime: c.teeTime,
+      teesByCategory: c.teesByCategory,
+      holeIndexes: [...c.holeIndexes],
+      pars: [...c.pars],
+      participants: buildParticipants(allIds),
+      teams: [],
+      scores: {},
+      locked: false
+    }));
+    return {
+      tournament: { name: "Champs Utah 2026" },
+      tripBuyIn: {
+        amountPerPlayer: 150,
+        // 5 rounds × $30 default — adjustable
+        payments: Object.fromEntries(
+          players.map((p) => [p.id, { paid: 0, method: "", date: "", notes: "" }])
+        )
+      },
+      players,
+      rounds
+    };
+  }
+  function migrateState(data) {
+    const fallbackTee = (r) => ({
+      name: "",
+      slopeRating: r.slopeRating ?? 113,
+      courseRating: r.courseRating ?? null
+    });
+    return {
+      ...data,
+      tripBuyIn: data.tripBuyIn ?? {
+        payments: Object.fromEntries(
+          data.players.map((p) => [p.id, { paid: 0, method: "", date: "", notes: "" }])
+        )
+      },
+      players: data.players.map((p) => ({
+        ...p,
+        handicapIndex: p.handicapIndex ?? p.handicap ?? 0
+      })),
+      rounds: data.rounds.map((r) => ({
+        ...r,
+        teeTime: r.teeTime ?? "",
+        teesByCategory: r.teesByCategory ?? { A: fallbackTee(r), B: fallbackTee(r) },
+        participants: Object.fromEntries(
+          Object.entries(r.participants || {}).map(([pid, part]) => [
+            pid,
+            { paid: false, ...part }
+          ])
+        ),
+        teams: (r.teams || []).map((t) => {
+          if (t.flight) return t;
+          const cats = (t.playerIds || []).map((pid) => data.players.find((p) => p.id === pid)?.category).filter(Boolean);
+          const flight = cats.length === 0 ? "A" : cats.every((c) => c === "B") ? "B" : "A";
+          return { ...t, flight };
+        })
+      }))
+    };
+  }
+  function getAuditConfig() {
+    if (typeof window === "undefined") return { auditMode: false };
+    const params = new URLSearchParams(window.location.search);
+    const stateParam = params.get("state");
+    const auditFlag = params.get("audit") === "1";
+    if (stateParam) return { auditMode: true, statePath: stateParam };
+    if (auditFlag) return { auditMode: true, statePath: "state.json" };
+    return { auditMode: false };
+  }
+  const palette = {
+    bg: "#F7F5F0",
+    panel: "#FFFFFF",
+    ink: "#0F1F17",
+    inkSoft: "#4A5C53",
+    rule: "#E4DFD4",
+    green: "#0E5C3A",
+    greenDeep: "#08311F",
+    gold: "#B8862E",
+    alert: "#A8421C",
+    good: "#2B6B3E"
+  };
+  function Pill({ children, tone = "neutral" }) {
+    const map = {
+      neutral: { bg: "#EFEAE0", fg: palette.ink },
+      green: { bg: "#DDEBDF", fg: palette.green },
+      gold: { bg: "#F4E9CD", fg: palette.gold },
+      A: { bg: "#DDEBDF", fg: palette.green },
+      B: { bg: "#F4E9CD", fg: palette.gold },
+      locked: { bg: "#E5DCD4", fg: "#5A3A21" },
+      open: { bg: "#DDEBDF", fg: palette.green }
+    };
+    const c = map[tone] || map.neutral;
+    return /* @__PURE__ */ React.createElement(
+      "span",
+      {
+        className: "inline-flex items-center px-2 py-0.5 text-[11px] uppercase tracking-wider",
+        style: {
+          background: c.bg,
+          color: c.fg,
+          fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+          letterSpacing: "0.08em",
+          borderRadius: 2
+        }
+      },
+      children
+    );
+  }
+  function Btn({ children, onClick, variant = "primary", disabled, type = "button", title }) {
+    const styles = {
+      primary: { bg: palette.greenDeep, fg: "#fff", border: palette.greenDeep },
+      secondary: { bg: "transparent", fg: palette.ink, border: palette.ink },
+      ghost: { bg: "transparent", fg: palette.inkSoft, border: "transparent" },
+      danger: { bg: palette.alert, fg: "#fff", border: palette.alert },
+      gold: { bg: palette.gold, fg: "#fff", border: palette.gold }
+    };
+    const s = styles[variant] || styles.primary;
+    return /* @__PURE__ */ React.createElement(
+      "button",
+      {
+        type,
+        onClick,
+        disabled,
+        title,
+        className: "px-4 py-2 text-sm font-medium transition active:translate-y-px disabled:opacity-40",
+        style: {
+          background: s.bg,
+          color: s.fg,
+          border: `1px solid ${s.border}`,
+          fontFamily: "ui-sans-serif, system-ui",
+          letterSpacing: "0.02em",
+          borderRadius: 2
+        }
+      },
+      children
+    );
+  }
+  function Card({ title, action, children, dense = false }) {
+    return /* @__PURE__ */ React.createElement(
+      "div",
+      {
+        style: {
+          background: palette.panel,
+          border: `1px solid ${palette.rule}`,
+          borderRadius: 2
+        },
+        className: "overflow-hidden"
+      },
+      (title || action) && /* @__PURE__ */ React.createElement(
+        "div",
+        {
+          className: "flex items-center justify-between px-4 py-3",
+          style: { borderBottom: `1px solid ${palette.rule}` }
+        },
+        /* @__PURE__ */ React.createElement(
+          "h3",
+          {
+            className: "text-sm uppercase",
+            style: {
+              fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+              letterSpacing: "0.12em",
+              color: palette.ink
+            }
+          },
+          title
+        ),
+        action
+      ),
+      /* @__PURE__ */ React.createElement("div", { className: dense ? "" : "p-4" }, children)
+    );
+  }
+  function NumberInput({ value, onChange, placeholder, min, max, step = 1, disabled, className = "", style = {} }) {
+    return /* @__PURE__ */ React.createElement(
+      "input",
+      {
+        type: "number",
+        value: value ?? "",
+        onChange: (e) => onChange(e.target.value === "" ? "" : Number(e.target.value)),
+        placeholder,
+        min,
+        max,
+        step,
+        disabled,
+        className: `px-2 py-1 text-sm w-full ${className}`,
+        style: {
+          border: `1px solid ${palette.rule}`,
+          background: disabled ? "#F7F5F0" : "#fff",
+          borderRadius: 2,
+          fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+          ...style
+        }
+      }
+    );
+  }
+  function TextInput({ value, onChange, placeholder, disabled, className = "" }) {
+    return /* @__PURE__ */ React.createElement(
+      "input",
+      {
+        type: "text",
+        value: value ?? "",
+        onChange: (e) => onChange(e.target.value),
+        placeholder,
+        disabled,
+        className: `px-2 py-1 text-sm w-full ${className}`,
+        style: {
+          border: `1px solid ${palette.rule}`,
+          background: disabled ? "#F7F5F0" : "#fff",
+          borderRadius: 2
+        }
+      }
+    );
+  }
+  function Toggle({ value, onChange, disabled, label }) {
+    return /* @__PURE__ */ React.createElement("label", { className: "inline-flex items-center gap-2 cursor-pointer select-none" }, /* @__PURE__ */ React.createElement(
+      "span",
+      {
+        className: "relative inline-block w-9 h-5 transition",
+        style: {
+          background: value ? palette.green : "#D5CFC4",
+          borderRadius: 999,
+          opacity: disabled ? 0.4 : 1
+        }
+      },
+      /* @__PURE__ */ React.createElement(
+        "span",
+        {
+          className: "absolute top-0.5 left-0.5 w-4 h-4 bg-white transition-transform",
+          style: {
+            transform: value ? "translateX(16px)" : "translateX(0)",
+            borderRadius: 999
+          }
+        }
+      ),
+      /* @__PURE__ */ React.createElement(
+        "input",
+        {
+          type: "checkbox",
+          checked: !!value,
+          onChange: (e) => onChange(e.target.checked),
+          disabled,
+          className: "absolute inset-0 opacity-0 cursor-pointer"
+        }
+      )
+    ), label && /* @__PURE__ */ React.createElement("span", { className: "text-sm" }, label));
+  }
+  function SetupTab({ state, setState }) {
+    const indexFileRef = useRef(null);
+    const updateName = (v) => setState((s) => ({ ...s, tournament: { ...s.tournament, name: v } }));
+    const importIndexes = async (file) => {
+      let text = await file.text();
+      if (text.charCodeAt(0) === 65279) text = text.slice(1);
+      const lines = text.split(/\r?\n/).filter((l) => l.trim());
+      if (lines.length < 2) {
+        alert("CSV is empty.");
+        return;
+      }
+      const parseLine = (line) => {
+        const cells = [];
+        let cur = "";
+        let inQ = false;
+        for (let i = 0; i < line.length; i++) {
+          const ch = line[i];
+          if (ch === '"') {
+            if (inQ && line[i + 1] === '"') {
+              cur += '"';
+              i++;
+            } else inQ = !inQ;
+          } else if (ch === "," && !inQ) {
+            cells.push(cur);
+            cur = "";
+          } else cur += ch;
+        }
+        cells.push(cur);
+        return cells.map((c) => c.trim());
+      };
+      const header = parseLine(lines[0]).map((h) => h.toLowerCase().replace(/\s+/g, ""));
+      const colFirst = header.findIndex((h) => /^firstname$|^first$/i.test(h));
+      const colLast = header.findIndex((h) => /^lastname$|^last$/i.test(h));
+      const colHcp = header.findIndex((h) => /^handicap$|^index$|^hcp$/i.test(h));
+      if (colFirst === -1 || colLast === -1 || colHcp === -1) {
+        alert(
+          `Couldn't locate FirstName, LastName, and Handicap columns. Detected: ${header.join(", ")}`
+        );
+        return;
+      }
+      const parseHcp = (s) => {
+        const t = String(s).trim();
+        if (t.startsWith("+")) return -Number(t.slice(1));
+        const n = Number(t);
+        return isNaN(n) ? null : n;
+      };
+      const updates = [];
+      const unmatched = [];
+      for (let i = 1; i < lines.length; i++) {
+        const cells = parseLine(lines[i]);
+        const fullName = `${cells[colFirst] ?? ""} ${cells[colLast] ?? ""}`.replace(/\s+/g, " ").trim();
+        if (!fullName) continue;
+        const hcp = parseHcp(cells[colHcp]);
+        if (hcp == null) continue;
+        const player = state.players.find(
+          (p) => p.name.toLowerCase() === fullName.toLowerCase()
+        );
+        if (!player) {
+          unmatched.push(fullName);
+          continue;
+        }
+        updates.push({ id: player.id, handicapIndex: hcp });
+      }
+      if (updates.length === 0) {
+        let msg2 = "No matching players found in the CSV.";
+        if (unmatched.length) msg2 += `
+Names in CSV: ${unmatched.slice(0, 5).join(", ")}${unmatched.length > 5 ? "\u2026" : ""}`;
+        alert(msg2);
+        return;
+      }
+      if (!confirm(
+        `Update handicap index for ${updates.length} player(s)?` + (unmatched.length ? `
+${unmatched.length} unmatched name(s) will be skipped.` : "")
+      ))
+        return;
+      setState((s) => ({
+        ...s,
+        players: s.players.map((p) => {
+          const u = updates.find((u2) => u2.id === p.id);
+          if (!u) return p;
+          const merged = { ...p, handicapIndex: u.handicapIndex };
+          if (!merged.categoryOverride) {
+            merged.category = categoryFromIndex(merged.handicapIndex);
+          }
+          return merged;
+        })
+      }));
+      let msg = `Updated handicap index for ${updates.length} player(s).`;
+      if (unmatched.length) msg += `
+Unmatched (skipped): ${unmatched.join(", ")}`;
+      alert(msg);
+    };
+    const addPlayer = () => {
+      const id = "p" + (Math.max(0, ...state.players.map((p) => Number(p.id.replace("p", "")) || 0)) + 1);
+      setState((s) => ({
+        ...s,
+        players: [
+          ...s.players,
+          {
+            id,
+            name: "New player",
+            handicapIndex: 18,
+            category: "B",
+            categoryOverride: false,
+            notes: ""
+          }
+        ],
+        tripBuyIn: {
+          ...s.tripBuyIn,
+          payments: {
+            ...s.tripBuyIn?.payments || {},
+            [id]: { paid: 0, method: "", date: "", notes: "" }
+          }
+        },
+        // also default-include in every round
+        rounds: s.rounds.map((r) => ({
+          ...r,
+          participants: {
+            ...r.participants,
+            [id]: { active: true, inSkins: true, inIndividualNet: true, inBestBall: true, paid: false }
+          }
+        }))
+      }));
+    };
+    const updatePlayer = (id, patch) => setState((s) => ({
+      ...s,
+      players: s.players.map((p) => {
+        if (p.id !== id) return p;
+        const merged = { ...p, ...patch };
+        if (patch.handicapIndex !== void 0 && !merged.categoryOverride) {
+          merged.category = categoryFromIndex(merged.handicapIndex);
+        }
+        return merged;
+      })
+    }));
+    const removePlayer = (id) => {
+      if (!confirm("Remove this player from the tournament?")) return;
+      setState((s) => {
+        const newPayments = { ...s.tripBuyIn?.payments || {} };
+        delete newPayments[id];
+        return {
+          ...s,
+          players: s.players.filter((p) => p.id !== id),
+          tripBuyIn: { ...s.tripBuyIn, payments: newPayments },
+          rounds: s.rounds.map((r) => {
+            const { [id]: _omit, ...rest } = r.participants;
+            const newScores = { ...r.scores };
+            delete newScores[id];
+            const newTeams = r.teams.map((t) => ({
+              ...t,
+              playerIds: t.playerIds.filter((x) => x !== id)
+            }));
+            return { ...r, participants: rest, scores: newScores, teams: newTeams };
+          })
+        };
+      });
+    };
+    const updateRound = (rid, patch) => setState((s) => ({
+      ...s,
+      rounds: s.rounds.map((r) => r.id === rid ? { ...r, ...patch } : r)
+    }));
+    return /* @__PURE__ */ React.createElement("div", { className: "space-y-6" }, /* @__PURE__ */ React.createElement(Card, { title: "Tournament" }, /* @__PURE__ */ React.createElement("label", { className: "text-xs uppercase tracking-wider", style: { color: palette.inkSoft } }, "Name"), /* @__PURE__ */ React.createElement("div", { className: "mt-1" }, /* @__PURE__ */ React.createElement(TextInput, { value: state.tournament.name, onChange: updateName }))), /* @__PURE__ */ React.createElement(
+      Card,
+      {
+        title: `Players (${state.players.length})`,
+        action: /* @__PURE__ */ React.createElement("div", { className: "flex gap-2 items-center" }, /* @__PURE__ */ React.createElement(
+          Btn,
+          {
+            variant: "secondary",
+            onClick: () => indexFileRef.current?.click()
+          },
+          "Import indexes (CSV)"
+        ), /* @__PURE__ */ React.createElement(
+          "input",
+          {
+            ref: indexFileRef,
+            type: "file",
+            accept: ".csv,text/csv",
+            className: "hidden",
+            onChange: (e) => {
+              if (e.target.files?.[0]) importIndexes(e.target.files[0]);
+              e.target.value = "";
+            }
+          }
+        ), /* @__PURE__ */ React.createElement(Btn, { onClick: addPlayer, variant: "secondary" }, "+ Add player")),
+        dense: true
+      },
+      /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm" }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium", style: { minWidth: 180 } }, "Name"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium", style: { width: 100 } }, "Hcp Index"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium", style: { width: 110 } }, "Category"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium", style: { width: 80 } }, "Override"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Notes"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2" }))), /* @__PURE__ */ React.createElement("tbody", null, state.players.map((p) => {
+        const auto = categoryFromIndex(p.handicapIndex);
+        return /* @__PURE__ */ React.createElement("tr", { key: p.id, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, /* @__PURE__ */ React.createElement(TextInput, { value: p.name, onChange: (v) => updatePlayer(p.id, { name: v }) })), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, /* @__PURE__ */ React.createElement(
+          NumberInput,
+          {
+            value: p.handicapIndex,
+            onChange: (v) => updatePlayer(p.id, { handicapIndex: v })
+          }
+        )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, p.categoryOverride ? /* @__PURE__ */ React.createElement(
+          "select",
+          {
+            value: p.category,
+            onChange: (e) => updatePlayer(p.id, { category: e.target.value }),
+            className: "px-2 py-1 text-sm w-full",
+            style: { border: `1px solid ${palette.rule}`, borderRadius: 2 }
+          },
+          /* @__PURE__ */ React.createElement("option", { value: "A" }, "A"),
+          /* @__PURE__ */ React.createElement("option", { value: "B" }, "B")
+        ) : /* @__PURE__ */ React.createElement(Pill, { tone: auto }, auto)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, /* @__PURE__ */ React.createElement(
+          Toggle,
+          {
+            value: p.categoryOverride,
+            onChange: (v) => updatePlayer(p.id, {
+              categoryOverride: v,
+              ...v ? {} : { category: categoryFromIndex(p.handicapIndex) }
+            })
+          }
+        )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, /* @__PURE__ */ React.createElement(
+          TextInput,
+          {
+            value: p.notes,
+            onChange: (v) => updatePlayer(p.id, { notes: v })
+          }
+        )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, /* @__PURE__ */ React.createElement(
+          "button",
+          {
+            onClick: () => removePlayer(p.id),
+            className: "text-xs",
+            style: { color: palette.alert }
+          },
+          "Remove"
+        )));
+      })))),
+      /* @__PURE__ */ React.createElement("div", { className: "px-3 py-2 text-xs", style: { color: palette.inkSoft } }, "Each player's ", /* @__PURE__ */ React.createElement("strong", null, "handicap index"), " (GHIN/WHS rating). Use ", /* @__PURE__ */ React.createElement("strong", null, "Import indexes (CSV)"), " to update from Golf Pad's daily golfer-list export \u2014 handicap indexes change day to day. Course handicaps are computed per round on the Round \u2192 Course tab. Categories auto-assign by index (A: \u226412, B: \u226513). Plus indexes (e.g. \u22121.8) sit in Category A.")
+    ), /* @__PURE__ */ React.createElement(Card, { title: "Rounds", dense: true }, /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm" }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium", style: { width: 70 } }, "Round"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Course"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium", style: { width: 140 } }, "Date"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium", style: { width: 130 } }, "Tee time"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Tees (A \xB7 B)"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium", style: { width: 90 } }, "Status"))), /* @__PURE__ */ React.createElement("tbody", null, state.rounds.map((r) => {
+      const tA = r.teesByCategory?.A;
+      const tB = r.teesByCategory?.B;
+      const fmtTee = (t) => t ? `${t.name || "\u2014"} (${t.courseRating ?? "?"}/${t.slopeRating ?? "?"})` : "\u2014";
+      return /* @__PURE__ */ React.createElement("tr", { key: r.id, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 font-medium" }, "R", r.number), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, /* @__PURE__ */ React.createElement(
+        TextInput,
+        {
+          value: r.courseName,
+          onChange: (v) => updateRound(r.id, { courseName: v }),
+          disabled: r.locked
+        }
+      )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, /* @__PURE__ */ React.createElement(
+        "input",
+        {
+          type: "date",
+          value: r.date,
+          onChange: (e) => updateRound(r.id, { date: e.target.value }),
+          disabled: r.locked,
+          className: "px-2 py-1 text-sm w-full",
+          style: { border: `1px solid ${palette.rule}`, borderRadius: 2 }
+        }
+      )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, /* @__PURE__ */ React.createElement(
+        TextInput,
+        {
+          value: r.teeTime ?? "",
+          onChange: (v) => updateRound(r.id, { teeTime: v }),
+          disabled: r.locked
+        }
+      )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-xs", style: { color: palette.inkSoft } }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement(Pill, { tone: "A" }, "A"), " ", fmtTee(tA)), /* @__PURE__ */ React.createElement("div", { className: "mt-1" }, /* @__PURE__ */ React.createElement(Pill, { tone: "B" }, "B"), " ", fmtTee(tB))), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, /* @__PURE__ */ React.createElement(Pill, { tone: r.locked ? "locked" : "open" }, r.locked ? "Locked" : "Open")));
+    })))), /* @__PURE__ */ React.createElement("div", { className: "px-3 py-2 text-xs", style: { color: palette.inkSoft } }, "Tees are configured per flight on each round's ", /* @__PURE__ */ React.createElement("strong", null, "Course"), " tab. Format above: tee name (rating/slope).")));
+  }
+  function RoundTab({ state, setState, currentRoundId, setCurrentRoundId }) {
+    const round = state.rounds.find((r) => r.id === currentRoundId);
+    const [subTab, setSubTab] = useState("Participation");
+    const warnings = useMemo(
+      () => round ? validateRound(round, state.players) : [],
+      [round, state.players]
+    );
+    if (!round) return null;
+    const updateRound = (patch) => setState((s) => ({
+      ...s,
+      rounds: s.rounds.map((r) => r.id === round.id ? { ...r, ...patch } : r)
+    }));
+    const toggleLock = () => updateRound({ locked: !round.locked });
+    const subs = ["Participation", "Course", "Teams", "Scores"];
+    return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement("div", { className: "flex flex-wrap items-center gap-2" }, state.rounds.map((r) => /* @__PURE__ */ React.createElement(
+      "button",
+      {
+        key: r.id,
+        onClick: () => setCurrentRoundId(r.id),
+        className: "px-3 py-2 text-sm transition",
+        style: {
+          background: r.id === round.id ? palette.greenDeep : "#fff",
+          color: r.id === round.id ? "#fff" : palette.ink,
+          border: `1px solid ${r.id === round.id ? palette.greenDeep : palette.rule}`,
+          borderRadius: 2
+        }
+      },
+      "R",
+      r.number,
+      /* @__PURE__ */ React.createElement("span", { className: "ml-2 text-xs opacity-70" }, r.courseName)
+    )), /* @__PURE__ */ React.createElement("div", { className: "flex-1" }), /* @__PURE__ */ React.createElement(Pill, { tone: round.locked ? "locked" : "open" }, round.locked ? "Locked" : "Open"), /* @__PURE__ */ React.createElement(Btn, { variant: round.locked ? "secondary" : "danger", onClick: toggleLock }, round.locked ? "Unlock round" : "Lock round")), warnings.length > 0 && /* @__PURE__ */ React.createElement(
+      "div",
+      {
+        className: "px-4 py-3 text-sm",
+        style: { background: "#FBEFE6", color: palette.alert, border: `1px solid #EBC9B0`, borderRadius: 2 }
+      },
+      /* @__PURE__ */ React.createElement("div", { className: "font-medium uppercase text-xs tracking-wider mb-1" }, "Warnings"),
+      /* @__PURE__ */ React.createElement("ul", { className: "list-disc pl-5" }, warnings.map((w, i) => /* @__PURE__ */ React.createElement("li", { key: i }, w)))
+    ), /* @__PURE__ */ React.createElement("div", { className: "flex flex-wrap gap-1" }, subs.map((t) => /* @__PURE__ */ React.createElement(
+      "button",
+      {
+        key: t,
+        onClick: () => setSubTab(t),
+        className: "px-3 py-1.5 text-sm",
+        style: {
+          background: subTab === t ? palette.ink : "transparent",
+          color: subTab === t ? "#fff" : palette.ink,
+          border: `1px solid ${subTab === t ? palette.ink : palette.rule}`,
+          borderRadius: 2
+        }
+      },
+      t
+    ))), subTab === "Participation" && /* @__PURE__ */ React.createElement(ParticipationPanel, { state, round, updateRound }), subTab === "Course" && /* @__PURE__ */ React.createElement(CoursePanel, { round, players: state.players, updateRound }), subTab === "Teams" && /* @__PURE__ */ React.createElement(TeamsPanel, { state, round, updateRound }), subTab === "Scores" && /* @__PURE__ */ React.createElement(ScoresPanel, { state, round, updateRound }));
+  }
+  function ParticipationPanel({ state, round, updateRound }) {
+    const setPart = (pid, patch) => {
+      const old = round.participants[pid] || {
+        active: false,
+        inSkins: false,
+        inIndividualNet: false,
+        inBestBall: false
+      };
+      updateRound({
+        participants: { ...round.participants, [pid]: { ...old, ...patch } }
+      });
+    };
+    const flightOf = (p) => flightForRound(round, p);
+    const active = state.players.filter((p) => round.participants[p.id]?.active);
+    const inSkinsA = active.filter(
+      (p) => round.participants[p.id]?.inSkins && flightOf(p) === "A"
+    );
+    const inSkinsB = active.filter(
+      (p) => round.participants[p.id]?.inSkins && flightOf(p) === "B"
+    );
+    const inIN = active.filter((p) => round.participants[p.id]?.inIndividualNet);
+    const inINA = inIN.filter((p) => flightOf(p) === "A");
+    const inINB = inIN.filter((p) => flightOf(p) === "B");
+    const inBB = active.filter((p) => round.participants[p.id]?.inBestBall);
+    const inBBA = inBB.filter((p) => flightOf(p) === "A");
+    const inBBB = inBB.filter((p) => flightOf(p) === "B");
+    const setAllActive = (val) => updateRound({
+      participants: Object.fromEntries(
+        state.players.map((p) => [
+          p.id,
+          {
+            ...round.participants[p.id] || {
+              inSkins: true,
+              inIndividualNet: true,
+              inBestBall: true
+            },
+            active: val
+          }
+        ])
+      )
+    });
+    const resetAllFlights = () => {
+      if (!confirm("Clear per-round flight overrides for all players in this round?")) return;
+      const next = { ...round.participants };
+      for (const pid of Object.keys(next)) {
+        if (next[pid].flight) {
+          const { flight, ...rest } = next[pid];
+          next[pid] = rest;
+        }
+      }
+      updateRound({ participants: next });
+    };
+    return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-2 md:grid-cols-7 gap-3" }, /* @__PURE__ */ React.createElement(KPI, { label: "Active", value: active.length }), /* @__PURE__ */ React.createElement(KPI, { label: "Skins A pot", value: fmt$(inSkinsA.length * 18), sub: `${inSkinsA.length} pl.` }), /* @__PURE__ */ React.createElement(KPI, { label: "Skins B pot", value: fmt$(inSkinsB.length * 18), sub: `${inSkinsB.length} pl.` }), /* @__PURE__ */ React.createElement(KPI, { label: "IN A pot", value: fmt$(inINA.length * 5), sub: `${inINA.length} pl.` }), /* @__PURE__ */ React.createElement(KPI, { label: "IN B pot", value: fmt$(inINB.length * 5), sub: `${inINB.length} pl.` }), /* @__PURE__ */ React.createElement(KPI, { label: "BB A pot", value: fmt$(inBBA.length * 5), sub: `${inBBA.length} pl.` }), /* @__PURE__ */ React.createElement(KPI, { label: "BB B pot", value: fmt$(inBBB.length * 5), sub: `${inBBB.length} pl.` })), /* @__PURE__ */ React.createElement("div", { className: "flex gap-2 flex-wrap items-center" }, /* @__PURE__ */ React.createElement(Btn, { variant: "secondary", onClick: () => setAllActive(true), disabled: round.locked }, "All in"), /* @__PURE__ */ React.createElement(Btn, { variant: "ghost", onClick: () => setAllActive(false), disabled: round.locked }, "All out"), /* @__PURE__ */ React.createElement(Btn, { variant: "ghost", onClick: resetAllFlights, disabled: round.locked }, "Reset flights"), /* @__PURE__ */ React.createElement("span", { className: "text-xs ml-2", style: { color: palette.inkSoft } }, "The ", /* @__PURE__ */ React.createElement("strong", null, "Flight"), " column is the assignment for THIS round only \u2014 Golf Pad re-flights each day, so override here when needed. The default falls back to the player's static category from their index.")), /* @__PURE__ */ React.createElement(Card, { dense: true }, /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm" }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Player"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium" }, "Index"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium" }, "Flight (this round)"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium" }, "Active"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium" }, "Skins"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium" }, "Ind. Net"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium" }, "Best Ball"))), /* @__PURE__ */ React.createElement("tbody", null, state.players.map((p) => {
+      const part = round.participants[p.id] || {};
+      const effective = flightForRound(round, p);
+      const isOverridden = part.flight === "A" || part.flight === "B";
+      const setFlight = (val) => {
+        if (val === "" || val === p.category) {
+          const { flight, ...rest } = part;
+          updateRound({
+            participants: { ...round.participants, [p.id]: rest }
+          });
+        } else {
+          setPart(p.id, { flight: val });
+        }
+      };
+      return /* @__PURE__ */ React.createElement("tr", { key: p.id, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, p.name), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-center", style: { fontFamily: "ui-monospace" } }, p.handicapIndex), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-center" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-center gap-1" }, /* @__PURE__ */ React.createElement(
+        "select",
+        {
+          value: effective || "",
+          onChange: (e) => setFlight(e.target.value),
+          disabled: round.locked || !part.active,
+          className: "px-2 py-1 text-sm",
+          style: { border: `1px solid ${palette.rule}`, borderRadius: 2, background: "#fff" }
+        },
+        /* @__PURE__ */ React.createElement("option", { value: "A" }, "A"),
+        /* @__PURE__ */ React.createElement("option", { value: "B" }, "B")
+      ), isOverridden && effective !== p.category && /* @__PURE__ */ React.createElement(
+        "span",
+        {
+          title: `Default by index = ${p.category}`,
+          className: "text-xs",
+          style: { color: palette.gold, fontWeight: 700 }
+        },
+        "\u25CF"
+      ))), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-center" }, /* @__PURE__ */ React.createElement(
+        Toggle,
+        {
+          value: part.active,
+          onChange: (v) => setPart(p.id, { active: v }),
+          disabled: round.locked
+        }
+      )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-center" }, /* @__PURE__ */ React.createElement(
+        Toggle,
+        {
+          value: part.inSkins,
+          onChange: (v) => setPart(p.id, { inSkins: v }),
+          disabled: round.locked || !part.active
+        }
+      )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-center" }, /* @__PURE__ */ React.createElement(
+        Toggle,
+        {
+          value: part.inIndividualNet,
+          onChange: (v) => setPart(p.id, { inIndividualNet: v }),
+          disabled: round.locked || !part.active
+        }
+      )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-center" }, /* @__PURE__ */ React.createElement(
+        Toggle,
+        {
+          value: part.inBestBall,
+          onChange: (v) => setPart(p.id, { inBestBall: v }),
+          disabled: round.locked || !part.active
+        }
+      )));
+    }))))));
+  }
+  function KPI({ label, value, sub }) {
+    return /* @__PURE__ */ React.createElement(
+      "div",
+      {
+        style: {
+          background: palette.panel,
+          border: `1px solid ${palette.rule}`,
+          borderRadius: 2
+        },
+        className: "p-3"
+      },
+      /* @__PURE__ */ React.createElement(
+        "div",
+        {
+          className: "text-[10px] uppercase tracking-widest",
+          style: { color: palette.inkSoft }
+        },
+        label
+      ),
+      /* @__PURE__ */ React.createElement("div", { className: "text-lg font-medium", style: { color: palette.ink, fontVariantNumeric: "tabular-nums" } }, value),
+      sub && /* @__PURE__ */ React.createElement("div", { className: "text-xs", style: { color: palette.inkSoft } }, sub)
+    );
+  }
+  function CoursePanel({ round, players, updateRound }) {
+    const setIdx = (h, val) => {
+      const arr = [...round.holeIndexes];
+      arr[h] = Number(val) || 0;
+      updateRound({ holeIndexes: arr });
+    };
+    const setPar = (h, val) => {
+      const arr = [...round.pars || Array(18).fill(4)];
+      arr[h] = Number(val) || 0;
+      updateRound({ pars: arr });
+    };
+    const setTee = (cat, patch) => {
+      const next = {
+        ...round.teesByCategory || {},
+        [cat]: { ...round.teesByCategory?.[cat] || {}, ...patch }
+      };
+      updateRound({ teesByCategory: next });
+    };
+    const coursePar = sumPars(round.pars);
+    const teeA = round.teesByCategory?.A || {};
+    const teeB = round.teesByCategory?.B || {};
+    const previewByCat = ["A", "B"].map((cat) => {
+      const list = (players || []).filter((p) => flightForRound(round, p) === cat).map((p) => ({
+        id: p.id,
+        name: p.name,
+        index: p.handicapIndex,
+        ch: chForPlayer(p, round)
+      })).sort((a, b) => a.ch - b.ch);
+      return { cat, list };
+    });
+    return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement(Card, { title: "Tees by flight \u2014 slope, rating, par" }, /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4" }, ["A", "B"].map((cat) => {
+      const t = cat === "A" ? teeA : teeB;
+      const setT = (patch) => setTee(cat, patch);
+      return /* @__PURE__ */ React.createElement(
+        "div",
+        {
+          key: cat,
+          className: "p-3",
+          style: { border: `1px solid ${palette.rule}`, borderRadius: 2, background: "#FAFAF7" }
+        },
+        /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-2 mb-3" }, /* @__PURE__ */ React.createElement(Pill, { tone: cat }, cat), /* @__PURE__ */ React.createElement("span", { className: "text-sm font-medium" }, "Flight ", cat)),
+        /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-3 gap-2" }, /* @__PURE__ */ React.createElement("div", { className: "col-span-3" }, /* @__PURE__ */ React.createElement("label", { className: "text-xs uppercase tracking-wider", style: { color: palette.inkSoft } }, "Tee name"), /* @__PURE__ */ React.createElement("div", { className: "mt-1" }, /* @__PURE__ */ React.createElement(
+          TextInput,
+          {
+            value: t.name ?? "",
+            onChange: (v) => setT({ name: v }),
+            disabled: round.locked
+          }
+        ))), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-xs uppercase tracking-wider", style: { color: palette.inkSoft } }, "Slope"), /* @__PURE__ */ React.createElement("div", { className: "mt-1" }, /* @__PURE__ */ React.createElement(
+          NumberInput,
+          {
+            value: t.slopeRating ?? "",
+            onChange: (v) => setT({ slopeRating: v === "" ? null : Number(v) }),
+            min: 55,
+            max: 155,
+            disabled: round.locked
+          }
+        ))), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-xs uppercase tracking-wider", style: { color: palette.inkSoft } }, "Rating"), /* @__PURE__ */ React.createElement("div", { className: "mt-1" }, /* @__PURE__ */ React.createElement(
+          NumberInput,
+          {
+            value: t.courseRating ?? "",
+            onChange: (v) => setT({ courseRating: v === "" ? null : Number(v) }),
+            step: 0.1,
+            disabled: round.locked
+          }
+        ))), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-xs uppercase tracking-wider", style: { color: palette.inkSoft } }, "Course par"), /* @__PURE__ */ React.createElement(
+          "div",
+          {
+            className: "mt-1 px-2 py-1.5 text-sm",
+            style: { border: `1px solid ${palette.rule}`, borderRadius: 2, background: "#fff" }
+          },
+          coursePar || "\u2014"
+        )))
+      );
+    })), /* @__PURE__ */ React.createElement(
+      "div",
+      {
+        className: "mt-3 px-3 py-2 text-xs",
+        style: { background: "#FAF7EE", border: `1px solid ${palette.gold}33`, borderRadius: 2, color: palette.ink }
+      },
+      "Formula per flight: ",
+      /* @__PURE__ */ React.createElement("strong", null, "Course Handicap = round(Index \xD7 Slope \xF7 113) + (Course Rating \u2212 Par)"),
+      ". Skins use 75% of course handicap, capped at \xB118. Individual net and best ball use full course handicap."
+    )), /* @__PURE__ */ React.createElement(Card, { title: "Course \u2014 hole stroke index & par" }, /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0" } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-2 py-2 font-medium" }, "Hole"), Array.from({ length: 18 }, (_, i) => /* @__PURE__ */ React.createElement("th", { key: i, className: "px-1 py-2 font-medium text-center" }, i + 1)))), /* @__PURE__ */ React.createElement("tbody", null, /* @__PURE__ */ React.createElement("tr", { style: { borderTop: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-2 py-2 text-xs uppercase tracking-wider", style: { color: palette.inkSoft } }, "Stroke idx"), round.holeIndexes.map((v, i) => /* @__PURE__ */ React.createElement("td", { key: i, className: "px-1 py-1" }, /* @__PURE__ */ React.createElement(
+      NumberInput,
+      {
+        value: v,
+        onChange: (val) => setIdx(i, val),
+        min: 1,
+        max: 18,
+        disabled: round.locked
+      }
+    )))), /* @__PURE__ */ React.createElement("tr", { style: { borderTop: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-2 py-2 text-xs uppercase tracking-wider", style: { color: palette.inkSoft } }, "Par"), (round.pars || Array(18).fill(4)).map((v, i) => /* @__PURE__ */ React.createElement("td", { key: i, className: "px-1 py-1" }, /* @__PURE__ */ React.createElement(
+      NumberInput,
+      {
+        value: v,
+        onChange: (val) => setPar(i, val),
+        min: 3,
+        max: 6,
+        disabled: round.locked
+      }
+    ))))))), /* @__PURE__ */ React.createElement("div", { className: "text-xs mt-3", style: { color: palette.inkSoft } }, "Stroke index 1 = hardest hole. Indexes must be unique 1\u201318 for handicap allocation to be correct.")), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4" }, previewByCat.map(({ cat, list }) => {
+      const t = cat === "A" ? teeA : teeB;
+      return /* @__PURE__ */ React.createElement(
+        Card,
+        {
+          key: cat,
+          title: `Flight ${cat} \u2014 ${t.name || "(tee not set)"} \xB7 ${list.length} players`,
+          dense: true
+        },
+        /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Player"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium", style: { width: 70 } }, "Index"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium", style: { width: 90 } }, "CH"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium", style: { width: 90 } }, "Skins"))), /* @__PURE__ */ React.createElement("tbody", null, list.map((p) => /* @__PURE__ */ React.createElement("tr", { key: p.id, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, p.name), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, p.index), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right", style: { fontWeight: 600 } }, p.ch), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right", style: { color: palette.inkSoft } }, skinsHcp(p.ch)))))))
+      );
+    })));
+  }
+  function TeamsPanel({ state, round, updateRound }) {
+    const chOf = (p) => chForPlayer(p, round);
+    const bbPlayersByFlight = (flight) => state.players.filter(
+      (p) => flightForRound(round, p) === flight && round.participants[p.id]?.active && round.participants[p.id]?.inBestBall
+    );
+    const teamFlight = (t) => {
+      if (t.flight) return t.flight;
+      const cats = t.playerIds.map((pid) => {
+        const pl = state.players.find((p) => p.id === pid);
+        return pl ? flightForRound(round, pl) : null;
+      }).filter(Boolean);
+      if (cats.length === 0) return "A";
+      return cats.every((c) => c === "B") ? "B" : "A";
+    };
+    const teamsByFlight = (flight) => round.teams.filter((t) => teamFlight(t) === flight);
+    const addTeam = (flight) => {
+      const id = "t" + flight + "-" + Date.now().toString(36).slice(-3);
+      const existing = teamsByFlight(flight).length;
+      updateRound({
+        teams: [
+          ...round.teams,
+          { id, name: `Team ${flight}${existing + 1}`, playerIds: [], flight }
+        ]
+      });
+    };
+    const updateTeam = (tid, patch) => updateRound({
+      teams: round.teams.map((t) => t.id === tid ? { ...t, ...patch } : t)
+    });
+    const removeTeam = (tid) => {
+      if (!confirm("Remove team?")) return;
+      updateRound({ teams: round.teams.filter((t) => t.id !== tid) });
+    };
+    const togglePlayerOnTeam = (tid, pid) => {
+      const cleaned = round.teams.map((t) => ({
+        ...t,
+        playerIds: t.id === tid ? t.playerIds : t.playerIds.filter((x) => x !== pid)
+      }));
+      const target = cleaned.find((t) => t.id === tid);
+      const has = target.playerIds.includes(pid);
+      if (!has && target.playerIds.length >= 2) {
+        alert("Best-ball teams are 2-man pairs. Remove a player first.");
+        return;
+      }
+      const newTeams = cleaned.map(
+        (t) => t.id === tid ? {
+          ...t,
+          playerIds: has ? t.playerIds.filter((x) => x !== pid) : [...t.playerIds, pid]
+        } : t
+      );
+      updateRound({ teams: newTeams });
+    };
+    const flightSummary = (flight) => {
+      const pool = bbPlayersByFlight(flight);
+      const assigned = new Set(
+        round.teams.filter((t) => teamFlight(t) === flight).flatMap((t) => t.playerIds)
+      );
+      const unassigned = pool.filter((p) => !assigned.has(p.id));
+      return { pool, unassigned, teams: teamsByFlight(flight) };
+    };
+    const renderFlightColumn = (flight) => {
+      const { pool, unassigned, teams } = flightSummary(flight);
+      const flightBbPool = pool;
+      return /* @__PURE__ */ React.createElement("div", { key: flight }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-between mb-3" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-2" }, /* @__PURE__ */ React.createElement(Pill, { tone: flight }, flight), /* @__PURE__ */ React.createElement("span", { className: "text-sm font-medium" }, "Flight ", flight), /* @__PURE__ */ React.createElement("span", { className: "text-xs", style: { color: palette.inkSoft } }, pool.length, " players \xB7 ", unassigned.length, " unassigned")), /* @__PURE__ */ React.createElement("div", { className: "flex gap-2" }, /* @__PURE__ */ React.createElement(Btn, { variant: "secondary", onClick: () => addTeam(flight), disabled: round.locked }, "+ Pair"))), /* @__PURE__ */ React.createElement("div", { className: "space-y-3" }, teams.length === 0 && /* @__PURE__ */ React.createElement("div", { className: "text-sm", style: { color: palette.inkSoft, fontStyle: "italic" } }, "No teams yet for Flight ", flight, "."), teams.map((t) => {
+        const teamHcpAvg = t.playerIds.length === 0 ? 0 : t.playerIds.reduce((acc, pid) => {
+          const pl = state.players.find((pp) => pp.id === pid);
+          return acc + chOf(pl);
+        }, 0) / t.playerIds.length;
+        return /* @__PURE__ */ React.createElement(
+          Card,
+          {
+            key: t.id,
+            title: /* @__PURE__ */ React.createElement(
+              "input",
+              {
+                type: "text",
+                value: t.name,
+                onChange: (e) => updateTeam(t.id, { name: e.target.value }),
+                disabled: round.locked,
+                className: "text-sm font-medium uppercase tracking-wider bg-transparent",
+                style: { fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", letterSpacing: "0.12em" }
+              }
+            ),
+            action: /* @__PURE__ */ React.createElement("div", { className: "flex gap-2 items-center" }, /* @__PURE__ */ React.createElement("span", { className: "text-xs", style: { color: palette.inkSoft } }, "Avg ch ", teamHcpAvg.toFixed(1), " \xB7 ", t.playerIds.length, "/2"), /* @__PURE__ */ React.createElement(
+              "button",
+              {
+                onClick: () => removeTeam(t.id),
+                className: "text-xs",
+                style: { color: palette.alert },
+                disabled: round.locked
+              },
+              "Remove"
+            ))
+          },
+          /* @__PURE__ */ React.createElement("div", { className: "space-y-1" }, flightBbPool.map((p) => /* @__PURE__ */ React.createElement(
+            "label",
+            {
+              key: p.id,
+              className: "flex items-center justify-between py-1 px-2 cursor-pointer",
+              style: {
+                borderBottom: `1px dashed ${palette.rule}`,
+                opacity: round.locked ? 0.7 : 1
+              }
+            },
+            /* @__PURE__ */ React.createElement("span", { className: "flex items-center gap-2" }, /* @__PURE__ */ React.createElement(
+              "input",
+              {
+                type: "checkbox",
+                checked: t.playerIds.includes(p.id),
+                onChange: () => togglePlayerOnTeam(t.id, p.id),
+                disabled: round.locked
+              }
+            ), /* @__PURE__ */ React.createElement("span", { className: "text-sm" }, p.name)),
+            /* @__PURE__ */ React.createElement("span", { className: "text-xs", style: { color: palette.inkSoft, fontFamily: "ui-monospace" } }, "ch ", chOf(p))
+          )))
+        );
+      })));
+    };
+    return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("div", { className: "text-xs", style: { color: palette.inkSoft } }, "Best-ball teams are 2-man pairs within the same flight. Use ", /* @__PURE__ */ React.createElement("strong", null, "+ Pair"), " in each flight column to add a team, then check off two players to assign them. Each player can only be on one team per round.")), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-6" }, renderFlightColumn("A"), renderFlightColumn("B")));
+  }
+  function ScoresPanel({ state, round, updateRound }) {
+    const fileRef = useRef(null);
+    const chOf = (p) => chForPlayer(p, round);
+    const setScore = (pid, h, val) => {
+      const arr = [...round.scores[pid] || Array(18).fill("")];
+      arr[h] = val === "" ? "" : Number(val);
+      updateRound({ scores: { ...round.scores, [pid]: arr } });
+    };
+    const importCSV = async (file) => {
+      let text = await file.text();
+      if (text.charCodeAt(0) === 65279) text = text.slice(1);
+      const lines = text.split(/\r?\n/).filter((l) => l.trim());
+      if (lines.length < 2) {
+        alert("CSV is empty.");
+        return;
+      }
+      const parseLine = (line) => {
+        const cells = [];
+        let cur = "";
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+          const ch = line[i];
+          if (ch === '"') {
+            if (inQuotes && line[i + 1] === '"') {
+              cur += '"';
+              i++;
+            } else {
+              inQuotes = !inQuotes;
+            }
+          } else if (ch === "," && !inQuotes) {
+            cells.push(cur);
+            cur = "";
+          } else {
+            cur += ch;
+          }
+        }
+        cells.push(cur);
+        return cells.map((c) => c.trim());
+      };
+      const header = parseLine(lines[0]);
+      const norm = (s) => s.replace(/\s+/g, "").toLowerCase();
+      let nameCol = header.findIndex((h) => /^(player|team|name|golfer)$/i.test(h.trim()));
+      if (nameCol === -1) nameCol = 0;
+      const holeColIdxs = [];
+      for (let h = 1; h <= 18; h++) {
+        const idx = header.findIndex((col) => {
+          const n = norm(col);
+          return n === String(h) || n === `hole${h}` || n === `hole#${h}` || n === `h${h}`;
+        });
+        if (idx === -1) {
+          alert(
+            `Couldn't find a column for hole ${h}. Detected header columns:
+` + header.join(" | ")
+          );
+          return;
+        }
+        holeColIdxs.push(idx);
+      }
+      const newScores = { ...round.scores };
+      let imported = 0;
+      let unknown = [];
+      let zeroed = 0;
+      for (let i = 1; i < lines.length; i++) {
+        const cells = parseLine(lines[i]);
+        const name = cells[nameCol] ?? "";
+        if (!name.trim()) continue;
+        const player = state.players.find(
+          (p) => p.name.toLowerCase() === name.toLowerCase()
+        );
+        if (!player) {
+          unknown.push(name);
+          continue;
+        }
+        const scores = holeColIdxs.map((cIdx) => {
+          const v = cells[cIdx];
+          if (v === "" || v == null) return "";
+          const n = Number(v);
+          return isNaN(n) ? "" : n;
+        });
+        if (scores.every((s) => s === 0)) {
+          zeroed++;
+          continue;
+        }
+        newScores[player.id] = scores;
+        imported++;
+      }
+      updateRound({ scores: newScores });
+      let msg = `Imported scores for ${imported} player(s).`;
+      if (zeroed)
+        msg += `
+Skipped ${zeroed} all-zero row(s) \u2014 likely a pre-tournament export. Re-export after play.`;
+      if (unknown.length)
+        msg += `
+Unmatched names: ${unknown.join(", ")}
+Fix the spelling on the Setup tab or in the CSV, then re-import.`;
+      alert(msg);
+    };
+    const activePlayers = state.players.filter(
+      (p) => round.participants[p.id]?.active
+    );
+    const inlineResults = useMemo(
+      () => computeRoundResults(round, state.players),
+      [round, state.players]
+    );
+    const hasAnyScore = Object.values(round.scores || {}).some(
+      (arr) => Array.isArray(arr) && arr.some((s) => s !== "" && s != null)
+    );
+    return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("div", { className: "flex flex-wrap gap-2 items-center" }, /* @__PURE__ */ React.createElement(
+      Btn,
+      {
+        variant: "secondary",
+        onClick: () => fileRef.current?.click(),
+        disabled: round.locked
+      },
+      "Import CSV"
+    ), /* @__PURE__ */ React.createElement(
+      "input",
+      {
+        ref: fileRef,
+        type: "file",
+        accept: ".csv,text/csv",
+        className: "hidden",
+        onChange: (e) => {
+          if (e.target.files?.[0]) importCSV(e.target.files[0]);
+          e.target.value = "";
+        }
+      }
+    ), hasAnyScore && /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(CopyWhatsAppBtn, { round, results: inlineResults, players: state.players }), /* @__PURE__ */ React.createElement(ExportRoundCsvBtn, { round, results: inlineResults, players: state.players })), /* @__PURE__ */ React.createElement("span", { className: "text-xs", style: { color: palette.inkSoft } }, "Accepts Golf Pad export (", /* @__PURE__ */ React.createElement("code", null, '"Team","Hole#1"\u2026"Hole#18","Net"'), ") or simple ", /* @__PURE__ */ React.createElement("code", null, "Player,1,2,\u2026,18"), ". Names match case-insensitively against the roster."))), /* @__PURE__ */ React.createElement(Card, { dense: true }, /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "text-sm", style: { fontVariantNumeric: "tabular-nums", minWidth: 900 } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-2 py-2 font-medium sticky left-0 z-10", style: { background: "#F7F5F0", minWidth: 160 } }, "Player"), /* @__PURE__ */ React.createElement("th", { className: "px-1 py-2 font-medium text-xs", style: { color: palette.inkSoft } }, "CH"), Array.from({ length: 18 }, (_, i) => /* @__PURE__ */ React.createElement("th", { key: i, className: "px-1 py-2 font-medium text-center text-xs" }, i + 1)), /* @__PURE__ */ React.createElement("th", { className: "px-2 py-2 font-medium text-center" }, "Gross"), /* @__PURE__ */ React.createElement("th", { className: "px-2 py-2 font-medium text-center" }, "Net"))), /* @__PURE__ */ React.createElement("tbody", null, activePlayers.map((p) => {
+      const sc = round.scores[p.id] || Array(18).fill("");
+      const filled = sc.filter((s) => s !== "" && s != null).length;
+      const grossTotal = filled === 18 ? sc.reduce((a, b) => a + Number(b), 0) : null;
+      const ch = chOf(p);
+      const netTotal = grossTotal != null ? grossTotal - ch : null;
+      return /* @__PURE__ */ React.createElement("tr", { key: p.id, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 sticky left-0 z-10", style: { background: "#fff" } }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-2" }, /* @__PURE__ */ React.createElement("span", null, p.name), /* @__PURE__ */ React.createElement(Pill, { tone: flightForRound(round, p) }, flightForRound(round, p)))), /* @__PURE__ */ React.createElement("td", { className: "px-1 py-1 text-center text-xs", style: { color: palette.inkSoft } }, ch), Array.from({ length: 18 }, (_, i) => /* @__PURE__ */ React.createElement("td", { key: i, className: "px-0.5 py-0.5" }, /* @__PURE__ */ React.createElement(
+        "input",
+        {
+          type: "number",
+          value: sc[i] ?? "",
+          onChange: (e) => setScore(p.id, i, e.target.value),
+          disabled: round.locked,
+          className: "w-10 text-center text-sm py-1",
+          style: {
+            border: `1px solid ${palette.rule}`,
+            background: round.locked ? "#F7F5F0" : "#fff",
+            borderRadius: 2,
+            fontFamily: "ui-monospace"
+          }
+        }
+      ))), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center font-medium" }, grossTotal ?? "\u2014"), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center font-medium", style: { color: palette.green } }, netTotal ?? "\u2014"));
+    }))))));
+  }
+  function ResultsTab({ state, currentRoundId, setCurrentRoundId }) {
+    const round = state.rounds.find((r) => r.id === currentRoundId);
+    const results = useMemo(
+      () => round ? computeRoundResults(round, state.players) : null,
+      [round, state.players]
+    );
+    if (!round || !results) return null;
+    const playerById = Object.fromEntries(state.players.map((p) => [p.id, p]));
+    return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement("div", { className: "flex flex-wrap items-center gap-2" }, state.rounds.map((r) => /* @__PURE__ */ React.createElement(
+      "button",
+      {
+        key: r.id,
+        onClick: () => setCurrentRoundId(r.id),
+        className: "px-3 py-2 text-sm",
+        style: {
+          background: r.id === round.id ? palette.greenDeep : "#fff",
+          color: r.id === round.id ? "#fff" : palette.ink,
+          border: `1px solid ${r.id === round.id ? palette.greenDeep : palette.rule}`,
+          borderRadius: 2
+        }
+      },
+      "R",
+      r.number
+    ))), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("div", { className: "flex flex-wrap items-center gap-3" }, /* @__PURE__ */ React.createElement("div", { className: "flex-1 min-w-0" }, /* @__PURE__ */ React.createElement("div", { className: "text-xs uppercase tracking-wider", style: { color: palette.inkSoft } }, "Round ", round.number, " \xB7 ", round.courseName), /* @__PURE__ */ React.createElement("div", { className: "text-sm font-medium mt-0.5" }, "Share results with the group or export a CSV ledger")), /* @__PURE__ */ React.createElement(CopyWhatsAppBtn, { round, results, players: state.players }), /* @__PURE__ */ React.createElement(ExportRoundCsvBtn, { round, results, players: state.players }))), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-2 md:grid-cols-6 gap-3" }, /* @__PURE__ */ React.createElement(KPI, { label: "Active", value: results.activePlayerIds.length }), /* @__PURE__ */ React.createElement(KPI, { label: "Skins A", value: fmt$(results.potBreakdown.skinsA) }), /* @__PURE__ */ React.createElement(KPI, { label: "Skins B", value: fmt$(results.potBreakdown.skinsB) }), /* @__PURE__ */ React.createElement(KPI, { label: "IN A", value: fmt$(results.indNetA.pot) }), /* @__PURE__ */ React.createElement(KPI, { label: "IN B", value: fmt$(results.indNetB.pot) }), /* @__PURE__ */ React.createElement(KPI, { label: "Best Ball", value: fmt$(results.potBreakdown.bestBall) })), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-4" }, /* @__PURE__ */ React.createElement(SkinsCard, { title: "Skins \xB7 Category A", data: results.skinsA, playerById }), /* @__PURE__ */ React.createElement(SkinsCard, { title: "Skins \xB7 Category B", data: results.skinsB, playerById })), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-4" }, ["A", "B"].map((flight) => {
+      const data = results[`indNet${flight}`];
+      return /* @__PURE__ */ React.createElement(
+        Card,
+        {
+          key: flight,
+          title: `Individual Net \xB7 Flight ${flight}`,
+          action: /* @__PURE__ */ React.createElement("span", { className: "text-xs", style: { color: palette.inkSoft } }, "pot ", fmt$(data.pot), " \xB7 ", data.eligibleIds.length, " pl.")
+        },
+        data.eligibleIds.length === 0 ? /* @__PURE__ */ React.createElement("div", { className: "text-sm", style: { color: palette.inkSoft } }, "No entrants.") : /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Pos"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Player"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Gross"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Net"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Payout"))), /* @__PURE__ */ React.createElement("tbody", null, data.ranking.map((r) => /* @__PURE__ */ React.createElement("tr", { key: r.playerId, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, /* @__PURE__ */ React.createElement(
+          "span",
+          {
+            className: `inline-block w-6 h-6 text-xs leading-6 text-center ${r.position <= 3 ? "text-white" : ""}`,
+            style: {
+              background: r.position === 1 ? palette.gold : r.position === 2 ? palette.green : r.position === 3 ? palette.ink : "transparent",
+              borderRadius: 999,
+              color: r.position <= 3 ? "#fff" : palette.inkSoft
+            }
+          },
+          r.position
+        )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, playerById[r.playerId]?.name), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, r.gross), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right font-medium" }, r.net), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right font-medium", style: { color: palette.green } }, fmt$(data.payouts[r.playerId] || 0)))))))
+      );
+    })), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-4" }, ["A", "B"].map((flight) => {
+      const data = results[`bestBall${flight}`];
+      return /* @__PURE__ */ React.createElement(
+        Card,
+        {
+          key: flight,
+          title: `Best Ball \xB7 Flight ${flight}`,
+          action: /* @__PURE__ */ React.createElement("span", { className: "text-xs", style: { color: palette.inkSoft } }, "pot ", fmt$(data.pot), " \xB7 ", data.eligibleIds.length, " pl.")
+        },
+        data.teamResults.length === 0 ? /* @__PURE__ */ React.createElement("div", { className: "text-sm", style: { color: palette.inkSoft } }, "No teams yet.") : /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Pos"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Team"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Members"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Net BB"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Team"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Per pl."))), /* @__PURE__ */ React.createElement("tbody", null, data.teamResults.map((t) => /* @__PURE__ */ React.createElement("tr", { key: t.teamId, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, t.position ?? "\u2014"), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 font-medium" }, t.teamName), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-xs", style: { color: palette.inkSoft } }, t.members.map((id) => playerById[id]?.name).join(", ")), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, t.total ?? "\u2014"), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, fmt$(data.teamPayouts[t.teamId] || 0)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right", style: { color: palette.green } }, t.members.length > 0 && data.teamPayouts[t.teamId] ? fmt$((data.teamPayouts[t.teamId] || 0) / t.members.length) : "\u2014"))))))
+      );
+    })), /* @__PURE__ */ React.createElement(Card, { title: "Round payout ledger" }, /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Player"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "In"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Skins"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Ind. Net"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Best Ball"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Total won"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Net"))), /* @__PURE__ */ React.createElement("tbody", null, Object.entries(results.ledger).map(([pid, l]) => /* @__PURE__ */ React.createElement("tr", { key: pid, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, playerById[pid]?.name), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, fmt$(l.contrib)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, fmt$(l.winSkins)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, fmt$(l.winIN)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, fmt$(l.winBB)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right font-medium" }, fmt$(l.won)), /* @__PURE__ */ React.createElement(
+      "td",
+      {
+        className: "px-3 py-2 text-right font-medium",
+        style: { color: l.net >= 0 ? palette.green : palette.alert }
+      },
+      l.net >= 0 ? "+" : "",
+      fmt$(l.net)
+    ))))))), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("div", { className: "flex flex-wrap items-center gap-3" }, /* @__PURE__ */ React.createElement("div", { className: "flex-1 min-w-0 text-sm", style: { color: palette.inkSoft } }, "Share results: copy a formatted summary for WhatsApp, or download the round ledger as CSV."), /* @__PURE__ */ React.createElement(CopyWhatsAppBtn, { round, results, players: state.players }), /* @__PURE__ */ React.createElement(ExportRoundCsvBtn, { round, results, players: state.players }))));
+  }
+  function SkinsCard({ title, data, playerById }) {
+    if (!data || data.players.length === 0)
+      return /* @__PURE__ */ React.createElement(Card, { title }, /* @__PURE__ */ React.createElement("div", { className: "text-sm", style: { color: palette.inkSoft } }, "No entrants in this category."));
+    return /* @__PURE__ */ React.createElement(Card, { title }, /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-3 gap-2 mb-3" }, /* @__PURE__ */ React.createElement(KPI, { label: "Pot", value: fmt$(data.pot) }), /* @__PURE__ */ React.createElement(KPI, { label: "Skins won", value: data.totalAwarded }), /* @__PURE__ */ React.createElement(KPI, { label: "Per skin", value: fmt$(data.skinValue) })), /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-2 py-2 font-medium" }, "Hole"), /* @__PURE__ */ React.createElement("th", { className: "px-2 py-2 font-medium text-center" }, "Skins"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-2 py-2 font-medium" }, "Status"))), /* @__PURE__ */ React.createElement("tbody", null, data.holes.map((h) => /* @__PURE__ */ React.createElement("tr", { key: h.hole, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1" }, h.hole), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center" }, h.value), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1" }, h.status === "won" && /* @__PURE__ */ React.createElement("span", { style: { color: palette.green } }, playerById[h.winnerId]?.name, " +", h.value), h.status === "tied-carry" && /* @__PURE__ */ React.createElement("span", { style: { color: palette.gold } }, "Tied \u2014 carry ", h.value), h.status === "no-data" && /* @__PURE__ */ React.createElement("span", { style: { color: palette.inkSoft } }, "No scores"))))))), /* @__PURE__ */ React.createElement("div", { className: "mt-3" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-2 py-1 font-medium" }, "Player"), /* @__PURE__ */ React.createElement("th", { className: "px-2 py-1 font-medium text-right" }, "Skins"), /* @__PURE__ */ React.createElement("th", { className: "px-2 py-1 font-medium text-right" }, "Payout"))), /* @__PURE__ */ React.createElement("tbody", null, data.players.map((id) => ({
+      id,
+      name: playerById[id]?.name,
+      count: data.skinsByPlayer[id] || 0,
+      pay: data.payouts[id] || 0
+    })).sort((a, b) => b.count - a.count || b.pay - a.pay).map((row) => /* @__PURE__ */ React.createElement("tr", { key: row.id, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1" }, row.name), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-right" }, row.count), /* @__PURE__ */ React.createElement(
+      "td",
+      {
+        className: "px-2 py-1 text-right font-medium",
+        style: { color: row.pay > 0 ? palette.green : palette.inkSoft }
+      },
+      fmt$(row.pay)
+    )))))));
+  }
+  function CopyWhatsAppBtn({ round, results, players }) {
+    const playerById = Object.fromEntries(players.map((p) => [p.id, p]));
+    const onCopy = async () => {
+      const lines = [];
+      lines.push(`\u{1F3CC}\uFE0F *${round.courseName}* \u2014 R${round.number} (${round.date})`);
+      lines.push(`Active: ${results.activePlayerIds.length}`);
+      lines.push("");
+      lines.push(`*Skins A* \u2014 pot ${fmt$(results.potBreakdown.skinsA)} \xB7 per skin ${fmt$(results.skinsA.skinValue)}`);
+      Object.entries(results.skinsA.skinsByPlayer).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).forEach(
+        ([pid, n]) => lines.push(`  \u2022 ${playerById[pid]?.name}: ${n} skins \u2192 ${fmt$(results.skinsA.payouts[pid])}`)
+      );
+      lines.push("");
+      lines.push(`*Skins B* \u2014 pot ${fmt$(results.potBreakdown.skinsB)} \xB7 per skin ${fmt$(results.skinsB.skinValue)}`);
+      Object.entries(results.skinsB.skinsByPlayer).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).forEach(
+        ([pid, n]) => lines.push(`  \u2022 ${playerById[pid]?.name}: ${n} skins \u2192 ${fmt$(results.skinsB.payouts[pid])}`)
+      );
+      lines.push("");
+      lines.push(`*Individual Net A* \u2014 pot ${fmt$(results.indNetA.pot)}`);
+      results.indNetA.ranking.filter((r) => r.position <= 3 && (results.indNetA.payouts[r.playerId] || 0) > 0).forEach(
+        (r) => lines.push(`  ${r.position}. ${playerById[r.playerId]?.name} (${r.net}) \u2192 ${fmt$(results.indNetA.payouts[r.playerId])}`)
+      );
+      lines.push("");
+      lines.push(`*Individual Net B* \u2014 pot ${fmt$(results.indNetB.pot)}`);
+      results.indNetB.ranking.filter((r) => r.position <= 3 && (results.indNetB.payouts[r.playerId] || 0) > 0).forEach(
+        (r) => lines.push(`  ${r.position}. ${playerById[r.playerId]?.name} (${r.net}) \u2192 ${fmt$(results.indNetB.payouts[r.playerId])}`)
+      );
+      lines.push("");
+      lines.push(`*Best Ball A* \u2014 pot ${fmt$(results.bestBallA.pot)}`);
+      results.bestBallA.teamResults.filter((t) => (results.bestBallA.teamPayouts[t.teamId] || 0) > 0).forEach(
+        (t) => lines.push(
+          `  ${t.position}. ${t.teamName} (${t.total}) \u2192 ${fmt$(results.bestBallA.teamPayouts[t.teamId])}`
+        )
+      );
+      lines.push("");
+      lines.push(`*Best Ball B* \u2014 pot ${fmt$(results.bestBallB.pot)}`);
+      results.bestBallB.teamResults.filter((t) => (results.bestBallB.teamPayouts[t.teamId] || 0) > 0).forEach(
+        (t) => lines.push(
+          `  ${t.position}. ${t.teamName} (${t.total}) \u2192 ${fmt$(results.bestBallB.teamPayouts[t.teamId])}`
+        )
+      );
+      const text = lines.join("\n");
+      try {
+        await navigator.clipboard.writeText(text);
+        alert("WhatsApp summary copied to clipboard.");
+      } catch {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        alert("Copied.");
+      }
+    };
+    return /* @__PURE__ */ React.createElement(Btn, { variant: "gold", onClick: onCopy }, "\u{1F4CB} WhatsApp summary");
+  }
+  function ExportRoundCsvBtn({ round, results, players }) {
+    const playerById = Object.fromEntries(players.map((p) => [p.id, p]));
+    const onClick = () => {
+      const rows = [
+        ["Player", "Contribution", "Skins", "Ind.Net", "BestBall", "TotalWon", "Net"].join(",")
+      ];
+      Object.entries(results.ledger).forEach(([pid, l]) => {
+        rows.push(
+          [
+            playerById[pid]?.name,
+            l.contrib.toFixed(2),
+            l.winSkins.toFixed(2),
+            l.winIN.toFixed(2),
+            l.winBB.toFixed(2),
+            l.won.toFixed(2),
+            l.net.toFixed(2)
+          ].join(",")
+        );
+      });
+      const blob = new Blob([rows.join("\n")], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `R${round.number}_${round.courseName.replace(/\s+/g, "_")}_payouts.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+    return /* @__PURE__ */ React.createElement(Btn, { variant: "secondary", onClick }, "Export round CSV");
+  }
+  function LedgerTab({ state }) {
+    const playerById = Object.fromEntries(state.players.map((p) => [p.id, p]));
+    const allResults = state.rounds.map((r) => ({
+      round: r,
+      res: computeRoundResults(r, state.players)
+    }));
+    const cumulative = state.players.map((p) => {
+      const row = {
+        id: p.id,
+        name: p.name,
+        contrib: 0,
+        winSkins: 0,
+        winIN: 0,
+        winBB: 0,
+        won: 0,
+        net: 0,
+        perRound: []
+      };
+      for (const { round, res } of allResults) {
+        const l = res.ledger[p.id];
+        if (!l) {
+          row.perRound.push(null);
+          continue;
+        }
+        row.contrib += l.contrib;
+        row.winSkins += l.winSkins;
+        row.winIN += l.winIN;
+        row.winBB += l.winBB;
+        row.won += l.won;
+        row.net += l.net;
+        row.perRound.push(l.net);
+      }
+      return row;
+    });
+    const totals = cumulative.reduce(
+      (acc, r) => {
+        acc.contrib += r.contrib;
+        acc.winSkins += r.winSkins;
+        acc.winIN += r.winIN;
+        acc.winBB += r.winBB;
+        acc.won += r.won;
+        acc.net += r.net;
+        return acc;
+      },
+      { contrib: 0, winSkins: 0, winIN: 0, winBB: 0, won: 0, net: 0 }
+    );
+    const exportCSV = () => {
+      const headerCols = [
+        "Player",
+        ...state.rounds.map((r) => `R${r.number}_Net`),
+        "Contribution",
+        "Skins",
+        "Ind.Net",
+        "BestBall",
+        "TotalWon",
+        "Net"
+      ];
+      const rows = [headerCols.join(",")];
+      cumulative.forEach((r) => {
+        rows.push(
+          [
+            r.name,
+            ...r.perRound.map((v) => v == null ? "" : v.toFixed(2)),
+            r.contrib.toFixed(2),
+            r.winSkins.toFixed(2),
+            r.winIN.toFixed(2),
+            r.winBB.toFixed(2),
+            r.won.toFixed(2),
+            r.net.toFixed(2)
+          ].join(",")
+        );
+      });
+      const blob = new Blob([rows.join("\n")], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "cumulative_ledger.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+    return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-2 md:grid-cols-3 gap-3" }, /* @__PURE__ */ React.createElement(KPI, { label: "Total contributions", value: fmt$(totals.contrib), sub: "across all rounds" }), /* @__PURE__ */ React.createElement(KPI, { label: "Total winnings", value: fmt$(totals.won) }), /* @__PURE__ */ React.createElement(
+      KPI,
+      {
+        label: "Reconciliation",
+        value: fmt$(totals.contrib - totals.won),
+        sub: "should be $0.00 when all rounds are complete"
+      }
+    )), /* @__PURE__ */ React.createElement(
+      Card,
+      {
+        title: "Cumulative ledger",
+        action: /* @__PURE__ */ React.createElement(Btn, { variant: "secondary", onClick: exportCSV }, "Export CSV"),
+        dense: true
+      },
+      /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Player"), state.rounds.map((r) => /* @__PURE__ */ React.createElement("th", { key: r.id, className: "px-3 py-2 font-medium text-right" }, "R", r.number)), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "In"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Skins"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "IN"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "BB"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Won"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Net"))), /* @__PURE__ */ React.createElement("tbody", null, cumulative.slice().sort((a, b) => b.net - a.net).map((r) => /* @__PURE__ */ React.createElement("tr", { key: r.id, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 font-medium" }, r.name), r.perRound.map((v, i) => /* @__PURE__ */ React.createElement(
+        "td",
+        {
+          key: i,
+          className: "px-3 py-2 text-right text-xs",
+          style: {
+            color: v == null ? palette.inkSoft : v >= 0 ? palette.green : palette.alert
+          }
+        },
+        v == null ? "\u2014" : (v >= 0 ? "+" : "") + fmt$(v)
+      )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, fmt$(r.contrib)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, fmt$(r.winSkins)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, fmt$(r.winIN)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, fmt$(r.winBB)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, fmt$(r.won)), /* @__PURE__ */ React.createElement(
+        "td",
+        {
+          className: "px-3 py-2 text-right font-medium",
+          style: { color: r.net >= 0 ? palette.green : palette.alert }
+        },
+        r.net >= 0 ? "+" : "",
+        fmt$(r.net)
+      )))), /* @__PURE__ */ React.createElement("tfoot", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderTop: `2px solid ${palette.ink}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 font-medium uppercase text-xs tracking-wider" }, "Totals"), state.rounds.map((r) => /* @__PURE__ */ React.createElement("td", { key: r.id })), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right font-medium" }, fmt$(totals.contrib)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right font-medium" }, fmt$(totals.winSkins)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right font-medium" }, fmt$(totals.winIN)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right font-medium" }, fmt$(totals.winBB)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right font-medium" }, fmt$(totals.won)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right font-medium" }, fmt$(totals.net)))))),
+      /* @__PURE__ */ React.createElement("div", { className: "px-3 py-2 text-xs", style: { color: palette.inkSoft } }, `"In" is each player's stake into the side-game pots. "Net" is winnings minus stake.`)
+    ));
+  }
+  function DataTab({ state, setState }) {
+    const fileRef = useRef(null);
+    const exportJson = () => {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `champs_${(state.tournament.name || "tournament").replace(/\s+/g, "_")}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+    const exportStateJson = () => {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "state.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+    const importJson = async (file) => {
+      try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        if (!data.tournament || !Array.isArray(data.players) || !Array.isArray(data.rounds)) {
+          alert("Not a valid tournament file.");
+          return;
+        }
+        const migrated = migrateState(data);
+        if (!confirm("This will replace all current tournament data. Continue?")) return;
+        setState(migrated);
+        alert("Tournament loaded.");
+      } catch (e) {
+        alert("Failed to read JSON: " + e.message);
+      }
+    };
+    const resetSeed = () => {
+      if (!confirm("Reset to seeded sample tournament? This wipes current state.")) return;
+      setState(makeSeed());
+    };
+    return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement(Card, { title: "Save / load" }, /* @__PURE__ */ React.createElement("div", { className: "flex flex-wrap gap-2" }, /* @__PURE__ */ React.createElement(Btn, { onClick: exportJson }, "Export JSON (backup)"), /* @__PURE__ */ React.createElement(Btn, { variant: "secondary", onClick: exportStateJson }, "Export state.json (for hosting)"), /* @__PURE__ */ React.createElement(Btn, { variant: "secondary", onClick: () => fileRef.current?.click() }, "Import JSON"), /* @__PURE__ */ React.createElement(
+      "input",
+      {
+        ref: fileRef,
+        type: "file",
+        accept: ".json,application/json",
+        className: "hidden",
+        onChange: (e) => {
+          if (e.target.files?.[0]) importJson(e.target.files[0]);
+          e.target.value = "";
+        }
+      }
+    ), /* @__PURE__ */ React.createElement("div", { className: "flex-1" }), /* @__PURE__ */ React.createElement(Btn, { variant: "ghost", onClick: resetSeed }, "Reset to sample data")), /* @__PURE__ */ React.createElement("div", { className: "text-xs mt-3", style: { color: palette.inkSoft } }, /* @__PURE__ */ React.createElement("strong", null, "Export JSON (backup)"), ": dated filename \u2014 use for personal backups in Drive/OneDrive.", " ", /* @__PURE__ */ React.createElement("strong", null, "Export state.json (for hosting)"), ": fixed filename \u2014 upload this to your GitHub Pages repo so the public audit view auto-loads it. Data lives in browser memory only \u2014 export to preserve across reloads.")), /* @__PURE__ */ React.createElement(Card, { title: "Payout logic \u2014 quick reference" }, /* @__PURE__ */ React.createElement("div", { className: "text-sm space-y-2", style: { color: palette.ink } }, /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Per active player per round:"), " $28 stake into pots = $18 skins + $5 individual net + $5 best ball. Each side game's pot is built from players entered in that game."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Index vs Course Handicap:"), " the Setup tab stores each player's ", /* @__PURE__ */ React.createElement("em", null, "handicap index"), " (GHIN/WHS, e.g. 7.7). Per-round, the Course tab applies slope and rating to derive each player's ", /* @__PURE__ */ React.createElement("em", null, "course handicap"), ":", /* @__PURE__ */ React.createElement("span", { style: { fontFamily: "ui-monospace" } }, " CH = round(Index \xD7 Slope \xF7 113) + (Course Rating \u2212 Par)"), ". All payouts use the course handicap, not the index."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Skins handicap:"), " 75% of ", /* @__PURE__ */ React.createElement("em", null, "course"), " handicap, rounded, capped at \xB118. Used ", /* @__PURE__ */ React.createElement("em", null, "only"), " for skins. Individual net and best ball use the full course handicap."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Skins:"), " separate pots for Cat A and Cat B. Net low wins each hole; ties carry over. Per-skin value = pot \xF7 skins awarded."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Individual net:"), " separate pots for Flight A and Flight B. Within each flight, with N entrants: N\u22653 \u2192 3rd gets fixed $5, remainder 65/35; N=2 \u2192 65/35 of full pot; N=1 \u2192 full pot."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Best ball:"), " 65/35 split. Each team's payout splits equally among its members."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Ties (IN / BB):"), " resolved by USGA count-back. If two or more players or teams tie on total net, compare net on the last 9 holes; if still tied, the last 6; then last 3; then hole 18. Net for each segment uses a proportional handicap allocation (\xBD \xD7 CH for last 9, \u2153 \xD7 CH for last 6, \u2159 \xD7 CH for last 3, 1\u204418 \xD7 CH for hole 18). Skins ties are handled separately by carryover."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Plus indexes:"), " when course handicap is negative, player gives back strokes on the easiest holes (highest stroke index)."))));
+  }
+  function PaymentsTab({ state, setState }) {
+    const tripBuyIn = state.tripBuyIn || { amountPerPlayer: 150, payments: {} };
+    const expectedRoundContrib = (round, playerId) => {
+      const part = round.participants[playerId];
+      if (!part?.active) return 0;
+      return (part.inSkins ? 20 : 0) + (part.inIndividualNet ? 5 : 0) + (part.inBestBall ? 5 : 0);
+    };
+    const cumulativeNet = useMemo(() => {
+      const map = Object.fromEntries(state.players.map((p) => [p.id, 0]));
+      for (const r of state.rounds) {
+        const res = computeRoundResults(r, state.players);
+        for (const [pid, l] of Object.entries(res.ledger)) {
+          map[pid] = (map[pid] || 0) + l.net;
+        }
+      }
+      return map;
+    }, [state.rounds, state.players]);
+    const updateBuyInAmount = (v) => setState((s) => ({ ...s, tripBuyIn: { ...s.tripBuyIn, amountPerPlayer: Number(v) || 0 } }));
+    const updatePayment = (pid, patch) => setState((s) => ({
+      ...s,
+      tripBuyIn: {
+        ...s.tripBuyIn,
+        payments: {
+          ...s.tripBuyIn.payments,
+          [pid]: { ...s.tripBuyIn.payments?.[pid] || {}, ...patch }
+        }
+      }
+    }));
+    const updateRoundPaid = (rid, pid, paid) => setState((s) => ({
+      ...s,
+      rounds: s.rounds.map(
+        (r) => r.id !== rid ? r : {
+          ...r,
+          participants: {
+            ...r.participants,
+            [pid]: { ...r.participants[pid] || {}, paid }
+          }
+        }
+      )
+    }));
+    const expectedTotal = (playerId) => state.rounds.reduce((acc, r) => acc + expectedRoundContrib(r, playerId), 0);
+    const totalDue = state.players.reduce((acc, p) => acc + expectedTotal(p.id), 0);
+    const totalPaid = state.players.reduce(
+      (acc, p) => acc + Number(tripBuyIn.payments?.[p.id]?.paid || 0),
+      0
+    );
+    const totalBalance = totalDue - totalPaid;
+    const roundExpectedTotal = (r) => state.players.reduce((acc, p) => acc + expectedRoundContrib(r, p.id), 0);
+    const roundPaidTotal = (r) => state.players.reduce(
+      (acc, p) => acc + (r.participants[p.id]?.paid ? expectedRoundContrib(r, p.id) : 0),
+      0
+    );
+    return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement(Card, { title: "Trip-level buy-in" }, /* @__PURE__ */ React.createElement("div", { className: "text-xs px-1 py-2 mb-2", style: { color: palette.inkSoft } }, "Each player's ", /* @__PURE__ */ React.createElement("strong", null, "Due"), " is computed automatically from their participation across the 5 rounds \u2014 sum of $20 skins + $5 individual net + $5 best ball for every round where they're marked Active with the relevant toggles on the Round \u2192 Participation tab. Adjust participation first; the totals here update live."), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-3 gap-3 mb-3" }, /* @__PURE__ */ React.createElement(KPI, { label: "Players", value: String(state.players.length) }), /* @__PURE__ */ React.createElement(KPI, { label: "Total due (computed)", value: fmt$(totalDue) }), /* @__PURE__ */ React.createElement(
+      KPI,
+      {
+        label: totalBalance >= 0 ? "Outstanding" : "Surplus",
+        value: fmt$(Math.abs(totalBalance)),
+        sub: `Collected ${fmt$(totalPaid)}`
+      }
+    )), /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Player"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium", style: { width: 70 } }, "Rds"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium", style: { width: 90 } }, "Due"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium", style: { width: 110 } }, "Paid"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium", style: { width: 110 } }, "Balance"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium", style: { width: 130 } }, "Method"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium", style: { width: 140 } }, "Date"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Notes"), /* @__PURE__ */ React.createElement("th", { className: "text-center px-3 py-2 font-medium", style: { width: 90 } }, "Status"))), /* @__PURE__ */ React.createElement("tbody", null, state.players.map((p) => {
+      const pay = tripBuyIn.payments?.[p.id] || {};
+      const due = expectedTotal(p.id);
+      const activeRounds = state.rounds.filter(
+        (r) => r.participants[p.id]?.active
+      ).length;
+      const paid = Number(pay.paid || 0);
+      const bal = paid - due;
+      const status = due === 0 ? "\u2014" : bal === 0 && paid > 0 ? "Settled" : bal > 0 ? "Surplus" : paid > 0 ? "Partial" : "Owes";
+      const tone = status === "Settled" ? "open" : status === "Surplus" ? "A" : status === "Partial" ? "B" : status === "\u2014" ? "open" : "locked";
+      return /* @__PURE__ */ React.createElement("tr", { key: p.id, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, p.name), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right", style: { color: palette.inkSoft } }, activeRounds, "/5"), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, fmt$(due)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, /* @__PURE__ */ React.createElement(
+        NumberInput,
+        {
+          value: pay.paid ?? 0,
+          onChange: (v) => updatePayment(p.id, { paid: Number(v) || 0 }),
+          min: 0,
+          step: 5
+        }
+      )), /* @__PURE__ */ React.createElement(
+        "td",
+        {
+          className: "px-3 py-2 text-right",
+          style: { color: bal === 0 ? palette.green : bal > 0 ? palette.green : palette.alert, fontWeight: 600 }
+        },
+        fmt$(bal)
+      ), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, /* @__PURE__ */ React.createElement(
+        "select",
+        {
+          value: pay.method || "",
+          onChange: (e) => updatePayment(p.id, { method: e.target.value }),
+          className: "px-2 py-1 text-sm w-full",
+          style: { border: `1px solid ${palette.rule}`, borderRadius: 2 }
+        },
+        /* @__PURE__ */ React.createElement("option", { value: "" }, "\u2014"),
+        /* @__PURE__ */ React.createElement("option", { value: "Cash" }, "Cash"),
+        /* @__PURE__ */ React.createElement("option", { value: "Zelle" }, "Zelle"),
+        /* @__PURE__ */ React.createElement("option", { value: "Venmo" }, "Venmo"),
+        /* @__PURE__ */ React.createElement("option", { value: "Wire" }, "Wire"),
+        /* @__PURE__ */ React.createElement("option", { value: "Check" }, "Check"),
+        /* @__PURE__ */ React.createElement("option", { value: "Other" }, "Other")
+      )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, /* @__PURE__ */ React.createElement(
+        "input",
+        {
+          type: "date",
+          value: pay.date || "",
+          onChange: (e) => updatePayment(p.id, { date: e.target.value }),
+          className: "px-2 py-1 text-sm w-full",
+          style: { border: `1px solid ${palette.rule}`, borderRadius: 2 }
+        }
+      )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, /* @__PURE__ */ React.createElement(
+        TextInput,
+        {
+          value: pay.notes || "",
+          onChange: (v) => updatePayment(p.id, { notes: v })
+        }
+      )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-center" }, /* @__PURE__ */ React.createElement(Pill, { tone }, status)));
+    }))))), /* @__PURE__ */ React.createElement(Card, { title: "Per-round contributions", dense: true }, /* @__PURE__ */ React.createElement("div", { className: "text-xs px-3 py-2", style: { color: palette.inkSoft } }, "For players who pay round-by-round instead of (or in addition to) the trip buy-in. Toggle the box for each round once that player has handed over their stake. Amount per player per round depends on which side games they're entered in."), /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Player"), state.rounds.map((r) => /* @__PURE__ */ React.createElement(
+      "th",
+      {
+        key: r.id,
+        className: "px-2 py-2 font-medium text-center",
+        style: { minWidth: 90 }
+      },
+      "R",
+      r.number,
+      /* @__PURE__ */ React.createElement("div", { className: "text-xs font-normal", style: { color: palette.inkSoft } }, r.courseName.split(" ").slice(0, 2).join(" "))
+    )), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium", style: { width: 100 } }, "Owed"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium", style: { width: 100 } }, "Paid"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium", style: { width: 100 } }, "Bal"))), /* @__PURE__ */ React.createElement("tbody", null, state.players.map((p) => {
+      let owed = 0;
+      let paid = 0;
+      state.rounds.forEach((r) => {
+        const exp = expectedRoundContrib(r, p.id);
+        owed += exp;
+        if (r.participants[p.id]?.paid) paid += exp;
+      });
+      const bal = owed - paid;
+      return /* @__PURE__ */ React.createElement("tr", { key: p.id, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, p.name), state.rounds.map((r) => {
+        const part = r.participants[p.id] || {};
+        const exp = expectedRoundContrib(r, p.id);
+        return /* @__PURE__ */ React.createElement("td", { key: r.id, className: "px-2 py-1 text-center" }, !part.active ? /* @__PURE__ */ React.createElement("span", { style: { color: palette.inkSoft } }, "\u2014") : /* @__PURE__ */ React.createElement("label", { className: "inline-flex items-center gap-1 text-xs" }, /* @__PURE__ */ React.createElement(
+          "input",
+          {
+            type: "checkbox",
+            checked: !!part.paid,
+            onChange: (e) => updateRoundPaid(r.id, p.id, e.target.checked),
+            disabled: r.locked
+          }
+        ), /* @__PURE__ */ React.createElement("span", { style: { color: palette.inkSoft } }, fmt$(exp))));
+      }), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, fmt$(owed)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, fmt$(paid)), /* @__PURE__ */ React.createElement(
+        "td",
+        {
+          className: "px-3 py-2 text-right",
+          style: {
+            color: bal === 0 ? palette.green : palette.alert,
+            fontWeight: 600
+          }
+        },
+        fmt$(bal)
+      ));
+    }), /* @__PURE__ */ React.createElement("tr", { style: { background: "#FAFAF7", fontWeight: 600 } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, "Round totals"), state.rounds.map((r) => /* @__PURE__ */ React.createElement("td", { key: r.id, className: "px-2 py-2 text-center text-xs" }, fmt$(roundPaidTotal(r)), " / ", fmt$(roundExpectedTotal(r)))), /* @__PURE__ */ React.createElement("td", { colSpan: 3 })))))), /* @__PURE__ */ React.createElement(Card, { title: "Final settlement \u2014 buy-in vs. winnings" }, /* @__PURE__ */ React.createElement("div", { className: "text-xs px-3 py-2", style: { color: palette.inkSoft } }, "Combines trip-level buy-in plus cumulative side-game results. Positive Final = you owe the player at end of trip; negative = player owes Fernando."), /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Player"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium" }, "Buy-in paid"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium" }, "Side-game net"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium" }, "Final"))), /* @__PURE__ */ React.createElement("tbody", null, state.players.map((p) => {
+      const pay = tripBuyIn.payments?.[p.id] || {};
+      const paidIn = Number(pay.paid || 0);
+      const sg = cumulativeNet[p.id] || 0;
+      const final = paidIn + sg;
+      return /* @__PURE__ */ React.createElement("tr", { key: p.id, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, p.name), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, fmt$(paidIn)), /* @__PURE__ */ React.createElement(
+        "td",
+        {
+          className: "px-3 py-2 text-right",
+          style: { color: sg > 0 ? palette.green : sg < 0 ? palette.alert : palette.inkSoft }
+        },
+        fmt$(sg)
+      ), /* @__PURE__ */ React.createElement(
+        "td",
+        {
+          className: "px-3 py-2 text-right",
+          style: { color: final > 0 ? palette.green : final < 0 ? palette.alert : palette.ink, fontWeight: 600 }
+        },
+        fmt$(final)
+      ));
+    }))))));
+  }
+  function App() {
+    const audit = useMemo(() => getAuditConfig(), []);
+    const [rawState, rawSetState] = useState(() => makeSeed());
+    const [auditMeta, setAuditMeta] = useState({ loaded: false, error: null, fetchedAt: null });
+    const [tab, setTab] = useState("Setup");
+    const [currentRoundId, setCurrentRoundId] = useState(rawState.rounds[0]?.id);
+    const state = rawState;
+    const setState = audit.auditMode ? () => {
+    } : rawSetState;
+    useEffect(() => {
+      if (!audit.auditMode) return;
+      let cancelled = false;
+      const load = async () => {
+        try {
+          const url = audit.statePath + (audit.statePath.includes("?") ? "&" : "?") + "_=" + Date.now();
+          const resp = await fetch(url, { cache: "no-store" });
+          if (!resp.ok) throw new Error("HTTP " + resp.status);
+          const data = await resp.json();
+          if (!data.tournament || !Array.isArray(data.players) || !Array.isArray(data.rounds)) {
+            throw new Error("Invalid tournament file");
+          }
+          if (cancelled) return;
+          const migrated = migrateState(data);
+          rawSetState(migrated);
+          setCurrentRoundId(migrated.rounds[0]?.id);
+          setTab("Results");
+          setAuditMeta({ loaded: true, error: null, fetchedAt: /* @__PURE__ */ new Date() });
+        } catch (e) {
+          if (!cancelled) setAuditMeta({ loaded: false, error: e.message, fetchedAt: null });
+        }
+      };
+      load();
+      return () => {
+        cancelled = true;
+      };
+    }, [audit.auditMode, audit.statePath]);
+    const visibleTabs = audit.auditMode ? ["Round", "Results", "Ledger"] : ["Setup", "Round", "Results", "Ledger", "Payments", "Data"];
+    useEffect(() => {
+      if (audit.auditMode && !visibleTabs.includes(tab)) setTab("Results");
+    }, [audit.auditMode, tab]);
+    return /* @__PURE__ */ React.createElement(
+      "div",
+      {
+        className: "min-h-screen",
+        style: {
+          background: palette.bg,
+          color: palette.ink,
+          fontFamily: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+        }
+      },
+      /* @__PURE__ */ React.createElement(
+        "header",
+        {
+          className: "px-4 py-4 md:px-8",
+          style: { borderBottom: `1px solid ${palette.rule}`, background: palette.panel }
+        },
+        /* @__PURE__ */ React.createElement("div", { className: "flex flex-wrap items-center gap-3" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement(
+          "div",
+          {
+            className: "text-[10px] uppercase tracking-[0.3em]",
+            style: { color: palette.gold, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }
+          },
+          "Champs \xB7 Payout Manager",
+          audit.auditMode ? " \xB7 View only" : ""
+        ), /* @__PURE__ */ React.createElement(
+          "h1",
+          {
+            className: "text-xl md:text-2xl font-medium leading-tight",
+            style: { color: palette.greenDeep, letterSpacing: "-0.01em" }
+          },
+          state.tournament.name
+        )), /* @__PURE__ */ React.createElement("div", { className: "flex-1" }), /* @__PURE__ */ React.createElement("nav", { className: "flex flex-wrap gap-1" }, visibleTabs.map((t) => /* @__PURE__ */ React.createElement(
+          "button",
+          {
+            key: t,
+            onClick: () => setTab(t),
+            className: "px-3 py-2 text-sm transition",
+            style: {
+              background: tab === t ? palette.greenDeep : "transparent",
+              color: tab === t ? "#fff" : palette.ink,
+              border: `1px solid ${tab === t ? palette.greenDeep : palette.rule}`,
+              borderRadius: 2,
+              letterSpacing: "0.02em"
+            }
+          },
+          t
+        )))),
+        audit.auditMode && /* @__PURE__ */ React.createElement(
+          "div",
+          {
+            className: "mt-3 px-3 py-2 text-xs flex flex-wrap items-center gap-2",
+            style: {
+              background: auditMeta.error ? "#FCE9E5" : auditMeta.loaded ? "#E8F0EA" : "#F5EFD7",
+              border: `1px solid ${auditMeta.error ? palette.alert : auditMeta.loaded ? palette.green : palette.gold}`,
+              borderRadius: 2,
+              color: palette.ink
+            }
+          },
+          /* @__PURE__ */ React.createElement(
+            "span",
+            {
+              className: "inline-block w-2 h-2 rounded-full",
+              style: {
+                background: auditMeta.error ? palette.alert : auditMeta.loaded ? palette.green : palette.gold
+              }
+            }
+          ),
+          auditMeta.error ? /* @__PURE__ */ React.createElement("span", null, /* @__PURE__ */ React.createElement("strong", null, "Error loading data:"), " ", auditMeta.error, ". Showing default seed.") : auditMeta.loaded ? /* @__PURE__ */ React.createElement("span", null, /* @__PURE__ */ React.createElement("strong", null, "Live data"), " \xB7 last fetched", " ", auditMeta.fetchedAt ? auditMeta.fetchedAt.toLocaleString() : "\u2014", " ", "\xB7 view-only mode (no edits saved)") : /* @__PURE__ */ React.createElement("span", null, "Loading published tournament data\u2026"),
+          /* @__PURE__ */ React.createElement("div", { className: "flex-1" }),
+          /* @__PURE__ */ React.createElement(
+            "button",
+            {
+              onClick: () => window.location.reload(),
+              className: "px-2 py-1 text-xs",
+              style: {
+                border: `1px solid ${palette.rule}`,
+                background: "#fff",
+                borderRadius: 2,
+                cursor: "pointer"
+              }
+            },
+            "\u21BB Refresh"
+          )
+        )
+      ),
+      /* @__PURE__ */ React.createElement("main", { className: "px-4 py-4 md:px-8 md:py-6 max-w-[1400px] mx-auto" }, tab === "Setup" && !audit.auditMode && /* @__PURE__ */ React.createElement(SetupTab, { state, setState }), tab === "Round" && /* @__PURE__ */ React.createElement(
+        RoundTab,
+        {
+          state,
+          setState,
+          currentRoundId,
+          setCurrentRoundId
+        }
+      ), tab === "Results" && /* @__PURE__ */ React.createElement(
+        ResultsTab,
+        {
+          state,
+          currentRoundId,
+          setCurrentRoundId
+        }
+      ), tab === "Ledger" && /* @__PURE__ */ React.createElement(LedgerTab, { state }), tab === "Payments" && !audit.auditMode && /* @__PURE__ */ React.createElement(PaymentsTab, { state, setState }), tab === "Data" && !audit.auditMode && /* @__PURE__ */ React.createElement(DataTab, { state, setState })),
+      /* @__PURE__ */ React.createElement(
+        "footer",
+        {
+          className: "px-4 py-3 md:px-8 text-xs",
+          style: { color: palette.inkSoft, borderTop: `1px solid ${palette.rule}` }
+        },
+        audit.auditMode ? "Public view \xB7 scoring lives in Golf Pad Events \xB7 this site reflects the latest published snapshot." : "Companion admin tool \u2014 scoring still flows through Golf Pad Events. Snapshot to JSON before closing."
+      )
+    );
+  }
+  window.__renderApp = () => {
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(React.createElement(App));
+  };
+})();
+
+window.__renderApp();
+</script>
+</body>
+</html>
