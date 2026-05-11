@@ -354,7 +354,7 @@
     for (const p of playersCH) {
       const part = round.participants[p.id] || {};
       if (!part.active) continue;
-      const contrib = (part.inSkins ? 20 : 0) + (part.inIndividualNet ? 5 : 0) + (part.inBestBall ? 5 : 0);
+      const contrib = 30;
       const winSkins = (skinsA.payouts[p.id] || 0) + (skinsB.payouts[p.id] || 0);
       const winIN = indNet.payouts[p.id] || 0;
       const winBB = bb.playerPayouts[p.id] || 0;
@@ -1109,7 +1109,7 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
         }
       },
       t
-    ))), subTab === "Participation" && /* @__PURE__ */ React.createElement(ParticipationPanel, { state, round, updateRound, auditMode }), subTab === "Course" && /* @__PURE__ */ React.createElement(CoursePanel, { round, players: state.players, updateRound, auditMode }), subTab === "Teams" && /* @__PURE__ */ React.createElement(TeamsPanel, { state, round, updateRound, auditMode }), subTab === "Scores" && /* @__PURE__ */ React.createElement(ScoresPanel, { state, round, updateRound, auditMode }));
+    ))), subTab === "Participation" && /* @__PURE__ */ React.createElement(ParticipationPanel, { state, round, updateRound, auditMode }), subTab === "Course" && /* @__PURE__ */ React.createElement(CoursePanel, { round, players: state.players, updateRound, auditMode }), subTab === "Teams" && /* @__PURE__ */ React.createElement(TeamsPanel, { state, round, updateRound, auditMode }), subTab === "Scores" && /* @__PURE__ */ React.createElement(ScoresPanel, { state, round, updateRound, auditMode, setState }));
   }
   function ParticipationPanel({ state, round, updateRound, auditMode }) {
     const setPart = (pid, patch) => {
@@ -1143,12 +1143,11 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
         state.players.map((p) => [
           p.id,
           {
-            ...round.participants[p.id] || {
-              inSkins: true,
-              inIndividualNet: true,
-              inBestBall: true
-            },
-            active: val
+            ...round.participants[p.id] || {},
+            active: val,
+            inSkins: val,
+            inIndividualNet: val,
+            inBestBall: val
           }
         ])
       )
@@ -1164,7 +1163,7 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
       }
       updateRound({ participants: next });
     };
-    return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-2 md:grid-cols-7 gap-3" }, /* @__PURE__ */ React.createElement(KPI, { label: "Active", value: active.length }), /* @__PURE__ */ React.createElement(KPI, { label: "Skins A pot", value: fmt$(inSkinsA.length * 18), sub: `${inSkinsA.length} pl.` }), /* @__PURE__ */ React.createElement(KPI, { label: "Skins B pot", value: fmt$(inSkinsB.length * 18), sub: `${inSkinsB.length} pl.` }), /* @__PURE__ */ React.createElement(KPI, { label: "IN A pot", value: fmt$(inINA.length * 5), sub: `${inINA.length} pl.` }), /* @__PURE__ */ React.createElement(KPI, { label: "IN B pot", value: fmt$(inINB.length * 5), sub: `${inINB.length} pl.` }), /* @__PURE__ */ React.createElement(KPI, { label: "BB A pot", value: fmt$(inBBA.length * 5), sub: `${inBBA.length} pl.` }), /* @__PURE__ */ React.createElement(KPI, { label: "BB B pot", value: fmt$(inBBB.length * 5), sub: `${inBBB.length} pl.` })), !auditMode && /* @__PURE__ */ React.createElement("div", { className: "flex gap-2 flex-wrap items-center" }, /* @__PURE__ */ React.createElement(Btn, { variant: "secondary", onClick: () => setAllActive(true), disabled: effectiveLocked }, "All in"), /* @__PURE__ */ React.createElement(Btn, { variant: "ghost", onClick: () => setAllActive(false), disabled: effectiveLocked }, "All out"), /* @__PURE__ */ React.createElement(Btn, { variant: "ghost", onClick: resetAllFlights, disabled: effectiveLocked }, "Reset flights"), /* @__PURE__ */ React.createElement("span", { className: "text-xs ml-2", style: { color: palette.inkSoft } }, "The ", /* @__PURE__ */ React.createElement("strong", null, "Flight"), " column is the assignment for THIS round only \u2014 Golf Pad re-flights each day, so override here when needed. The default falls back to the player's static category from their index.")), /* @__PURE__ */ React.createElement(Card, { dense: true }, /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm" }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Player"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium" }, "Index"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium" }, "Flight (this round)"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium" }, "Active"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium" }, "Skins"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium" }, "Ind. Net"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium" }, "Best Ball"))), /* @__PURE__ */ React.createElement("tbody", null, state.players.map((p) => {
+    return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-2 md:grid-cols-4 gap-3" }, /* @__PURE__ */ React.createElement(KPI, { label: "Active", value: active.length }), /* @__PURE__ */ React.createElement(KPI, { label: "Skins A", value: fmt$(inSkinsA.length * 18), sub: `${inSkinsA.length} pl.` }), /* @__PURE__ */ React.createElement(KPI, { label: "Skins B", value: fmt$(inSkinsB.length * 18), sub: `${inSkinsB.length} pl.` }), /* @__PURE__ */ React.createElement(KPI, { label: "Total pot", value: fmt$(active.length * 28), sub: `$30\xD7${active.length} = ${fmt$(active.length * 30)}` })), !auditMode && /* @__PURE__ */ React.createElement("div", { className: "flex gap-2 flex-wrap items-center" }, /* @__PURE__ */ React.createElement(Btn, { variant: "secondary", onClick: () => setAllActive(true), disabled: effectiveLocked }, "All in"), /* @__PURE__ */ React.createElement(Btn, { variant: "ghost", onClick: () => setAllActive(false), disabled: effectiveLocked }, "All out"), /* @__PURE__ */ React.createElement(Btn, { variant: "ghost", onClick: resetAllFlights, disabled: effectiveLocked }, "Reset flights"), /* @__PURE__ */ React.createElement("span", { className: "text-xs ml-2", style: { color: palette.inkSoft } }, "The ", /* @__PURE__ */ React.createElement("strong", null, "Flight"), " column is the assignment for THIS round only \u2014 Golf Pad re-flights each day, so override here when needed. The default falls back to the player's static category from their index.")), /* @__PURE__ */ React.createElement(Card, { dense: true }, /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm" }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Player"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium" }, "Index"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium" }, "Flight (this round)"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium" }, "Active"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "$30"))), /* @__PURE__ */ React.createElement("tbody", null, state.players.map((p) => {
       const part = round.participants[p.id] || {};
       const effective = flightForRound(round, p);
       const isOverridden = part.flight === "A" || part.flight === "B";
@@ -1177,6 +1176,14 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
         } else {
           setPart(p.id, { flight: val });
         }
+      };
+      const toggleActive = (v) => {
+        setPart(p.id, {
+          active: v,
+          inSkins: v,
+          inIndividualNet: v,
+          inBestBall: v
+        });
       };
       return /* @__PURE__ */ React.createElement("tr", { key: p.id, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, p.name), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-center", style: { fontFamily: "ui-monospace" } }, p.handicapIndex), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-center" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-center gap-1" }, /* @__PURE__ */ React.createElement(
         "select",
@@ -1201,31 +1208,10 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
         Toggle,
         {
           value: part.active,
-          onChange: (v) => setPart(p.id, { active: v }),
+          onChange: toggleActive,
           disabled: effectiveLocked
         }
-      )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-center" }, /* @__PURE__ */ React.createElement(
-        Toggle,
-        {
-          value: part.inSkins,
-          onChange: (v) => setPart(p.id, { inSkins: v }),
-          disabled: effectiveLocked || !part.active
-        }
-      )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-center" }, /* @__PURE__ */ React.createElement(
-        Toggle,
-        {
-          value: part.inIndividualNet,
-          onChange: (v) => setPart(p.id, { inIndividualNet: v }),
-          disabled: effectiveLocked || !part.active
-        }
-      )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-center" }, /* @__PURE__ */ React.createElement(
-        Toggle,
-        {
-          value: part.inBestBall,
-          onChange: (v) => setPart(p.id, { inBestBall: v }),
-          disabled: effectiveLocked || !part.active
-        }
-      )));
+      )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right", style: { color: part.active ? palette.green : palette.inkSoft } }, part.active ? "$30" : "\u2014"));
     }))))));
   }
   function KPI({ label, value, sub }) {
@@ -1486,14 +1472,42 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
     };
     return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("div", { className: "text-xs", style: { color: palette.inkSoft } }, "Best-ball teams are 2-man pairs within the same flight. Use ", /* @__PURE__ */ React.createElement("strong", null, "+ Pair"), " in each flight column to add a team, then check off two players to assign them. Each player can only be on one team per round.")), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-6" }, renderFlightColumn("A"), renderFlightColumn("B")));
   }
-  function ScoresPanel({ state, round, updateRound, auditMode }) {
+  function ScoresPanel({ state, round, updateRound, auditMode, setState }) {
     const effectiveLocked = round.locked || auditMode;
     const fileRef = useRef(null);
+    const jsonRef = useRef(null);
     const chOf = (p) => chForPlayer(p, round);
     const setScore = (pid, h, val) => {
       const arr = [...round.scores[pid] || Array(18).fill("")];
       arr[h] = val === "" ? "" : Number(val);
       updateRound({ scores: { ...round.scores, [pid]: arr } });
+    };
+    const prevRoundsHaveData = round.number > 1 && state.rounds.filter((r) => r.number < round.number).some((r) => Object.values(r.scores || {}).some(
+      (arr) => Array.isArray(arr) && arr.some((s) => s !== "" && s != null)
+    ));
+    const importJson = async (file) => {
+      try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        if (!data.tournament || !Array.isArray(data.players) || !Array.isArray(data.rounds)) {
+          alert("Not a valid tournament file.");
+          return;
+        }
+        const migrated = migrateState(data);
+        setState(migrated);
+        alert("Backup loaded. Now import the CSV for this round.");
+      } catch (e) {
+        alert("Failed to read JSON: " + e.message);
+      }
+    };
+    const handleImportClick = () => {
+      if (round.number > 1 && !prevRoundsHaveData) {
+        if (confirm("No data from previous rounds detected. Load your latest JSON backup first?\n\nClick OK to load JSON, or Cancel to skip and import CSV directly.")) {
+          jsonRef.current?.click();
+          return;
+        }
+      }
+      fileRef.current?.click();
     };
     const importCSV = async (file) => {
       let text = await file.text();
@@ -1594,11 +1608,11 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
     const hasAnyScore = Object.values(round.scores || {}).some(
       (arr) => Array.isArray(arr) && arr.some((s) => s !== "" && s != null)
     );
-    return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("div", { className: "flex flex-wrap gap-2 items-center" }, /* @__PURE__ */ React.createElement(
+    return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, !auditMode && /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("div", { className: "flex flex-wrap gap-2 items-center" }, /* @__PURE__ */ React.createElement(
       Btn,
       {
         variant: "secondary",
-        onClick: () => fileRef.current?.click(),
+        onClick: handleImportClick,
         disabled: effectiveLocked
       },
       "Import CSV"
@@ -1614,7 +1628,19 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
           e.target.value = "";
         }
       }
-    ), hasAnyScore && /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(CopyWhatsAppBtn, { round, results: inlineResults, players: state.players }), /* @__PURE__ */ React.createElement(ExportRoundCsvBtn, { round, results: inlineResults, players: state.players })), /* @__PURE__ */ React.createElement("span", { className: "text-xs", style: { color: palette.inkSoft } }, "Accepts Golf Pad export (", /* @__PURE__ */ React.createElement("code", null, '"Team","Hole#1"\u2026"Hole#18","Net"'), ") or simple ", /* @__PURE__ */ React.createElement("code", null, "Player,1,2,\u2026,18"), ". Names match case-insensitively against the roster."))), /* @__PURE__ */ React.createElement(Card, { dense: true }, /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "text-sm", style: { fontVariantNumeric: "tabular-nums", minWidth: 900 } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-2 py-2 font-medium sticky left-0 z-10", style: { background: "#F7F5F0", minWidth: 160 } }, "Player"), /* @__PURE__ */ React.createElement("th", { className: "px-1 py-2 font-medium text-xs", style: { color: palette.inkSoft } }, "CH"), Array.from({ length: 18 }, (_, i) => /* @__PURE__ */ React.createElement("th", { key: i, className: "px-1 py-2 font-medium text-center text-xs" }, i + 1)), /* @__PURE__ */ React.createElement("th", { className: "px-2 py-2 font-medium text-center" }, "Gross"), /* @__PURE__ */ React.createElement("th", { className: "px-2 py-2 font-medium text-center" }, "Net"))), /* @__PURE__ */ React.createElement("tbody", null, activePlayers.map((p) => {
+    ), /* @__PURE__ */ React.createElement(
+      "input",
+      {
+        ref: jsonRef,
+        type: "file",
+        accept: ".json,application/json",
+        className: "hidden",
+        onChange: (e) => {
+          if (e.target.files?.[0]) importJson(e.target.files[0]);
+          e.target.value = "";
+        }
+      }
+    ), hasAnyScore && /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(CopyWhatsAppBtn, { round, results: inlineResults, players: state.players }), /* @__PURE__ */ React.createElement(ExportRoundCsvBtn, { round, results: inlineResults, players: state.players })), /* @__PURE__ */ React.createElement("span", { className: "text-xs", style: { color: palette.inkSoft } }, "Accepts Golf Pad export (", /* @__PURE__ */ React.createElement("code", null, '"Team","Hole#1"\u2026"Hole#18","Net"'), ") or simple ", /* @__PURE__ */ React.createElement("code", null, "Player,1,2,\u2026,18"), ". Names match case-insensitively against the roster."))), auditMode && /* @__PURE__ */ React.createElement("div", { className: "text-sm px-1 py-2", style: { color: palette.inkSoft } }, /* @__PURE__ */ React.createElement("strong", null, round.courseName), round.tees?.A?.name && ` \xB7 Flight A: ${round.tees.A.name} (Slope ${round.tees.A.slopeRating || "\u2014"} / Rating ${round.tees.A.courseRating || "\u2014"})`, round.tees?.B?.name && ` \xB7 Flight B: ${round.tees.B.name} (Slope ${round.tees.B.slopeRating || "\u2014"} / Rating ${round.tees.B.courseRating || "\u2014"})`, ` \xB7 Par ${sumPars(round.pars)}`), /* @__PURE__ */ React.createElement(Card, { dense: true }, /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "text-sm", style: { fontVariantNumeric: "tabular-nums", minWidth: 900 } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-2 py-2 font-medium sticky left-0 z-10", style: { background: "#F7F5F0", minWidth: 160 } }, "Player"), /* @__PURE__ */ React.createElement("th", { className: "px-1 py-2 font-medium text-xs", style: { color: palette.inkSoft } }, "CH"), Array.from({ length: 18 }, (_, i) => /* @__PURE__ */ React.createElement("th", { key: i, className: "px-1 py-2 font-medium text-center text-xs" }, i + 1)), /* @__PURE__ */ React.createElement("th", { className: "px-2 py-2 font-medium text-center" }, "Gross"), /* @__PURE__ */ React.createElement("th", { className: "px-2 py-2 font-medium text-center" }, "Net"))), /* @__PURE__ */ React.createElement("tbody", null, activePlayers.map((p) => {
       const sc = round.scores[p.id] || Array(18).fill("");
       const filled = sc.filter((s) => s !== "" && s != null).length;
       const grossTotal = filled === 18 ? sc.reduce((a, b) => a + Number(b), 0) : null;
@@ -1638,7 +1664,7 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
       ))), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center font-medium" }, grossTotal ?? "\u2014"), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center font-medium", style: { color: palette.green } }, netTotal ?? "\u2014"));
     }))))));
   }
-  function ResultsTab({ state, currentRoundId, setCurrentRoundId }) {
+  function ResultsTab({ state, currentRoundId, setCurrentRoundId, auditMode }) {
     const round = state.rounds.find((r) => r.id === currentRoundId);
     const [subTab, setSubTab] = useState("Payouts");
     const results = useMemo(
@@ -1663,7 +1689,7 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
       },
       "R",
       r.number
-    ))), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("div", { className: "flex flex-wrap items-center gap-3" }, /* @__PURE__ */ React.createElement("div", { className: "flex-1 min-w-0" }, /* @__PURE__ */ React.createElement("div", { className: "text-xs uppercase tracking-wider", style: { color: palette.inkSoft } }, "Round ", round.number, " \xB7 ", round.courseName), /* @__PURE__ */ React.createElement("div", { className: "text-sm font-medium mt-0.5" }, "Share results with the group or export a CSV ledger")), /* @__PURE__ */ React.createElement(CopyWhatsAppBtn, { round, results, players: state.players }), /* @__PURE__ */ React.createElement(ExportRoundCsvBtn, { round, results, players: state.players }))), /* @__PURE__ */ React.createElement("div", { className: "flex flex-wrap gap-1" }, subs.map((t) => /* @__PURE__ */ React.createElement(
+    ))), !auditMode && /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("div", { className: "flex flex-wrap items-center gap-3" }, /* @__PURE__ */ React.createElement("div", { className: "flex-1 min-w-0" }, /* @__PURE__ */ React.createElement("div", { className: "text-xs uppercase tracking-wider", style: { color: palette.inkSoft } }, "Round ", round.number, " \xB7 ", round.courseName), /* @__PURE__ */ React.createElement("div", { className: "text-sm font-medium mt-0.5" }, "Share results with the group or export a CSV ledger")), /* @__PURE__ */ React.createElement(CopyWhatsAppBtn, { round, results, players: state.players }), /* @__PURE__ */ React.createElement(ExportRoundCsvBtn, { round, results, players: state.players }))), auditMode && /* @__PURE__ */ React.createElement("div", { className: "text-sm px-1", style: { color: palette.inkSoft } }, /* @__PURE__ */ React.createElement("strong", null, "Round ", round.number, " \xB7 ", round.courseName), round.tees?.A?.name && ` \xB7 Flight A: ${round.tees.A.name} (Slope ${round.tees.A.slopeRating || "\u2014"} / Rating ${round.tees.A.courseRating || "\u2014"})`, round.tees?.B?.name && ` \xB7 Flight B: ${round.tees.B.name} (Slope ${round.tees.B.slopeRating || "\u2014"} / Rating ${round.tees.B.courseRating || "\u2014"})`, ` \xB7 Par ${sumPars(round.pars)}`), /* @__PURE__ */ React.createElement("div", { className: "flex flex-wrap gap-1" }, subs.map((t) => /* @__PURE__ */ React.createElement(
       "button",
       {
         key: t,
@@ -2042,9 +2068,9 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
     };
     return /* @__PURE__ */ React.createElement(Btn, { variant: "secondary", onClick }, "Export round CSV");
   }
-  function LedgerTab({ state }) {
+  function LedgerTab({ state, auditMode }) {
     const playerById = Object.fromEntries(state.players.map((p) => [p.id, p]));
-    const allResults = state.rounds.map((r) => ({
+    const allResults = state.rounds.filter((r) => r.locked).map((r) => ({
       round: r,
       res: computeRoundResults(r, state.players)
     }));
@@ -2060,8 +2086,13 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
         net: 0,
         perRound: []
       };
-      for (const { round, res } of allResults) {
-        const l = res.ledger[p.id];
+      for (const rd of state.rounds) {
+        const entry = allResults.find((a) => a.round.id === rd.id);
+        if (!entry) {
+          row.perRound.push(null);
+          continue;
+        }
+        const l = entry.res.ledger[p.id];
         if (!l) {
           row.perRound.push(null);
           continue;
@@ -2133,7 +2164,7 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
       Card,
       {
         title: "Cumulative ledger",
-        action: /* @__PURE__ */ React.createElement(Btn, { variant: "secondary", onClick: exportCSV }, "Export CSV"),
+        action: !auditMode && /* @__PURE__ */ React.createElement(Btn, { variant: "secondary", onClick: exportCSV }, "Export CSV"),
         dense: true
       },
       /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Player"), state.rounds.map((r) => /* @__PURE__ */ React.createElement("th", { key: r.id, className: "px-3 py-2 font-medium text-right" }, "R", r.number)), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "In"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Skins"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "IN"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "BB"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Won"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Net"))), /* @__PURE__ */ React.createElement("tbody", null, cumulative.slice().sort((a, b) => b.net - a.net).map((r) => /* @__PURE__ */ React.createElement("tr", { key: r.id, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 font-medium" }, r.name), r.perRound.map((v, i) => /* @__PURE__ */ React.createElement(
@@ -2160,6 +2191,78 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
   }
   function DataTab({ state, setState }) {
     const fileRef = useRef(null);
+    const ghKey = "champs_github_config";
+    const loadGH = () => {
+      try {
+        return JSON.parse(localStorage.getItem(ghKey)) || {};
+      } catch {
+        return {};
+      }
+    };
+    const [ghConfig, setGhConfig] = useState(loadGH);
+    const [ghStatus, setGhStatus] = useState(null);
+    const [ghMsg, setGhMsg] = useState("");
+    const [showToken, setShowToken] = useState(false);
+    const saveGH = (patch) => {
+      const next = { ...ghConfig, ...patch };
+      setGhConfig(next);
+      localStorage.setItem(ghKey, JSON.stringify(next));
+    };
+    const publishToGitHub = async () => {
+      const { owner, repo, token, path: filePath } = ghConfig;
+      if (!owner || !repo || !token) {
+        setGhStatus("error");
+        setGhMsg("Configure owner, repo, and token first.");
+        return;
+      }
+      const apiPath = (filePath || "state.json").replace(/^\//, "");
+      const apiBase = `https://api.github.com/repos/${owner}/${repo}/contents/${apiPath}`;
+      const headers = {
+        Authorization: `token ${token}`,
+        Accept: "application/vnd.github.v3+json",
+        "Content-Type": "application/json"
+      };
+      setGhStatus("publishing");
+      setGhMsg("");
+      try {
+        let sha = null;
+        try {
+          const getResp = await fetch(apiBase, { headers });
+          if (getResp.ok) {
+            const data = await getResp.json();
+            sha = data.sha;
+          }
+        } catch {
+        }
+        const content = btoa(unescape(encodeURIComponent(JSON.stringify(state, null, 2))));
+        const body = {
+          message: `Update state.json \u2014 ${(/* @__PURE__ */ new Date()).toLocaleString()}`,
+          content
+        };
+        if (sha) body.sha = sha;
+        const putResp = await fetch(apiBase, {
+          method: "PUT",
+          headers,
+          body: JSON.stringify(body)
+        });
+        if (!putResp.ok) {
+          const err = await putResp.json().catch(() => ({}));
+          throw new Error(err.message || `HTTP ${putResp.status}`);
+        }
+        setGhStatus("ok");
+        setGhMsg(`Published at ${(/* @__PURE__ */ new Date()).toLocaleTimeString()}`);
+        const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `champs_${(state.tournament.name || "tournament").replace(/\s+/g, "_")}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        setGhStatus("error");
+        setGhMsg(e.message);
+      }
+    };
     const exportJson = () => {
       const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
@@ -2210,18 +2313,80 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
           e.target.value = "";
         }
       }
-    ), /* @__PURE__ */ React.createElement("div", { className: "flex-1" }), /* @__PURE__ */ React.createElement(Btn, { variant: "ghost", onClick: resetSeed }, "Reset to sample data")), /* @__PURE__ */ React.createElement("div", { className: "text-xs mt-3", style: { color: palette.inkSoft } }, /* @__PURE__ */ React.createElement("strong", null, "Export JSON (backup)"), ": dated filename \u2014 use for personal backups in Drive/OneDrive.", " ", /* @__PURE__ */ React.createElement("strong", null, "Export state.json (for hosting)"), ": fixed filename \u2014 upload this to your GitHub Pages repo so the public audit view auto-loads it. Data lives in browser memory only \u2014 export to preserve across reloads.")), /* @__PURE__ */ React.createElement(Card, { title: "Payout logic \u2014 quick reference" }, /* @__PURE__ */ React.createElement("div", { className: "text-sm space-y-2", style: { color: palette.ink } }, /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Per active player per round:"), " $28 stake into pots = $18 skins + $5 individual net + $5 best ball. Each side game's pot is built from players entered in that game."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Index vs Course Handicap:"), " the Setup tab stores each player's ", /* @__PURE__ */ React.createElement("em", null, "handicap index"), " (GHIN/WHS, e.g. 7.7). Per-round, the Course tab applies slope and rating to derive each player's ", /* @__PURE__ */ React.createElement("em", null, "course handicap"), ":", /* @__PURE__ */ React.createElement("span", { style: { fontFamily: "ui-monospace" } }, " CH = round(Index \xD7 Slope \xF7 113) + (Course Rating \u2212 Par)"), ". All payouts use the course handicap, not the index."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Skins handicap:"), " 75% of ", /* @__PURE__ */ React.createElement("em", null, "course"), " handicap, rounded, capped at \xB118. Used ", /* @__PURE__ */ React.createElement("em", null, "only"), " for skins. Individual net and best ball use the full course handicap."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Skins:"), " separate pots for Cat A and Cat B. Net low wins each hole; ties carry over. Per-skin value = pot \xF7 skins awarded."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Individual net:"), " separate pots for Flight A and Flight B. Within each flight, with N entrants: N\u22653 \u2192 3rd gets fixed $5, remainder 65/35; N=2 \u2192 65/35 of full pot; N=1 \u2192 full pot."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Best ball:"), " 65/35 split. Each team's payout splits equally among its members."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Ties (IN / BB):"), " resolved by USGA count-back. If two or more players or teams tie on total net, compare net on the last 9 holes; if still tied, the last 6; then last 3; then hole 18. Net for each segment uses a proportional handicap allocation (\xBD \xD7 CH for last 9, \u2153 \xD7 CH for last 6, \u2159 \xD7 CH for last 3, 1\u204418 \xD7 CH for hole 18). Skins ties are handled separately by carryover."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Plus indexes:"), " when course handicap is negative, player gives back strokes on the easiest holes (highest stroke index)."))));
+    ), /* @__PURE__ */ React.createElement("div", { className: "flex-1" }), /* @__PURE__ */ React.createElement(Btn, { variant: "ghost", onClick: resetSeed }, "Reset to sample data")), /* @__PURE__ */ React.createElement("div", { className: "text-xs mt-3", style: { color: palette.inkSoft } }, /* @__PURE__ */ React.createElement("strong", null, "Export JSON (backup)"), ": dated filename \u2014 use for personal backups in Drive/OneDrive.", " ", /* @__PURE__ */ React.createElement("strong", null, "Export state.json (for hosting)"), ": fixed filename \u2014 upload this to your GitHub Pages repo so the public audit view auto-loads it. Data lives in browser memory only \u2014 export to preserve across reloads.")), /* @__PURE__ */ React.createElement(Card, { title: "Publish to GitHub Pages" }, /* @__PURE__ */ React.createElement("div", { className: "space-y-3" }, /* @__PURE__ */ React.createElement("div", { className: "text-sm", style: { color: palette.inkSoft } }, "Push ", /* @__PURE__ */ React.createElement("code", { style: { background: "#F0EDE5", padding: "1px 4px", borderRadius: 2 } }, "state.json"), " directly to your GitHub repo so the live audit page updates instantly \u2014 no manual upload needed."), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-3" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "block text-xs font-medium mb-1", style: { color: palette.inkSoft } }, "Owner"), /* @__PURE__ */ React.createElement(
+      "input",
+      {
+        type: "text",
+        placeholder: "felurob",
+        value: ghConfig.owner || "",
+        onChange: (e) => saveGH({ owner: e.target.value.trim() }),
+        className: "w-full px-2 py-1.5 text-sm",
+        style: { border: `1px solid ${palette.rule}`, borderRadius: 2 }
+      }
+    )), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "block text-xs font-medium mb-1", style: { color: palette.inkSoft } }, "Repo"), /* @__PURE__ */ React.createElement(
+      "input",
+      {
+        type: "text",
+        placeholder: "champs-2026",
+        value: ghConfig.repo || "",
+        onChange: (e) => saveGH({ repo: e.target.value.trim() }),
+        className: "w-full px-2 py-1.5 text-sm",
+        style: { border: `1px solid ${palette.rule}`, borderRadius: 2 }
+      }
+    )), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "block text-xs font-medium mb-1", style: { color: palette.inkSoft } }, "File path"), /* @__PURE__ */ React.createElement(
+      "input",
+      {
+        type: "text",
+        placeholder: "state.json",
+        value: ghConfig.path || "",
+        onChange: (e) => saveGH({ path: e.target.value.trim() }),
+        className: "w-full px-2 py-1.5 text-sm",
+        style: { border: `1px solid ${palette.rule}`, borderRadius: 2 }
+      }
+    )), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "block text-xs font-medium mb-1", style: { color: palette.inkSoft } }, "Personal Access Token", /* @__PURE__ */ React.createElement(
+      "button",
+      {
+        onClick: () => setShowToken(!showToken),
+        className: "ml-2 text-xs underline",
+        style: { color: palette.green }
+      },
+      showToken ? "hide" : "show"
+    )), /* @__PURE__ */ React.createElement(
+      "input",
+      {
+        type: showToken ? "text" : "password",
+        placeholder: "ghp_xxxxxxxxxxxx",
+        value: ghConfig.token || "",
+        onChange: (e) => saveGH({ token: e.target.value.trim() }),
+        className: "w-full px-2 py-1.5 text-sm",
+        style: { border: `1px solid ${palette.rule}`, borderRadius: 2 }
+      }
+    ))), /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-3" }, /* @__PURE__ */ React.createElement(
+      Btn,
+      {
+        onClick: publishToGitHub,
+        disabled: ghStatus === "publishing"
+      },
+      ghStatus === "publishing" ? "Publishing\u2026" : "Publish to GitHub"
+    ), ghStatus === "ok" && /* @__PURE__ */ React.createElement("span", { className: "text-sm font-medium", style: { color: palette.green } }, "\u2713 ", ghMsg), ghStatus === "error" && /* @__PURE__ */ React.createElement("span", { className: "text-sm font-medium", style: { color: palette.alert } }, "\u2717 ", ghMsg)), /* @__PURE__ */ React.createElement("div", { className: "text-xs", style: { color: palette.inkSoft } }, /* @__PURE__ */ React.createElement("strong", null, "Setup (one time):"), " Go to ", /* @__PURE__ */ React.createElement("a", { href: "https://github.com/settings/tokens?type=beta", target: "_blank", rel: "noopener", style: { color: palette.green, textDecoration: "underline" } }, "GitHub \u2192 Settings \u2192 Fine-grained tokens"), " \u2192 Generate new token \u2192 select only the ", /* @__PURE__ */ React.createElement("code", { style: { background: "#F0EDE5", padding: "1px 4px", borderRadius: 2 } }, "champs-2026"), " repo \u2192 permissions: Contents (Read and write) \u2192 Generate. Paste the token above. Config is saved in your browser."))), /* @__PURE__ */ React.createElement(Card, { title: "Payout logic \u2014 quick reference" }, /* @__PURE__ */ React.createElement("div", { className: "text-sm space-y-2", style: { color: palette.ink } }, /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Per active player per round:"), " $28 stake into pots = $18 skins + $5 individual net + $5 best ball. Each side game's pot is built from players entered in that game."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Index vs Course Handicap:"), " the Setup tab stores each player's ", /* @__PURE__ */ React.createElement("em", null, "handicap index"), " (GHIN/WHS, e.g. 7.7). Per-round, the Course tab applies slope and rating to derive each player's ", /* @__PURE__ */ React.createElement("em", null, "course handicap"), ":", /* @__PURE__ */ React.createElement("span", { style: { fontFamily: "ui-monospace" } }, " CH = round(Index \xD7 Slope \xF7 113) + (Course Rating \u2212 Par)"), ". All payouts use the course handicap, not the index."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Skins handicap:"), " 75% of ", /* @__PURE__ */ React.createElement("em", null, "course"), " handicap, rounded, capped at \xB118. Used ", /* @__PURE__ */ React.createElement("em", null, "only"), " for skins. Individual net and best ball use the full course handicap."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Skins:"), " separate pots for Cat A and Cat B. Net low wins each hole; ties carry over. Per-skin value = pot \xF7 skins awarded."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Individual net:"), " separate pots for Flight A and Flight B. Within each flight, with N entrants: N\u22653 \u2192 3rd gets fixed $5, remainder 65/35; N=2 \u2192 65/35 of full pot; N=1 \u2192 full pot."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Best ball:"), " 65/35 split. Each team's payout splits equally among its members."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Ties (IN / BB):"), " resolved by USGA count-back. If two or more players or teams tie on total net, compare net on the last 9 holes; if still tied, the last 6; then last 3; then hole 18. Net for each segment uses a proportional handicap allocation (\xBD \xD7 CH for last 9, \u2153 \xD7 CH for last 6, \u2159 \xD7 CH for last 3, 1\u204418 \xD7 CH for hole 18). Skins ties are handled separately by carryover."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Plus indexes:"), " when course handicap is negative, player gives back strokes on the easiest holes (highest stroke index)."))));
   }
   function PaymentsTab({ state, setState }) {
     const tripBuyIn = state.tripBuyIn || { amountPerPlayer: 150, payments: {} };
     const expectedRoundContrib = (round, playerId) => {
+      if (!round.locked) return 0;
       const part = round.participants[playerId];
       if (!part?.active) return 0;
-      return (part.inSkins ? 20 : 0) + (part.inIndividualNet ? 5 : 0) + (part.inBestBall ? 5 : 0);
+      return 30;
+    };
+    const perRoundAmount = (round, playerId) => {
+      const part = round.participants[playerId];
+      if (!part?.active) return 0;
+      return 30;
     };
     const cumulativeNet = useMemo(() => {
       const map = Object.fromEntries(state.players.map((p) => [p.id, 0]));
       for (const r of state.rounds) {
+        if (!r.locked) continue;
         const res = computeRoundResults(r, state.players);
         for (const [pid, l] of Object.entries(res.ledger)) {
           map[pid] = (map[pid] || 0) + l.net;
@@ -2252,19 +2417,14 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
         }
       )
     }));
-    const expectedTotal = (playerId) => state.rounds.reduce((acc, r) => acc + expectedRoundContrib(r, playerId), 0);
+    const expectedTotal = (playerId) => state.rounds.reduce((acc, r) => acc + perRoundAmount(r, playerId), 0);
     const totalDue = state.players.reduce((acc, p) => acc + expectedTotal(p.id), 0);
     const totalPaid = state.players.reduce(
       (acc, p) => acc + Number(tripBuyIn.payments?.[p.id]?.paid || 0),
       0
     );
     const totalBalance = totalDue - totalPaid;
-    const roundExpectedTotal = (r) => state.players.reduce((acc, p) => acc + expectedRoundContrib(r, p.id), 0);
-    const roundPaidTotal = (r) => state.players.reduce(
-      (acc, p) => acc + (r.participants[p.id]?.paid ? expectedRoundContrib(r, p.id) : 0),
-      0
-    );
-    return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement(Card, { title: "Trip-level buy-in" }, /* @__PURE__ */ React.createElement("div", { className: "text-xs px-1 py-2 mb-2", style: { color: palette.inkSoft } }, "Each player's ", /* @__PURE__ */ React.createElement("strong", null, "Due"), " is computed automatically from their participation across the 5 rounds \u2014 sum of $20 skins + $5 individual net + $5 best ball for every round where they're marked Active with the relevant toggles on the Round \u2192 Participation tab. Adjust participation first; the totals here update live."), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-3 gap-3 mb-3" }, /* @__PURE__ */ React.createElement(KPI, { label: "Players", value: String(state.players.length) }), /* @__PURE__ */ React.createElement(KPI, { label: "Total due (computed)", value: fmt$(totalDue) }), /* @__PURE__ */ React.createElement(
+    return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement(Card, { title: "Trip-level buy-in" }, /* @__PURE__ */ React.createElement("div", { className: "text-xs px-1 py-2 mb-2", style: { color: palette.inkSoft } }, "Each player's ", /* @__PURE__ */ React.createElement("strong", null, "Due"), " = $30 \xD7 rounds where they're marked Active. Toggle participation in Round \u2192 Participation. Collect payment before each round."), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-3 gap-3 mb-3" }, /* @__PURE__ */ React.createElement(KPI, { label: "Players", value: String(state.players.length) }), /* @__PURE__ */ React.createElement(KPI, { label: "Total due (computed)", value: fmt$(totalDue) }), /* @__PURE__ */ React.createElement(
       KPI,
       {
         label: totalBalance >= 0 ? "Outstanding" : "Surplus",
@@ -2275,7 +2435,7 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
       const pay = tripBuyIn.payments?.[p.id] || {};
       const due = expectedTotal(p.id);
       const activeRounds = state.rounds.filter(
-        (r) => r.participants[p.id]?.active
+        (r) => r.locked && r.participants[p.id]?.active
       ).length;
       const paid = Number(pay.paid || 0);
       const bal = paid - due;
@@ -2327,7 +2487,7 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
           onChange: (v) => updatePayment(p.id, { notes: v })
         }
       )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-center" }, /* @__PURE__ */ React.createElement(Pill, { tone }, status)));
-    }))))), /* @__PURE__ */ React.createElement(Card, { title: "Per-round contributions", dense: true }, /* @__PURE__ */ React.createElement("div", { className: "text-xs px-3 py-2", style: { color: palette.inkSoft } }, "For players who pay round-by-round instead of (or in addition to) the trip buy-in. Toggle the box for each round once that player has handed over their stake. Amount per player per round depends on which side games they're entered in."), /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Player"), state.rounds.map((r) => /* @__PURE__ */ React.createElement(
+    }))))), /* @__PURE__ */ React.createElement(Card, { title: "Per-round collection", dense: true }, /* @__PURE__ */ React.createElement("div", { className: "text-xs px-3 py-2", style: { color: palette.inkSoft } }, "$30 per player per round. Check the box once they've paid. Active = playing that round."), /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Player"), state.rounds.map((r) => /* @__PURE__ */ React.createElement(
       "th",
       {
         key: r.id,
@@ -2341,35 +2501,41 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
       let owed = 0;
       let paid = 0;
       state.rounds.forEach((r) => {
-        const exp = expectedRoundContrib(r, p.id);
-        owed += exp;
-        if (r.participants[p.id]?.paid) paid += exp;
+        const amt = perRoundAmount(r, p.id);
+        owed += amt;
+        if (r.participants[p.id]?.paid) paid += amt;
       });
       const bal = owed - paid;
       return /* @__PURE__ */ React.createElement("tr", { key: p.id, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, p.name), state.rounds.map((r) => {
         const part = r.participants[p.id] || {};
-        const exp = expectedRoundContrib(r, p.id);
+        const amt = perRoundAmount(r, p.id);
         return /* @__PURE__ */ React.createElement("td", { key: r.id, className: "px-2 py-1 text-center" }, !part.active ? /* @__PURE__ */ React.createElement("span", { style: { color: palette.inkSoft } }, "\u2014") : /* @__PURE__ */ React.createElement("label", { className: "inline-flex items-center gap-1 text-xs" }, /* @__PURE__ */ React.createElement(
           "input",
           {
             type: "checkbox",
             checked: !!part.paid,
-            onChange: (e) => updateRoundPaid(r.id, p.id, e.target.checked),
-            disabled: r.locked
+            onChange: (e) => updateRoundPaid(r.id, p.id, e.target.checked)
           }
-        ), /* @__PURE__ */ React.createElement("span", { style: { color: palette.inkSoft } }, fmt$(exp))));
-      }), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, fmt$(owed)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, fmt$(paid)), /* @__PURE__ */ React.createElement(
+        ), /* @__PURE__ */ React.createElement("span", { style: { color: part.paid ? palette.green : palette.inkSoft } }, fmt$(amt))));
+      }), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, fmt$(owed)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right", style: { color: paid > 0 ? palette.green : palette.inkSoft } }, fmt$(paid)), /* @__PURE__ */ React.createElement(
         "td",
         {
           className: "px-3 py-2 text-right",
           style: {
-            color: bal === 0 ? palette.green : palette.alert,
+            color: bal === 0 && owed > 0 ? palette.green : bal > 0 ? palette.alert : palette.inkSoft,
             fontWeight: 600
           }
         },
         fmt$(bal)
       ));
-    }), /* @__PURE__ */ React.createElement("tr", { style: { background: "#FAFAF7", fontWeight: 600 } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, "Round totals"), state.rounds.map((r) => /* @__PURE__ */ React.createElement("td", { key: r.id, className: "px-2 py-2 text-center text-xs" }, fmt$(roundPaidTotal(r)), " / ", fmt$(roundExpectedTotal(r)))), /* @__PURE__ */ React.createElement("td", { colSpan: 3 })))))), /* @__PURE__ */ React.createElement(Card, { title: "Final settlement \u2014 buy-in vs. winnings" }, /* @__PURE__ */ React.createElement("div", { className: "text-xs px-3 py-2", style: { color: palette.inkSoft } }, "Combines trip-level buy-in plus cumulative side-game results. Positive Final = you owe the player at end of trip; negative = player owes Fernando."), /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Player"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium" }, "Buy-in paid"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium" }, "Side-game net"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium" }, "Final"))), /* @__PURE__ */ React.createElement("tbody", null, state.players.map((p) => {
+    }), /* @__PURE__ */ React.createElement("tr", { style: { background: "#FAFAF7", fontWeight: 600 } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, "Round totals"), state.rounds.map((r) => {
+      const rOwed = state.players.reduce((a, p) => a + perRoundAmount(r, p.id), 0);
+      const rPaid = state.players.reduce((a, p) => {
+        const amt = perRoundAmount(r, p.id);
+        return a + (r.participants[p.id]?.paid ? amt : 0);
+      }, 0);
+      return /* @__PURE__ */ React.createElement("td", { key: r.id, className: "px-2 py-2 text-center text-xs" }, fmt$(rPaid), " / ", fmt$(rOwed));
+    }), /* @__PURE__ */ React.createElement("td", { colSpan: 3 })))))), /* @__PURE__ */ React.createElement(Card, { title: "Final settlement \u2014 buy-in vs. winnings" }, /* @__PURE__ */ React.createElement("div", { className: "text-xs px-3 py-2", style: { color: palette.inkSoft } }, "Combines trip-level buy-in plus cumulative side-game results. Positive Final = you owe the player at end of trip; negative = player owes Fernando."), /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Player"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium" }, "Buy-in paid"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium" }, "Side-game net"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium" }, "Final"))), /* @__PURE__ */ React.createElement("tbody", null, state.players.map((p) => {
       const pay = tripBuyIn.payments?.[p.id] || {};
       const paidIn = Number(pay.paid || 0);
       const sg = cumulativeNet[p.id] || 0;
@@ -2427,7 +2593,7 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
         cancelled = true;
       };
     }, [audit.auditMode, audit.statePath]);
-    const visibleTabs = audit.auditMode ? ["Round", "Results", "Ledger"] : ["Setup", "Round", "Results", "Ledger", "Payments", "Data"];
+    const visibleTabs = audit.auditMode ? ["Round", "Results", "Payouts"] : ["Setup", "Round", "Results", "Payouts", "Payments", "Data"];
     useEffect(() => {
       if (audit.auditMode && !visibleTabs.includes(tab)) setTab("Results");
     }, [audit.auditMode, tab]);
@@ -2530,9 +2696,10 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
         {
           state,
           currentRoundId,
-          setCurrentRoundId
+          setCurrentRoundId,
+          auditMode: audit.auditMode
         }
-      ), tab === "Ledger" && /* @__PURE__ */ React.createElement(LedgerTab, { state }), tab === "Payments" && !audit.auditMode && /* @__PURE__ */ React.createElement(PaymentsTab, { state, setState }), tab === "Data" && !audit.auditMode && /* @__PURE__ */ React.createElement(DataTab, { state, setState })),
+      ), tab === "Payouts" && /* @__PURE__ */ React.createElement(LedgerTab, { state, auditMode: audit.auditMode }), tab === "Payments" && !audit.auditMode && /* @__PURE__ */ React.createElement(PaymentsTab, { state, setState }), tab === "Data" && !audit.auditMode && /* @__PURE__ */ React.createElement(DataTab, { state, setState })),
       /* @__PURE__ */ React.createElement(
         "footer",
         {
