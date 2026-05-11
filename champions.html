@@ -1,13 +1,17 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Champs — Payout Manager</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
 <script src="https://cdn.tailwindcss.com"></script>
-<style>body{margin:0}input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}input[type=number]{-moz-appearance:textfield;}</style>
+<style>
+  html, body { margin: 0; padding: 0; background: #F7F5F0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+  #root { min-height: 100vh; }
+</style>
 </head>
 <body>
 <div id="root"></div>
@@ -2557,6 +2561,346 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
       ));
     }))))));
   }
+  function RulesTab() {
+    return /* @__PURE__ */ React.createElement("div", { className: "space-y-6 max-w-3xl mx-auto" }, /* @__PURE__ */ React.createElement("div", { className: "pb-4", style: { borderBottom: `2px solid ${palette.gold}` } }, /* @__PURE__ */ React.createElement(
+      "div",
+      {
+        className: "text-[10px] uppercase mb-2",
+        style: {
+          fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+          letterSpacing: "0.32em",
+          color: palette.gold
+        }
+      },
+      "Champs \xB7 Utah 2026 \xB7 Reglamento"
+    ), /* @__PURE__ */ React.createElement(
+      "h2",
+      {
+        className: "text-2xl md:text-3xl leading-tight",
+        style: {
+          fontFamily: "Georgia, 'Times New Roman', serif",
+          color: palette.greenDeep,
+          letterSpacing: "-0.01em",
+          fontWeight: 500
+        }
+      },
+      "Flights diarios ",
+      /* @__PURE__ */ React.createElement("em", { style: { color: palette.gold } }, "y"),
+      " reglas de desempate"
+    ), /* @__PURE__ */ React.createElement("p", { className: "text-sm mt-2 max-w-xl", style: { color: palette.inkSoft } }, "C\xF3mo se asignan los flights cada d\xEDa durante el torneo y c\xF3mo se resuelven los empates en Individual Net y Best Ball.")), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "flex items-baseline gap-3 mb-1" }, /* @__PURE__ */ React.createElement(
+      "span",
+      {
+        style: {
+          fontFamily: "Georgia, serif",
+          fontStyle: "italic",
+          color: palette.gold,
+          fontSize: 14,
+          letterSpacing: "0.04em"
+        }
+      },
+      "01"
+    ), /* @__PURE__ */ React.createElement(
+      "h3",
+      {
+        className: "text-xl md:text-2xl",
+        style: {
+          fontFamily: "Georgia, serif",
+          fontWeight: 500,
+          color: palette.greenDeep,
+          letterSpacing: "-0.01em"
+        }
+      },
+      "C\xF3mo se arman los flights cada d\xEDa"
+    )), /* @__PURE__ */ React.createElement("p", { className: "text-sm mb-4 max-w-xl", style: { color: palette.inkSoft } }, "El flight de un jugador puede cambiar de un d\xEDa al otro. Lo determina la composici\xF3n real del campo ese d\xEDa."), /* @__PURE__ */ React.createElement(
+      "div",
+      {
+        className: "p-5 mb-3",
+        style: {
+          background: palette.panel,
+          border: `1px solid ${palette.rule}`,
+          borderLeft: `3px solid ${palette.gold}`
+        }
+      },
+      /* @__PURE__ */ React.createElement(
+        "h4",
+        {
+          className: "text-base mb-2",
+          style: { fontFamily: "Georgia, serif", fontWeight: 500, color: palette.ink }
+        },
+        "Default por handicap index"
+      ),
+      /* @__PURE__ */ React.createElement("ul", { className: "text-sm space-y-2", style: { color: palette.ink } }, /* @__PURE__ */ React.createElement("li", { className: "flex gap-2" }, /* @__PURE__ */ React.createElement("span", { style: { color: palette.gold } }, "\u2726"), /* @__PURE__ */ React.createElement("span", null, /* @__PURE__ */ React.createElement("strong", null, "Flight A"), " \xB7 jugadores con \xEDndice ", /* @__PURE__ */ React.createElement("strong", null, "\u2264 12"))), /* @__PURE__ */ React.createElement("li", { className: "flex gap-2" }, /* @__PURE__ */ React.createElement("span", { style: { color: palette.gold } }, "\u2726"), /* @__PURE__ */ React.createElement("span", null, /* @__PURE__ */ React.createElement("strong", null, "Flight B"), " \xB7 jugadores con \xEDndice ", /* @__PURE__ */ React.createElement("strong", null, "\u2265 13"))), /* @__PURE__ */ React.createElement("li", { className: "flex gap-2" }, /* @__PURE__ */ React.createElement("span", { style: { color: palette.gold } }, "\u2726"), /* @__PURE__ */ React.createElement("span", null, "Los plus handicaps (\xEDndice negativo, ej.", " ", /* @__PURE__ */ React.createElement("span", { style: { fontFamily: "ui-monospace, Menlo, monospace" } }, "+1.8"), ") entran en Flight A")))
+    ), /* @__PURE__ */ React.createElement(
+      "div",
+      {
+        className: "p-5 mb-3",
+        style: { background: palette.panel, border: `1px solid ${palette.rule}` }
+      },
+      /* @__PURE__ */ React.createElement(
+        "h4",
+        {
+          className: "text-base mb-2",
+          style: { fontFamily: "Georgia, serif", fontWeight: 500, color: palette.ink }
+        },
+        "Reasignaci\xF3n diaria"
+      ),
+      /* @__PURE__ */ React.createElement("p", { className: "text-sm mb-2", style: { color: palette.ink } }, "Golf Pad recompone los flights cada d\xEDa seg\xFAn los jugadores confirmados de esa ronda. No todos juegan los cinco d\xEDas, as\xED que la composici\xF3n del campo cambia."),
+      /* @__PURE__ */ React.createElement("p", { className: "text-sm", style: { color: palette.ink } }, /* @__PURE__ */ React.createElement("strong", null, "El flight oficial de cada ronda es el que Golf Pad publica antes de la salida"), " \u2014 no el flight est\xE1tico por \xEDndice.")
+    ), /* @__PURE__ */ React.createElement(
+      "div",
+      {
+        className: "p-5",
+        style: { background: palette.panel, border: `1px solid ${palette.rule}` }
+      },
+      /* @__PURE__ */ React.createElement(
+        "h4",
+        {
+          className: "text-base mb-2",
+          style: { fontFamily: "Georgia, serif", fontWeight: 500, color: palette.ink }
+        },
+        "C\xF3mo se publica el lineup"
+      ),
+      /* @__PURE__ */ React.createElement("ul", { className: "text-sm space-y-2", style: { color: palette.ink } }, /* @__PURE__ */ React.createElement("li", { className: "flex gap-2" }, /* @__PURE__ */ React.createElement("span", { style: { color: palette.gold } }, "\u2726"), /* @__PURE__ */ React.createElement("span", null, "Golf Pad asigna flights cuando se confirman los jugadores del d\xEDa")), /* @__PURE__ */ React.createElement("li", { className: "flex gap-2" }, /* @__PURE__ */ React.createElement("span", { style: { color: palette.gold } }, "\u2726"), /* @__PURE__ */ React.createElement("span", null, "El administrador refleja esa asignaci\xF3n en el sistema")), /* @__PURE__ */ React.createElement("li", { className: "flex gap-2" }, /* @__PURE__ */ React.createElement("span", { style: { color: palette.gold } }, "\u2726"), /* @__PURE__ */ React.createElement("span", null, "Para consultar tu flight de la ronda: en este mismo portal ve a", " ", /* @__PURE__ */ React.createElement("strong", null, "Round"), " \u2192 selecciona la ronda del d\xEDa \u2192 tab", " ", /* @__PURE__ */ React.createElement("strong", null, "Course"), ". Abajo aparece la tabla de jugadores por flight con su course handicap calculado para ese tee.")))
+    ), /* @__PURE__ */ React.createElement(
+      "div",
+      {
+        className: "mt-5 pt-4",
+        style: {
+          borderTop: `1px solid ${palette.rule}`,
+          fontFamily: "Georgia, serif",
+          fontStyle: "italic",
+          fontSize: 17,
+          lineHeight: 1.5,
+          color: palette.greenDeep
+        }
+      },
+      /* @__PURE__ */ React.createElement("span", { style: { color: palette.gold, fontSize: 28, lineHeight: 0, verticalAlign: "-8px", marginRight: 4 } }, "\u201C"),
+      "Tu \xEDndice te asigna un flight por defecto, pero qui\xE9n juega hoy define los flights de hoy."
+    )), /* @__PURE__ */ React.createElement("div", { className: "pt-8" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-baseline gap-3 mb-1" }, /* @__PURE__ */ React.createElement(
+      "span",
+      {
+        style: {
+          fontFamily: "Georgia, serif",
+          fontStyle: "italic",
+          color: palette.gold,
+          fontSize: 14,
+          letterSpacing: "0.04em"
+        }
+      },
+      "02"
+    ), /* @__PURE__ */ React.createElement(
+      "h3",
+      {
+        className: "text-xl md:text-2xl",
+        style: {
+          fontFamily: "Georgia, serif",
+          fontWeight: 500,
+          color: palette.greenDeep,
+          letterSpacing: "-0.01em"
+        }
+      },
+      "Desempate \xB7 m\xE9todo USGA ",
+      /* @__PURE__ */ React.createElement("em", null, "count-back")
+    )), /* @__PURE__ */ React.createElement("p", { className: "text-sm mb-4 max-w-xl", style: { color: palette.inkSoft } }, "Aplica en Individual Net y Best Ball. Skins se resuelven solas con carryover hoyo a hoyo."), /* @__PURE__ */ React.createElement(
+      "div",
+      {
+        className: "p-5 mb-3",
+        style: { background: palette.panel, border: `1px solid ${palette.rule}` }
+      },
+      /* @__PURE__ */ React.createElement(
+        "h4",
+        {
+          className: "text-base mb-2",
+          style: { fontFamily: "Georgia, serif", fontWeight: 500, color: palette.ink }
+        },
+        "Cuando hay empate en el net total"
+      ),
+      /* @__PURE__ */ React.createElement("p", { className: "text-sm mb-3", style: { color: palette.ink } }, "Se comparan los jugadores (o equipos) en cuatro niveles sucesivos. El primer nivel que rompa el empate decide la posici\xF3n."),
+      /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: palette.bg, borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2", style: { width: 60 } }), /* @__PURE__ */ React.createElement(
+        "th",
+        {
+          className: "text-left px-3 py-2",
+          style: {
+            fontFamily: "ui-sans-serif",
+            fontSize: 11,
+            fontWeight: 600,
+            textTransform: "uppercase",
+            letterSpacing: "0.1em",
+            color: palette.inkSoft
+          }
+        },
+        "Segmento"
+      ), /* @__PURE__ */ React.createElement(
+        "th",
+        {
+          className: "text-left px-3 py-2",
+          style: {
+            fontFamily: "ui-sans-serif",
+            fontSize: 11,
+            fontWeight: 600,
+            textTransform: "uppercase",
+            letterSpacing: "0.1em",
+            color: palette.inkSoft
+          }
+        },
+        "Handicap aplicado"
+      ))), /* @__PURE__ */ React.createElement("tbody", null, [
+        { lvl: "1", seg: "\xDAltimos 9 hoyos", note: "Hoyos 10 \u2013 18", hcp: "\xBD \xD7 Course Hcp" },
+        { lvl: "2", seg: "\xDAltimos 6 hoyos", note: "Hoyos 13 \u2013 18", hcp: "\u2153 \xD7 Course Hcp" },
+        { lvl: "3", seg: "\xDAltimos 3 hoyos", note: "Hoyos 16 \u2013 18", hcp: "\u2159 \xD7 Course Hcp" },
+        { lvl: "4", seg: "Hoyo 18", note: "Solamente", hcp: "1\u204418 \xD7 Course Hcp" }
+      ].map((row) => /* @__PURE__ */ React.createElement("tr", { key: row.lvl, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-3 align-top" }, /* @__PURE__ */ React.createElement(
+        "span",
+        {
+          style: {
+            fontFamily: "Georgia, serif",
+            fontStyle: "italic",
+            color: palette.gold,
+            fontSize: 22,
+            lineHeight: 1
+          }
+        },
+        row.lvl
+      )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-3 align-top" }, /* @__PURE__ */ React.createElement("div", { style: { fontWeight: 600, color: palette.ink } }, row.seg), /* @__PURE__ */ React.createElement("div", { className: "text-xs mt-1", style: { color: palette.inkSoft } }, row.note)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-3 align-top" }, /* @__PURE__ */ React.createElement(
+        "span",
+        {
+          style: {
+            fontFamily: "ui-monospace, Menlo, monospace",
+            background: palette.bg,
+            padding: "4px 8px",
+            fontSize: 12.5,
+            color: palette.greenDeep,
+            whiteSpace: "nowrap"
+          }
+        },
+        row.hcp
+      )))))),
+      /* @__PURE__ */ React.createElement(
+        "div",
+        {
+          className: "mt-4 p-4",
+          style: {
+            background: "#F5EFD7",
+            borderLeft: `3px solid ${palette.gold}`
+          }
+        },
+        /* @__PURE__ */ React.createElement(
+          "div",
+          {
+            className: "text-[10px] uppercase mb-2",
+            style: {
+              fontFamily: "ui-monospace, Menlo, monospace",
+              letterSpacing: "0.2em",
+              color: palette.gold
+            }
+          },
+          "Ejemplo"
+        ),
+        /* @__PURE__ */ React.createElement("p", { className: "text-sm mb-2", style: { color: palette.ink } }, "Dos jugadores del Flight A terminan con net 69. Comparamos sus \xFAltimos 9 hoyos:"),
+        /* @__PURE__ */ React.createElement(
+          "table",
+          {
+            className: "w-full text-sm mt-2",
+            style: { fontVariantNumeric: "tabular-nums", borderCollapse: "collapse" }
+          },
+          /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", null, /* @__PURE__ */ React.createElement(
+            "th",
+            {
+              className: "text-left px-2 py-1.5",
+              style: {
+                fontSize: 11,
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+                color: palette.greenDeep,
+                borderBottom: `1px solid rgba(184,134,46,0.3)`
+              }
+            },
+            "Jugador"
+          ), /* @__PURE__ */ React.createElement(
+            "th",
+            {
+              className: "text-right px-2 py-1.5",
+              style: {
+                fontSize: 11,
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+                color: palette.greenDeep,
+                borderBottom: `1px solid rgba(184,134,46,0.3)`
+              }
+            },
+            "Net"
+          ), /* @__PURE__ */ React.createElement(
+            "th",
+            {
+              className: "text-right px-2 py-1.5",
+              style: {
+                fontSize: 11,
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+                color: palette.greenDeep,
+                borderBottom: `1px solid rgba(184,134,46,0.3)`
+              }
+            },
+            "Net \xFAltimos 9"
+          ), /* @__PURE__ */ React.createElement(
+            "th",
+            {
+              className: "text-left px-2 py-1.5",
+              style: {
+                fontSize: 11,
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+                color: palette.greenDeep,
+                borderBottom: `1px solid rgba(184,134,46,0.3)`
+              }
+            },
+            "Resultado"
+          ))),
+          /* @__PURE__ */ React.createElement("tbody", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "rgba(14,92,58,0.06)", fontWeight: 600 } }, /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1.5", style: { borderBottom: `1px solid rgba(184,134,46,0.2)` } }, "Francisco Amauris"), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1.5 text-right", style: { borderBottom: `1px solid rgba(184,134,46,0.2)` } }, "69"), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1.5 text-right", style: { borderBottom: `1px solid rgba(184,134,46,0.2)` } }, "34.5"), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1.5", style: { borderBottom: `1px solid rgba(184,134,46,0.2)` } }, "1\xB0")), /* @__PURE__ */ React.createElement("tr", null, /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1.5" }, "Jay Gonzalez"), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1.5 text-right" }, "69"), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1.5 text-right" }, "35.5"), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1.5" }, "2\xB0")))
+        ),
+        /* @__PURE__ */ React.createElement("p", { className: "text-sm mt-3", style: { color: palette.ink } }, "Francisco gana 1\xB0 lugar con menor net en los \xFAltimos nueve. No se necesita bajar al nivel 2.")
+      )
+    ), /* @__PURE__ */ React.createElement(
+      "div",
+      {
+        className: "p-5",
+        style: {
+          background: palette.panel,
+          border: `1px solid ${palette.rule}`,
+          borderLeft: `3px solid ${palette.gold}`
+        }
+      },
+      /* @__PURE__ */ React.createElement(
+        "h4",
+        {
+          className: "text-base mb-2",
+          style: { fontFamily: "Georgia, serif", fontWeight: 500, color: palette.ink }
+        },
+        "Posiciones \xFAnicas"
+      ),
+      /* @__PURE__ */ React.createElement("p", { className: "text-sm mb-2", style: { color: palette.ink } }, "El count-back garantiza que cada posici\xF3n tenga un solo ganador.", " ", /* @__PURE__ */ React.createElement("strong", null, "No hay empates compartidos en el podio"), ", ni reparto de premios entre empatados, ni medallas dobles."),
+      /* @__PURE__ */ React.createElement("p", { className: "text-sm", style: { color: palette.ink } }, "Si despu\xE9s de los cuatro niveles dos jugadores siguen exactamente iguales \u2014 escenario virtualmente imposible \u2014 el sistema mantiene el orden original sin pooling.")
+    ), /* @__PURE__ */ React.createElement(
+      "div",
+      {
+        className: "mt-5 pt-4",
+        style: {
+          borderTop: `1px solid ${palette.rule}`,
+          fontFamily: "Georgia, serif",
+          fontStyle: "italic",
+          fontSize: 17,
+          lineHeight: 1.5,
+          color: palette.greenDeep
+        }
+      },
+      /* @__PURE__ */ React.createElement("span", { style: { color: palette.gold, fontSize: 28, lineHeight: 0, verticalAlign: "-8px", marginRight: 4 } }, "\u201C"),
+      "El que juegue mejor en la parte final del campo gana el desempate."
+    )));
+  }
   function App() {
     const audit = useMemo(() => getAuditConfig(), []);
     const [rawState, rawSetState] = useState(() => makeSeed());
@@ -2593,7 +2937,7 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
         cancelled = true;
       };
     }, [audit.auditMode, audit.statePath]);
-    const visibleTabs = audit.auditMode ? ["Round", "Results", "Payouts"] : ["Setup", "Round", "Results", "Payouts", "Payments", "Data"];
+    const visibleTabs = audit.auditMode ? ["Round", "Results", "Payouts", "Reglas"] : ["Setup", "Round", "Results", "Payouts", "Reglas", "Payments", "Data"];
     useEffect(() => {
       if (audit.auditMode && !visibleTabs.includes(tab)) setTab("Results");
     }, [audit.auditMode, tab]);
@@ -2699,7 +3043,7 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
           setCurrentRoundId,
           auditMode: audit.auditMode
         }
-      ), tab === "Payouts" && /* @__PURE__ */ React.createElement(LedgerTab, { state, auditMode: audit.auditMode }), tab === "Payments" && !audit.auditMode && /* @__PURE__ */ React.createElement(PaymentsTab, { state, setState }), tab === "Data" && !audit.auditMode && /* @__PURE__ */ React.createElement(DataTab, { state, setState })),
+      ), tab === "Payouts" && /* @__PURE__ */ React.createElement(LedgerTab, { state, auditMode: audit.auditMode }), tab === "Payments" && !audit.auditMode && /* @__PURE__ */ React.createElement(PaymentsTab, { state, setState }), tab === "Reglas" && /* @__PURE__ */ React.createElement(RulesTab, null), tab === "Data" && !audit.auditMode && /* @__PURE__ */ React.createElement(DataTab, { state, setState })),
       /* @__PURE__ */ React.createElement(
         "footer",
         {
@@ -2710,7 +3054,10 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
       )
     );
   }
-  window.__renderApp = () => ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
+  window.__renderApp = () => {
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(React.createElement(App));
+  };
 })();
 
 window.__renderApp();
