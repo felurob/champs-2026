@@ -1725,6 +1725,10 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
   }
   function ResultsScoresView({ round, results, playerById, state }) {
     const coursePar = sumPars(round.pars);
+    const [expandedPlayers, setExpandedPlayers] = useState({});
+    const [expandedTeams, setExpandedTeams] = useState({});
+    const togglePlayer = (pid) => setExpandedPlayers((prev) => ({ ...prev, [pid]: !prev[pid] }));
+    const toggleTeam = (tid) => setExpandedTeams((prev) => ({ ...prev, [tid]: !prev[tid] }));
     const scoresByFlight = (flight) => {
       const data = results[`indNet${flight}`];
       if (!data || data.ranking.length === 0) return [];
@@ -1734,6 +1738,75 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
       const data = results[`bestBall${flight}`];
       if (!data) return [];
       return data.teamResults.filter((t) => t.total != null);
+    };
+    const renderPlayerScorecard = (r) => {
+      const scores = round.scores[r.playerId] || [];
+      if (!allScored(scores)) return null;
+      const pars = round.pars || [];
+      const frontGross = scores.slice(0, 9).reduce((a, b) => a + Number(b), 0);
+      const backGross = scores.slice(9, 18).reduce((a, b) => a + Number(b), 0);
+      const frontPar = pars.slice(0, 9).reduce((a, b) => a + (Number(b) || 0), 0);
+      const backPar = pars.slice(9, 18).reduce((a, b) => a + (Number(b) || 0), 0);
+      return /* @__PURE__ */ React.createElement("tr", null, /* @__PURE__ */ React.createElement("td", { colSpan: 6, className: "px-0 py-0" }, /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto", style: { background: "#FAFAF7" } }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-xs", style: { fontVariantNumeric: "tabular-nums", minWidth: 600 } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 font-medium", style: { color: palette.inkSoft, width: 50 } }, "Hole"), Array.from({ length: 9 }, (_, i) => /* @__PURE__ */ React.createElement("td", { key: i, className: "px-1 py-1 text-center font-medium", style: { width: 32 } }, i + 1)), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center font-medium", style: { background: "#F0EDE5", width: 40 } }, "Out"), Array.from({ length: 9 }, (_, i) => /* @__PURE__ */ React.createElement("td", { key: i + 9, className: "px-1 py-1 text-center font-medium", style: { width: 32 } }, i + 10)), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center font-medium", style: { background: "#F0EDE5", width: 40 } }, "In"), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center font-medium", style: { background: "#E8E4DA", width: 44 } }, "Tot"))), /* @__PURE__ */ React.createElement("tbody", null, /* @__PURE__ */ React.createElement("tr", { style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1", style: { color: palette.inkSoft } }, "Par"), pars.slice(0, 9).map((p, i) => /* @__PURE__ */ React.createElement("td", { key: i, className: "px-1 py-1 text-center", style: { color: palette.inkSoft } }, p)), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center", style: { background: "#F0EDE5", color: palette.inkSoft } }, frontPar), pars.slice(9, 18).map((p, i) => /* @__PURE__ */ React.createElement("td", { key: i, className: "px-1 py-1 text-center", style: { color: palette.inkSoft } }, p)), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center", style: { background: "#F0EDE5", color: palette.inkSoft } }, backPar), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center", style: { background: "#E8E4DA", color: palette.inkSoft } }, coursePar)), /* @__PURE__ */ React.createElement("tr", null, /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 font-medium" }, "Score"), scores.slice(0, 9).map((s, i) => {
+        const diff = Number(s) - (Number(pars[i]) || 0);
+        return /* @__PURE__ */ React.createElement("td", { key: i, className: "px-1 py-1 text-center font-medium", style: {
+          color: diff < 0 ? palette.green : diff > 0 ? palette.alert : palette.ink,
+          background: diff <= -2 ? "#D0F0D8" : diff === -1 ? "#E8F5EB" : diff >= 2 ? "#FCE9E5" : "transparent"
+        } }, s);
+      }), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center font-medium", style: { background: "#F0EDE5" } }, frontGross), scores.slice(9, 18).map((s, i) => {
+        const diff = Number(s) - (Number(pars[i + 9]) || 0);
+        return /* @__PURE__ */ React.createElement("td", { key: i, className: "px-1 py-1 text-center font-medium", style: {
+          color: diff < 0 ? palette.green : diff > 0 ? palette.alert : palette.ink,
+          background: diff <= -2 ? "#D0F0D8" : diff === -1 ? "#E8F5EB" : diff >= 2 ? "#FCE9E5" : "transparent"
+        } }, s);
+      }), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center font-medium", style: { background: "#F0EDE5" } }, backGross), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center font-medium", style: { background: "#E8E4DA" } }, r.gross)))))));
+    };
+    const renderTeamScorecard = (team) => {
+      const pars = round.pars || [];
+      const members = team.members;
+      if (members.length === 0) return null;
+      const memberData = members.map((pid) => {
+        const player = state.players.find((p) => p.id === pid);
+        const ch = chForPlayer(player, round);
+        const scores = round.scores[pid] || [];
+        const nets = round.holeIndexes.map((SI, i) => {
+          const g = scores[i];
+          if (g === "" || g == null) return null;
+          return netOnHole(Number(g), ch, SI);
+        });
+        return { pid, name: playerById[pid]?.name, ch, scores, nets };
+      });
+      const bestPerHole = Array.from({ length: 18 }, (_, h) => {
+        let bestNet = null;
+        let bestPid = null;
+        for (const m of memberData) {
+          if (m.nets[h] != null && (bestNet == null || m.nets[h] < bestNet)) {
+            bestNet = m.nets[h];
+            bestPid = m.pid;
+          }
+        }
+        return bestPid;
+      });
+      const frontPar = pars.slice(0, 9).reduce((a, b) => a + (Number(b) || 0), 0);
+      const backPar = pars.slice(9, 18).reduce((a, b) => a + (Number(b) || 0), 0);
+      return /* @__PURE__ */ React.createElement("tr", null, /* @__PURE__ */ React.createElement("td", { colSpan: 5, className: "px-0 py-0" }, /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto", style: { background: "#FAFAF7" } }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-xs", style: { fontVariantNumeric: "tabular-nums", minWidth: 600 } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 font-medium", style: { color: palette.inkSoft, width: 110 } }, "Hole"), Array.from({ length: 9 }, (_, i) => /* @__PURE__ */ React.createElement("td", { key: i, className: "px-1 py-1 text-center font-medium", style: { width: 32 } }, i + 1)), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center font-medium", style: { background: "#F0EDE5", width: 40 } }, "Out"), Array.from({ length: 9 }, (_, i) => /* @__PURE__ */ React.createElement("td", { key: i + 9, className: "px-1 py-1 text-center font-medium", style: { width: 32 } }, i + 10)), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center font-medium", style: { background: "#F0EDE5", width: 40 } }, "In"), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center font-medium", style: { background: "#E8E4DA", width: 44 } }, "Tot"))), /* @__PURE__ */ React.createElement("tbody", null, /* @__PURE__ */ React.createElement("tr", { style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1", style: { color: palette.inkSoft } }, "Par"), pars.slice(0, 9).map((p, i) => /* @__PURE__ */ React.createElement("td", { key: i, className: "px-1 py-1 text-center", style: { color: palette.inkSoft } }, p)), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center", style: { background: "#F0EDE5", color: palette.inkSoft } }, frontPar), pars.slice(9, 18).map((p, i) => /* @__PURE__ */ React.createElement("td", { key: i, className: "px-1 py-1 text-center", style: { color: palette.inkSoft } }, p)), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center", style: { background: "#F0EDE5", color: palette.inkSoft } }, backPar), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center", style: { background: "#E8E4DA", color: palette.inkSoft } }, coursePar)), memberData.map((m) => {
+        const frontGross = m.scores.slice(0, 9).reduce((a, b) => a + (Number(b) || 0), 0);
+        const backGross = m.scores.slice(9, 18).reduce((a, b) => a + (Number(b) || 0), 0);
+        const totalGross = frontGross + backGross;
+        return /* @__PURE__ */ React.createElement("tr", { key: m.pid, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1" }, /* @__PURE__ */ React.createElement("span", { className: "font-medium" }, m.name), /* @__PURE__ */ React.createElement("span", { className: "ml-1", style: { color: palette.inkSoft } }, "(ch ", m.ch, ")")), m.scores.slice(0, 9).map((s, i) => {
+          const isBest = bestPerHole[i] === m.pid;
+          return /* @__PURE__ */ React.createElement("td", { key: i, className: "px-1 py-1 text-center font-medium", style: {
+            background: isBest ? "#D0F0D8" : "transparent",
+            color: isBest ? palette.green : palette.ink
+          } }, s === "" || s == null ? "\u2014" : s);
+        }), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center", style: { background: "#F0EDE5" } }, frontGross), m.scores.slice(9, 18).map((s, i) => {
+          const isBest = bestPerHole[i + 9] === m.pid;
+          return /* @__PURE__ */ React.createElement("td", { key: i, className: "px-1 py-1 text-center font-medium", style: {
+            background: isBest ? "#D0F0D8" : "transparent",
+            color: isBest ? palette.green : palette.ink
+          } }, s === "" || s == null ? "\u2014" : s);
+        }), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center", style: { background: "#F0EDE5" } }, backGross), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center font-medium", style: { background: "#E8E4DA" } }, totalGross));
+      }))))));
     };
     return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-2 md:grid-cols-4 gap-3" }, /* @__PURE__ */ React.createElement(KPI, { label: "Course", value: round.courseName }), /* @__PURE__ */ React.createElement(KPI, { label: "Par", value: coursePar }), /* @__PURE__ */ React.createElement(KPI, { label: "Active", value: results.activePlayerIds.length }), /* @__PURE__ */ React.createElement(KPI, { label: "Date", value: round.date })), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-4" }, ["A", "B"].map((flight) => {
       const ranking = scoresByFlight(flight);
@@ -1746,18 +1819,35 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
         },
         ranking.length === 0 ? /* @__PURE__ */ React.createElement("div", { className: "text-sm", style: { color: palette.inkSoft } }, "No scores yet.") : /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium", style: { width: 40 } }, "Pos"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Player"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right", style: { width: 60 } }, "CH"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right", style: { width: 70 } }, "Gross"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right", style: { width: 80 } }, "vs Par"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right", style: { width: 60 } }, "Net"))), /* @__PURE__ */ React.createElement("tbody", null, ranking.map((r) => {
           const vsPar = r.gross - coursePar;
-          return /* @__PURE__ */ React.createElement("tr", { key: r.playerId, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, /* @__PURE__ */ React.createElement(
-            "span",
+          const isExpanded = expandedPlayers[r.playerId];
+          return /* @__PURE__ */ React.createElement(React.Fragment, { key: r.playerId }, /* @__PURE__ */ React.createElement(
+            "tr",
             {
-              className: "inline-block w-6 h-6 text-xs leading-6 text-center",
+              onClick: () => togglePlayer(r.playerId),
               style: {
-                background: r.position === 1 ? palette.gold : r.position === 2 ? palette.green : r.position === 3 ? palette.ink : "transparent",
-                borderRadius: 999,
-                color: r.position <= 3 ? "#fff" : palette.inkSoft
-              }
+                borderBottom: isExpanded ? "none" : `1px solid ${palette.rule}`,
+                cursor: "pointer"
+              },
+              className: "hover:bg-gray-50 transition-colors"
             },
-            r.position
-          )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 font-medium" }, playerById[r.playerId]?.name), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right", style: { color: palette.inkSoft } }, r.courseHcp), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, r.gross), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right", style: { color: vsPar > 0 ? palette.alert : vsPar < 0 ? palette.green : palette.ink } }, vsPar > 0 ? "+" : "", vsPar), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right font-medium", style: { color: palette.green } }, r.net));
+            /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, /* @__PURE__ */ React.createElement(
+              "span",
+              {
+                className: "inline-block w-6 h-6 text-xs leading-6 text-center",
+                style: {
+                  background: r.position === 1 ? palette.gold : r.position === 2 ? palette.green : r.position === 3 ? palette.ink : "transparent",
+                  borderRadius: 999,
+                  color: r.position <= 3 ? "#fff" : palette.inkSoft
+                }
+              },
+              r.position
+            )),
+            /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 font-medium" }, /* @__PURE__ */ React.createElement("span", { className: "flex items-center gap-1" }, /* @__PURE__ */ React.createElement("span", { style: { color: palette.green, fontSize: 10 } }, isExpanded ? "\u25BC" : "\u25B6"), playerById[r.playerId]?.name)),
+            /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right", style: { color: palette.inkSoft } }, r.courseHcp),
+            /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, r.gross),
+            /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right", style: { color: vsPar > 0 ? palette.alert : vsPar < 0 ? palette.green : palette.ink } }, vsPar > 0 ? "+" : "", vsPar),
+            /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right font-medium", style: { color: palette.green } }, r.net)
+          ), isExpanded && renderPlayerScorecard(r));
         }))))
       );
     })), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-4" }, ["A", "B"].map((flight) => {
@@ -1770,18 +1860,36 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
           title: `Best Ball Teams \xB7 Flight ${flight}`,
           action: /* @__PURE__ */ React.createElement("span", { className: "text-xs", style: { color: palette.inkSoft } }, teams.length, " teams")
         },
-        teams.length === 0 ? /* @__PURE__ */ React.createElement("div", { className: "text-sm", style: { color: palette.inkSoft } }, "No teams or scores yet.") : /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium", style: { width: 40 } }, "Pos"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Team"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Members"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Net BB"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Payout"))), /* @__PURE__ */ React.createElement("tbody", null, teams.map((t) => /* @__PURE__ */ React.createElement("tr", { key: t.teamId, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, /* @__PURE__ */ React.createElement(
-          "span",
-          {
-            className: "inline-block w-6 h-6 text-xs leading-6 text-center",
-            style: {
-              background: t.position === 1 ? palette.gold : t.position === 2 ? palette.green : "transparent",
-              borderRadius: 999,
-              color: t.position <= 2 ? "#fff" : palette.inkSoft
-            }
-          },
-          t.position
-        )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 font-medium" }, t.teamName), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-xs", style: { color: palette.inkSoft } }, t.members.map((id) => playerById[id]?.name).join(", ")), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right font-medium" }, t.total), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right font-medium", style: { color: palette.green } }, fmt$(data.teamPayouts[t.teamId] || 0)))))))
+        teams.length === 0 ? /* @__PURE__ */ React.createElement("div", { className: "text-sm", style: { color: palette.inkSoft } }, "No teams or scores yet.") : /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium", style: { width: 40 } }, "Pos"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Team"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Members"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Net BB"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Payout"))), /* @__PURE__ */ React.createElement("tbody", null, teams.map((t) => {
+          const isExpanded = expandedTeams[t.teamId];
+          return /* @__PURE__ */ React.createElement(React.Fragment, { key: t.teamId }, /* @__PURE__ */ React.createElement(
+            "tr",
+            {
+              onClick: () => toggleTeam(t.teamId),
+              style: {
+                borderBottom: isExpanded ? "none" : `1px solid ${palette.rule}`,
+                cursor: "pointer"
+              },
+              className: "hover:bg-gray-50 transition-colors"
+            },
+            /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, /* @__PURE__ */ React.createElement(
+              "span",
+              {
+                className: "inline-block w-6 h-6 text-xs leading-6 text-center",
+                style: {
+                  background: t.position === 1 ? palette.gold : t.position === 2 ? palette.green : "transparent",
+                  borderRadius: 999,
+                  color: t.position <= 2 ? "#fff" : palette.inkSoft
+                }
+              },
+              t.position
+            )),
+            /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 font-medium" }, /* @__PURE__ */ React.createElement("span", { className: "flex items-center gap-1" }, /* @__PURE__ */ React.createElement("span", { style: { color: palette.green, fontSize: 10 } }, isExpanded ? "\u25BC" : "\u25B6"), t.teamName)),
+            /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-xs", style: { color: palette.inkSoft } }, t.members.map((id) => playerById[id]?.name).join(", ")),
+            /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right font-medium" }, t.total),
+            /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right font-medium", style: { color: palette.green } }, fmt$(data.teamPayouts[t.teamId] || 0))
+          ), isExpanded && renderTeamScorecard(t));
+        }))))
       );
     })));
   }
