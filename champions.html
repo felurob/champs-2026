@@ -1,21 +1,16 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="es">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Champs — Payout Manager</title>
-<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-  html, body { margin: 0; padding: 0; background: #F7F5F0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
-  #root { min-height: 100vh; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Champs · Payout Manager</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
-<div id="root"></div>
-<script>
+  <div id="root"></div>
+  <script>
 (() => {
   const { useState, useMemo, useRef, useEffect } = React;
   const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
@@ -40,9 +35,21 @@
       courseRating: round.courseRating ?? null
     };
   }
+  function roundFlights(round) {
+    return round?.flightConfig?.flights || ["A", "B"];
+  }
   function flightForRound(round, player) {
     const f = round?.participants?.[player?.id]?.flight;
-    if (f === "A" || f === "B") return f;
+    if (f && /^[A-Z]$/.test(f)) return f;
+    if (round?.flightConfig?.cutoffs?.length) {
+      const idx = Number(player?.handicapIndex ?? 99);
+      const flights = roundFlights(round);
+      const cutoffs = round.flightConfig.cutoffs;
+      for (let i = 0; i < cutoffs.length; i++) {
+        if (idx <= cutoffs[i]) return flights[i];
+      }
+      return flights[flights.length - 1];
+    }
     return player?.category;
   }
   function chForPlayer(player, round) {
@@ -154,7 +161,8 @@
     const skinValue = dollarFloor(skinValueFloat);
     const payouts = {};
     for (const p of catPlayers) payouts[p.id] = skinsByPlayer[p.id] * skinValue;
-    if (totalAwarded === 0 && catPlayers.length > 0) {
+    const anyDataAtAll = holes.some((h) => h.status !== "no-data");
+    if (totalAwarded === 0 && catPlayers.length > 0 && anyDataAtAll) {
       const each = dollarFloor(pot / catPlayers.length);
       for (const p of catPlayers) payouts[p.id] = each;
     }
@@ -313,19 +321,20 @@
     };
   }
   function computeBestBall(playersAll, round) {
-    const a = computeBestBallForFlight(playersAll, round, "A");
-    const b = computeBestBallForFlight(playersAll, round, "B");
-    const playerPayouts = { ...a.playerPayouts, ...b.playerPayouts };
+    const flights = roundFlights(round);
+    const perFlight = Object.fromEntries(
+      flights.map((f) => [f, computeBestBallForFlight(playersAll, round, f)])
+    );
+    const playerPayouts = Object.assign({}, ...flights.map((f) => perFlight[f].playerPayouts));
     return {
-      A: a,
-      B: b,
-      pot: a.pot + b.pot,
-      teamResults: [...a.teamResults, ...b.teamResults],
-      teamPayouts: { ...a.teamPayouts, ...b.teamPayouts },
+      ...perFlight,
+      pot: flights.reduce((s, f) => s + perFlight[f].pot, 0),
+      teamResults: flights.flatMap((f) => perFlight[f].teamResults),
+      teamPayouts: Object.assign({}, ...flights.map((f) => perFlight[f].teamPayouts)),
       playerPayouts,
-      positions: { A: a.positions, B: b.positions },
-      eligibleIds: [...a.eligibleIds, ...b.eligibleIds],
-      houseLeftover: a.houseLeftover + b.houseLeftover
+      positions: Object.fromEntries(flights.map((f) => [f, perFlight[f].positions])),
+      eligibleIds: flights.flatMap((f) => perFlight[f].eligibleIds),
+      houseLeftover: flights.reduce((s, f) => s + perFlight[f].houseLeftover, 0)
     };
   }
   function computeRoundResults(round, players) {
@@ -341,24 +350,27 @@
     const inIN = (cat) => activePlayers.filter(
       (p) => round.participants[p.id]?.inIndividualNet && p.flight === cat
     );
-    const skinsA = computeSkinsForCategory(inSkins("A"), round);
-    const skinsB = computeSkinsForCategory(inSkins("B"), round);
-    const indNetA = computeIndividualNet(inIN("A"), round);
-    const indNetB = computeIndividualNet(inIN("B"), round);
+    const flights = roundFlights(round);
+    const skinsByFlight = Object.fromEntries(flights.map((f) => [f, computeSkinsForCategory(inSkins(f), round)]));
+    const indNetByFlight = Object.fromEntries(flights.map((f) => [f, computeIndividualNet(inIN(f), round)]));
+    const skinsA = skinsByFlight["A"] || computeSkinsForCategory([], round);
+    const skinsB = skinsByFlight["B"] || computeSkinsForCategory([], round);
+    const indNetA = indNetByFlight["A"] || computeIndividualNet([], round);
+    const indNetB = indNetByFlight["B"] || computeIndividualNet([], round);
     const indNet = {
-      eligibleIds: [...indNetA.eligibleIds, ...indNetB.eligibleIds],
-      pot: indNetA.pot + indNetB.pot,
-      ranking: [...indNetA.ranking, ...indNetB.ranking],
-      payouts: { ...indNetA.payouts, ...indNetB.payouts },
-      positions: { A: indNetA.positions, B: indNetB.positions }
+      eligibleIds: flights.flatMap((f) => indNetByFlight[f].eligibleIds),
+      pot: flights.reduce((s, f) => s + indNetByFlight[f].pot, 0),
+      ranking: flights.flatMap((f) => indNetByFlight[f].ranking),
+      payouts: Object.assign({}, ...flights.map((f) => indNetByFlight[f].payouts)),
+      positions: Object.fromEntries(flights.map((f) => [f, indNetByFlight[f].positions]))
     };
     const bb = computeBestBall(playersCH, round);
-    const houseAmount = activePlayers.length * 2 + (skinsA.houseLeftover || 0) + (skinsB.houseLeftover || 0) + (indNetA.houseLeftover || 0) + (indNetB.houseLeftover || 0) + (bb.houseLeftover || 0);
+    const houseAmount = activePlayers.length * 2 + flights.reduce((s, f) => s + (skinsByFlight[f].houseLeftover || 0), 0) + flights.reduce((s, f) => s + (indNetByFlight[f].houseLeftover || 0), 0) + (bb.houseLeftover || 0);
     const ledger = {};
     for (const p of playersCH) {
       const part = round.participants[p.id] || {};
       if (!part.active) continue;
-      const contrib = 30;
+      const contrib = (part.inSkins ? 20 : 0) + (part.inIndividualNet ? 5 : 0) + (part.inBestBall ? 5 : 0);
       const winSkins = (skinsA.payouts[p.id] || 0) + (skinsB.payouts[p.id] || 0);
       const winIN = indNet.payouts[p.id] || 0;
       const winBB = bb.playerPayouts[p.id] || 0;
@@ -377,29 +389,31 @@
       activePlayerIds: activePlayers.map((p) => p.id),
       coursePar: sumPars(round.pars),
       courseHcps: Object.fromEntries(playersCH.map((p) => [p.id, p.courseHcp])),
+      flights,
       potBreakdown: {
-        skinsA: skinsA.pot,
-        skinsB: skinsB.pot,
+        ...Object.fromEntries(flights.map((f) => [`skins${f}`, skinsByFlight[f].pot])),
         individualNet: indNet.pot,
         bestBall: bb.pot,
         house: houseAmount,
-        total: skinsA.pot + skinsB.pot + indNet.pot + bb.pot + houseAmount
+        total: flights.reduce((s, f) => s + skinsByFlight[f].pot, 0) + indNet.pot + bb.pot + houseAmount
       },
+      skinsByFlight,
       skinsA,
       skinsB,
       indNet,
       indNetA,
       indNetB,
+      indNetByFlight,
       bestBall: bb,
-      bestBallA: bb.A,
-      bestBallB: bb.B,
+      bestBallA: bb["A"],
+      bestBallB: bb["B"],
       houseAmount,
       ledger
     };
   }
   function validateRound(round, players) {
     const warnings = [];
-    for (const cat of ["A", "B"]) {
+    for (const cat of roundFlights(round)) {
       const t = round.teesByCategory?.[cat];
       if (!t || !t.slopeRating) {
         warnings.push(`Flight ${cat}: slope rating not set \u2014 course handicaps will use neutral 113.`);
@@ -474,7 +488,7 @@
       { id: "p21", name: "Rafael Zorrilla (Pichu)", handicapIndex: 9, notes: "" },
       { id: "p22", name: "Edgar Alma", handicapIndex: -1.8, notes: "Plus handicap" },
       { id: "p23", name: "Ram\xF3n Villanueva", handicapIndex: 12.9, notes: "" },
-      { id: "p24", name: "Eduardo Ferreiro", handicapIndex: 14.8, notes: "" },
+      { id: "p24", name: "Tom Nu\xF1ez", handicapIndex: 25.9, notes: "" },
       { id: "p25", name: "Elcris Matias", handicapIndex: 16, notes: "" },
       { id: "p26", name: "Magin Ferreiro", handicapIndex: 11.8, notes: "" },
       { id: "p27", name: "Rafael Rubiera", handicapIndex: 19.8, notes: "" },
@@ -562,6 +576,8 @@
       pars: [...c.pars],
       participants: buildParticipants(allIds),
       teams: [],
+      draftLog: [],
+      flightConfig: null,
       scores: {},
       locked: false
     }));
@@ -1060,7 +1076,7 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
       )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-xs", style: { color: palette.inkSoft } }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement(Pill, { tone: "A" }, "A"), " ", fmtTee(tA)), /* @__PURE__ */ React.createElement("div", { className: "mt-1" }, /* @__PURE__ */ React.createElement(Pill, { tone: "B" }, "B"), " ", fmtTee(tB))), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, /* @__PURE__ */ React.createElement(Pill, { tone: r.locked ? "locked" : "open" }, r.locked ? "Locked" : "Open")));
     })))), /* @__PURE__ */ React.createElement("div", { className: "px-3 py-2 text-xs", style: { color: palette.inkSoft } }, "Tees are configured per flight on each round's ", /* @__PURE__ */ React.createElement("strong", null, "Course"), " tab. Format above: tee name (rating/slope).")));
   }
-  function RoundTab({ state, setState, currentRoundId, setCurrentRoundId, auditMode }) {
+  function RoundTab({ state, setState, currentRoundId, setCurrentRoundId }) {
     const round = state.rounds.find((r) => r.id === currentRoundId);
     const [subTab, setSubTab] = useState("Participation");
     const warnings = useMemo(
@@ -1068,7 +1084,6 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
       [round, state.players]
     );
     if (!round) return null;
-    const effectiveLocked = round.locked || auditMode;
     const updateRound = (patch) => setState((s) => ({
       ...s,
       rounds: s.rounds.map((r) => r.id === round.id ? { ...r, ...patch } : r)
@@ -1091,7 +1106,7 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
       "R",
       r.number,
       /* @__PURE__ */ React.createElement("span", { className: "ml-2 text-xs opacity-70" }, r.courseName)
-    )), /* @__PURE__ */ React.createElement("div", { className: "flex-1" }), /* @__PURE__ */ React.createElement(Pill, { tone: round.locked ? "locked" : "open" }, round.locked ? "Locked" : "Open"), !auditMode && /* @__PURE__ */ React.createElement(Btn, { variant: round.locked ? "secondary" : "danger", onClick: toggleLock }, round.locked ? "Unlock round" : "Lock round")), !auditMode && warnings.length > 0 && /* @__PURE__ */ React.createElement(
+    )), /* @__PURE__ */ React.createElement("div", { className: "flex-1" }), /* @__PURE__ */ React.createElement(Pill, { tone: round.locked ? "locked" : "open" }, round.locked ? "Locked" : "Open"), /* @__PURE__ */ React.createElement(Btn, { variant: round.locked ? "secondary" : "danger", onClick: toggleLock }, round.locked ? "Unlock round" : "Lock round")), warnings.length > 0 && /* @__PURE__ */ React.createElement(
       "div",
       {
         className: "px-4 py-3 text-sm",
@@ -1113,9 +1128,181 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
         }
       },
       t
-    ))), subTab === "Participation" && /* @__PURE__ */ React.createElement(ParticipationPanel, { state, round, updateRound, auditMode }), subTab === "Course" && /* @__PURE__ */ React.createElement(CoursePanel, { round, players: state.players, updateRound, auditMode }), subTab === "Teams" && /* @__PURE__ */ React.createElement(TeamsPanel, { state, round, updateRound, auditMode }), subTab === "Scores" && /* @__PURE__ */ React.createElement(ScoresPanel, { state, round, updateRound, auditMode, setState }));
+    ))), subTab === "Participation" && /* @__PURE__ */ React.createElement(ParticipationPanel, { state, round, updateRound, setState }), subTab === "Course" && /* @__PURE__ */ React.createElement(CoursePanel, { round, players: state.players, updateRound }), subTab === "Teams" && /* @__PURE__ */ React.createElement(TeamsPanel, { state, round, updateRound }), subTab === "Scores" && /* @__PURE__ */ React.createElement(ScoresPanel, { state, round, updateRound }));
   }
-  function ParticipationPanel({ state, round, updateRound, auditMode }) {
+  function FlightConfigModal({ activePlayers, currentConfig, onConfirm, onClose }) {
+    const FLIGHT_LABELS = ["A", "B", "C", "D"];
+    const sorted = [...activePlayers].sort((a, b) => Number(a.handicapIndex) - Number(b.handicapIndex));
+    const [numFlights, setNumFlights] = React.useState(currentConfig?.flights?.length || 2);
+    const defaultCutoffs = () => {
+      if (sorted.length === 0) return [12];
+      const step = sorted.length / numFlights;
+      return Array.from(
+        { length: numFlights - 1 },
+        (_, i) => Number(sorted[Math.round(step * (i + 1)) - 1]?.handicapIndex ?? 20)
+      );
+    };
+    const [cutoffs, setCutoffs] = React.useState(
+      currentConfig?.cutoffs || defaultCutoffs()
+    );
+    const updateNumFlights = (n) => {
+      setNumFlights(n);
+      const step = sorted.length / n;
+      setCutoffs(Array.from(
+        { length: n - 1 },
+        (_, i) => Number(sorted[Math.round(step * (i + 1)) - 1]?.handicapIndex ?? 20)
+      ));
+    };
+    const setCutoff = (i, val) => {
+      const c = [...cutoffs];
+      c[i] = Number(val);
+      setCutoffs(c);
+    };
+    const assignFlight = (player) => {
+      const idx = Number(player.handicapIndex);
+      const flights = FLIGHT_LABELS.slice(0, numFlights);
+      for (let i = 0; i < cutoffs.length; i++) {
+        if (idx <= cutoffs[i]) return flights[i];
+      }
+      return flights[flights.length - 1];
+    };
+    const distribution = FLIGHT_LABELS.slice(0, numFlights).map((f) => ({
+      flight: f,
+      players: sorted.filter((p) => assignFlight(p) === f)
+    }));
+    return /* @__PURE__ */ React.createElement("div", { style: { position: "fixed", inset: 0, background: "rgba(15,31,23,0.8)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center" } }, /* @__PURE__ */ React.createElement("div", { style: { background: palette.panel, borderRadius: 4, width: "min(600px, 96vw)", maxHeight: "90vh", overflow: "auto", padding: 24, boxShadow: "0 12px 48px rgba(0,0,0,0.4)" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 } }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, fontFamily: "ui-monospace", color: palette.inkSoft, textTransform: "uppercase", letterSpacing: "0.12em" } }, "Configuraci\xF3n de flights"), /* @__PURE__ */ React.createElement("div", { style: { fontFamily: "Georgia,serif", fontSize: 20, fontWeight: 700, color: palette.greenDeep } }, "Distribuci\xF3n de Flights")), /* @__PURE__ */ React.createElement("button", { onClick: onClose, style: { color: palette.inkSoft, fontSize: 20, background: "none", border: "none", cursor: "pointer" } }, "\u2715")), /* @__PURE__ */ React.createElement("div", { style: { marginBottom: 16 } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 12, color: palette.inkSoft, marginBottom: 6, fontWeight: 600 } }, "N\xFAmero de flights"), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: 8 } }, [2, 3, 4].map((n) => /* @__PURE__ */ React.createElement(
+      "button",
+      {
+        key: n,
+        onClick: () => updateNumFlights(n),
+        style: {
+          padding: "6px 18px",
+          borderRadius: 2,
+          fontWeight: 700,
+          fontSize: 14,
+          cursor: "pointer",
+          background: numFlights === n ? palette.greenDeep : "#fff",
+          color: numFlights === n ? "#fff" : palette.ink,
+          border: `1px solid ${numFlights === n ? palette.greenDeep : palette.rule}`
+        }
+      },
+      n
+    )))), cutoffs.length > 0 && /* @__PURE__ */ React.createElement("div", { style: { marginBottom: 16 } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 12, color: palette.inkSoft, marginBottom: 6, fontWeight: 600 } }, "Handicap m\xE1ximo por flight (cutoff)"), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: 12, flexWrap: "wrap" } }, cutoffs.map((c, i) => /* @__PURE__ */ React.createElement("div", { key: i, style: { display: "flex", flexDirection: "column", gap: 4 } }, /* @__PURE__ */ React.createElement("label", { style: { fontSize: 11, color: palette.inkSoft } }, "Flight ", FLIGHT_LABELS[i], " \u2264"), /* @__PURE__ */ React.createElement(
+      "input",
+      {
+        type: "number",
+        step: "0.1",
+        value: c,
+        onChange: (e) => setCutoff(i, e.target.value),
+        style: { width: 80, padding: "4px 8px", border: `1px solid ${palette.rule}`, borderRadius: 2, fontSize: 14 }
+      }
+    ))))), /* @__PURE__ */ React.createElement("div", { style: { marginBottom: 20 } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 12, color: palette.inkSoft, marginBottom: 8, fontWeight: 600 } }, "Distribuci\xF3n resultante"), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: 10, flexWrap: "wrap" } }, distribution.map(({ flight, players }) => /* @__PURE__ */ React.createElement("div", { key: flight, style: { flex: 1, minWidth: 140, border: `1px solid ${palette.rule}`, borderRadius: 3, overflow: "hidden" } }, /* @__PURE__ */ React.createElement("div", { style: { padding: "6px 10px", background: palette.greenDeep, color: "#fff", display: "flex", justifyContent: "space-between", alignItems: "center" } }, /* @__PURE__ */ React.createElement("span", { style: { fontWeight: 700, fontSize: 13 } }, "Flight ", flight), /* @__PURE__ */ React.createElement("span", { style: { fontSize: 11, opacity: 0.8 } }, players.length, " jugadores")), players.length > 0 && /* @__PURE__ */ React.createElement("div", { style: { padding: "4px 0", fontSize: 11, color: palette.inkSoft, textAlign: "center" } }, players[0].handicapIndex, " \u2013 ", players[players.length - 1].handicapIndex), /* @__PURE__ */ React.createElement("div", { style: { maxHeight: 140, overflowY: "auto" } }, players.map((p) => /* @__PURE__ */ React.createElement("div", { key: p.id, style: { padding: "3px 10px", borderTop: `1px solid ${palette.rule}`, display: "flex", justifyContent: "space-between", fontSize: 12 } }, /* @__PURE__ */ React.createElement("span", null, p.name.split(" ")[0], " ", p.name.split(" ").slice(-1)[0]), /* @__PURE__ */ React.createElement("span", { style: { color: palette.inkSoft, fontFamily: "ui-monospace" } }, p.handicapIndex)))))))), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: 10, justifyContent: "flex-end" } }, /* @__PURE__ */ React.createElement("button", { onClick: onClose, style: { padding: "8px 20px", border: `1px solid ${palette.rule}`, borderRadius: 2, background: "#fff", cursor: "pointer", fontSize: 14 } }, "Cancelar"), /* @__PURE__ */ React.createElement(
+      "button",
+      {
+        onClick: () => onConfirm({
+          flights: FLIGHT_LABELS.slice(0, numFlights),
+          cutoffs: [...cutoffs]
+        }),
+        style: { padding: "8px 20px", background: palette.greenDeep, color: "#fff", border: "none", borderRadius: 2, fontWeight: 700, cursor: "pointer", fontSize: 14 }
+      },
+      "Guardar distribuci\xF3n"
+    ))));
+  }
+  function ParticipationPanel({ state, round, updateRound, setState }) {
+    const rosterFileRef = useRef(null);
+    const [showFlightConfig, setShowFlightConfig] = React.useState(false);
+    const importRoster = async (file) => {
+      let text = await file.text();
+      if (text.charCodeAt(0) === 65279) text = text.slice(1);
+      const lines = text.split(/\r?\n/).filter((l) => l.trim());
+      if (lines.length < 2) {
+        alert("CSV is empty.");
+        return;
+      }
+      const parseLine = (line) => {
+        const cells = [];
+        let cur = "";
+        let inQ = false;
+        for (let i = 0; i < line.length; i++) {
+          const ch = line[i];
+          if (ch === '"') {
+            if (inQ && line[i + 1] === '"') {
+              cur += '"';
+              i++;
+            } else inQ = !inQ;
+          } else if (ch === "," && !inQ) {
+            cells.push(cur);
+            cur = "";
+          } else cur += ch;
+        }
+        cells.push(cur);
+        return cells.map((c) => c.trim());
+      };
+      const header = parseLine(lines[0]).map((h) => h.toLowerCase().replace(/\s+/g, ""));
+      const colFirst = header.findIndex((h) => /^firstname$|^first$/.test(h));
+      const colLast = header.findIndex((h) => /^lastname$|^last$/.test(h));
+      const colHcp = header.findIndex((h) => /^handicap$|^index$|^hcp$/.test(h));
+      if (colFirst === -1 || colLast === -1 || colHcp === -1) {
+        alert("Columnas requeridas no encontradas (FirstName, LastName, Handicap).\nDetectadas: " + header.join(", "));
+        return;
+      }
+      const parseHcp = (s) => {
+        const t = String(s).trim();
+        if (t.startsWith("+")) return -Number(t.slice(1));
+        const n = Number(t);
+        return isNaN(n) ? null : n;
+      };
+      const matchedIds = /* @__PURE__ */ new Set();
+      const hcpUpdates = [];
+      const unmatched = [];
+      for (let i = 1; i < lines.length; i++) {
+        const cells = parseLine(lines[i]);
+        const fullName = `${cells[colFirst] ?? ""} ${cells[colLast] ?? ""}`.replace(/\s+/g, " ").trim();
+        if (!fullName) continue;
+        const hcp = parseHcp(cells[colHcp]);
+        const player = state.players.find((p) => p.name.toLowerCase() === fullName.toLowerCase());
+        if (!player) {
+          unmatched.push(fullName);
+          continue;
+        }
+        matchedIds.add(player.id);
+        if (hcp != null) hcpUpdates.push({ id: player.id, handicapIndex: hcp });
+      }
+      if (matchedIds.size === 0) {
+        let msg2 = "No se encontraron jugadores que coincidan con el roster.";
+        if (unmatched.length) msg2 += "\nNombres en el CSV: " + unmatched.slice(0, 5).join(", ");
+        alert(msg2);
+        return;
+      }
+      const deactivated = state.players.length - matchedIds.size;
+      if (!confirm(
+        `Activar ${matchedIds.size} jugadores \xB7 Desactivar ${deactivated} en esta ronda.
+Tambi\xE9n se actualizan los handicap indexes.` + (unmatched.length ? `
+${unmatched.length} nombre(s) sin match ser\xE1n ignorados.` : "")
+      )) return;
+      setState((s) => ({
+        ...s,
+        players: s.players.map((p) => {
+          const u = hcpUpdates.find((u2) => u2.id === p.id);
+          if (!u) return p;
+          const merged = { ...p, handicapIndex: u.handicapIndex };
+          if (!merged.categoryOverride) merged.category = categoryFromIndex(merged.handicapIndex);
+          return merged;
+        })
+      }));
+      const newParticipants = {};
+      for (const p of state.players) {
+        newParticipants[p.id] = {
+          ...round.participants[p.id] || { inSkins: true, inIndividualNet: true, inBestBall: true, paid: false },
+          active: matchedIds.has(p.id)
+        };
+      }
+      updateRound({ participants: newParticipants });
+      let msg = `Listo. Activados: ${matchedIds.size} \xB7 Desactivados: ${deactivated}.`;
+      if (unmatched.length) msg += "\nSin match (ignorados): " + unmatched.join(", ");
+      alert(msg);
+      setShowFlightConfig(true);
+    };
     const setPart = (pid, patch) => {
       const old = round.participants[pid] || {
         active: false,
@@ -1127,31 +1314,38 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
         participants: { ...round.participants, [pid]: { ...old, ...patch } }
       });
     };
-    const effectiveLocked = round.locked || auditMode;
     const flightOf = (p) => flightForRound(round, p);
     const active = state.players.filter((p) => round.participants[p.id]?.active);
-    const inSkinsA = active.filter(
-      (p) => round.participants[p.id]?.inSkins && flightOf(p) === "A"
-    );
-    const inSkinsB = active.filter(
-      (p) => round.participants[p.id]?.inSkins && flightOf(p) === "B"
-    );
-    const inIN = active.filter((p) => round.participants[p.id]?.inIndividualNet);
-    const inINA = inIN.filter((p) => flightOf(p) === "A");
-    const inINB = inIN.filter((p) => flightOf(p) === "B");
-    const inBB = active.filter((p) => round.participants[p.id]?.inBestBall);
-    const inBBA = inBB.filter((p) => flightOf(p) === "A");
-    const inBBB = inBB.filter((p) => flightOf(p) === "B");
+    const flights = roundFlights(round);
+    const inSkinsByFlight = Object.fromEntries(flights.map((f) => [
+      f,
+      active.filter((p) => round.participants[p.id]?.inSkins && flightOf(p) === f)
+    ]));
+    const inINByFlight = Object.fromEntries(flights.map((f) => [
+      f,
+      active.filter((p) => round.participants[p.id]?.inIndividualNet && flightOf(p) === f)
+    ]));
+    const inBBByFlight = Object.fromEntries(flights.map((f) => [
+      f,
+      active.filter((p) => round.participants[p.id]?.inBestBall && flightOf(p) === f)
+    ]));
+    const inSkinsA = inSkinsByFlight["A"] || [];
+    const inSkinsB = inSkinsByFlight["B"] || [];
+    const inINA = inINByFlight["A"] || [];
+    const inINB = inINByFlight["B"] || [];
+    const inBBA = inBBByFlight["A"] || [];
+    const inBBB = inBBByFlight["B"] || [];
     const setAllActive = (val) => updateRound({
       participants: Object.fromEntries(
         state.players.map((p) => [
           p.id,
           {
-            ...round.participants[p.id] || {},
-            active: val,
-            inSkins: val,
-            inIndividualNet: val,
-            inBestBall: val
+            ...round.participants[p.id] || {
+              inSkins: true,
+              inIndividualNet: true,
+              inBestBall: true
+            },
+            active: val
           }
         ])
       )
@@ -1167,10 +1361,53 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
       }
       updateRound({ participants: next });
     };
-    return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-2 md:grid-cols-4 gap-3" }, /* @__PURE__ */ React.createElement(KPI, { label: "Active", value: active.length }), /* @__PURE__ */ React.createElement(KPI, { label: "Skins A", value: fmt$(inSkinsA.length * 18), sub: `${inSkinsA.length} pl.` }), /* @__PURE__ */ React.createElement(KPI, { label: "Skins B", value: fmt$(inSkinsB.length * 18), sub: `${inSkinsB.length} pl.` }), /* @__PURE__ */ React.createElement(KPI, { label: "Total pot", value: fmt$(active.length * 28), sub: `$30\xD7${active.length} = ${fmt$(active.length * 30)}` })), !auditMode && /* @__PURE__ */ React.createElement("div", { className: "flex gap-2 flex-wrap items-center" }, /* @__PURE__ */ React.createElement(Btn, { variant: "secondary", onClick: () => setAllActive(true), disabled: effectiveLocked }, "All in"), /* @__PURE__ */ React.createElement(Btn, { variant: "ghost", onClick: () => setAllActive(false), disabled: effectiveLocked }, "All out"), /* @__PURE__ */ React.createElement(Btn, { variant: "ghost", onClick: resetAllFlights, disabled: effectiveLocked }, "Reset flights"), /* @__PURE__ */ React.createElement("span", { className: "text-xs ml-2", style: { color: palette.inkSoft } }, "The ", /* @__PURE__ */ React.createElement("strong", null, "Flight"), " column is the assignment for THIS round only \u2014 Golf Pad re-flights each day, so override here when needed. The default falls back to the player's static category from their index.")), /* @__PURE__ */ React.createElement(Card, { dense: true }, /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm" }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Player"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium" }, "Index"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium" }, "Flight (this round)"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium" }, "Active"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "$30"))), /* @__PURE__ */ React.createElement("tbody", null, state.players.map((p) => {
+    const activePlayers = state.players.filter((p) => round.participants[p.id]?.active);
+    const handleFlightConfig = (config) => {
+      const newParticipants = { ...round.participants };
+      for (const p of state.players) {
+        if (!newParticipants[p.id]?.active) continue;
+        const idx = Number(p.handicapIndex);
+        let fl = config.flights[config.flights.length - 1];
+        for (let i = 0; i < config.cutoffs.length; i++) {
+          if (idx <= config.cutoffs[i]) {
+            fl = config.flights[i];
+            break;
+          }
+        }
+        newParticipants[p.id] = { ...newParticipants[p.id], flight: fl };
+      }
+      updateRound({ flightConfig: config, participants: newParticipants });
+      setShowFlightConfig(false);
+    };
+    return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, showFlightConfig && /* @__PURE__ */ React.createElement(
+      FlightConfigModal,
+      {
+        activePlayers,
+        currentConfig: round.flightConfig,
+        onConfirm: handleFlightConfig,
+        onClose: () => setShowFlightConfig(false)
+      }
+    ), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-2 md:grid-cols-4 gap-3" }, /* @__PURE__ */ React.createElement(KPI, { label: "Active", value: String(activePlayers.length) }), roundFlights(round).map((f) => /* @__PURE__ */ React.createElement(KPI, { key: f, label: `Skins ${f} pot`, value: fmt$((inSkinsByFlight[f] || []).length * 18), sub: `${(inSkinsByFlight[f] || []).length} pl.` }))), /* @__PURE__ */ React.createElement("div", { className: "flex gap-2 flex-wrap items-center" }, /* @__PURE__ */ React.createElement(Btn, { variant: "gold", onClick: () => rosterFileRef.current?.click(), disabled: round.locked }, "Import Golf Pad list"), /* @__PURE__ */ React.createElement(
+      "input",
+      {
+        ref: rosterFileRef,
+        type: "file",
+        accept: ".csv,text/csv",
+        className: "hidden",
+        onChange: (e) => {
+          if (e.target.files?.[0]) importRoster(e.target.files[0]);
+          e.target.value = "";
+        }
+      }
+    ), /* @__PURE__ */ React.createElement(Btn, { variant: "secondary", onClick: () => setShowFlightConfig(true), disabled: round.locked }, "Configurar Flights"), /* @__PURE__ */ React.createElement(Btn, { variant: "secondary", onClick: () => setAllActive(true), disabled: round.locked }, "All in"), /* @__PURE__ */ React.createElement(Btn, { variant: "ghost", onClick: () => setAllActive(false), disabled: round.locked }, "All out"), /* @__PURE__ */ React.createElement(Btn, { variant: "ghost", onClick: resetAllFlights, disabled: round.locked }, "Reset flights"), /* @__PURE__ */ React.createElement("span", { className: "text-xs ml-2", style: { color: palette.inkSoft } }, "Usa ", /* @__PURE__ */ React.createElement("strong", null, "Configurar Flights"), " para definir cu\xE1ntos flights y sus rangos de handicap para esta ronda.")), /* @__PURE__ */ React.createElement(Card, { dense: true }, /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm" }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Player"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium" }, "Index"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium" }, "Flight (this round)"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium" }, "Active"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium" }, "Skins"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium" }, "Ind. Net"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium" }, "Best Ball"))), /* @__PURE__ */ React.createElement("tbody", null, [...state.players].sort((a, b) => {
+      const aActive = !!round.participants[a.id]?.active;
+      const bActive = !!round.participants[b.id]?.active;
+      if (aActive !== bActive) return aActive ? -1 : 1;
+      return Number(a.handicapIndex) - Number(b.handicapIndex);
+    }).map((p) => {
       const part = round.participants[p.id] || {};
       const effective = flightForRound(round, p);
-      const isOverridden = part.flight === "A" || part.flight === "B";
+      const isOverridden = /^[A-Z]$/.test(part.flight || "");
       const setFlight = (val) => {
         if (val === "" || val === p.category) {
           const { flight, ...rest } = part;
@@ -1181,25 +1418,16 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
           setPart(p.id, { flight: val });
         }
       };
-      const toggleActive = (v) => {
-        setPart(p.id, {
-          active: v,
-          inSkins: v,
-          inIndividualNet: v,
-          inBestBall: v
-        });
-      };
       return /* @__PURE__ */ React.createElement("tr", { key: p.id, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, p.name), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-center", style: { fontFamily: "ui-monospace" } }, p.handicapIndex), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-center" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-center gap-1" }, /* @__PURE__ */ React.createElement(
         "select",
         {
           value: effective || "",
           onChange: (e) => setFlight(e.target.value),
-          disabled: effectiveLocked || !part.active,
+          disabled: round.locked || !part.active,
           className: "px-2 py-1 text-sm",
           style: { border: `1px solid ${palette.rule}`, borderRadius: 2, background: "#fff" }
         },
-        /* @__PURE__ */ React.createElement("option", { value: "A" }, "A"),
-        /* @__PURE__ */ React.createElement("option", { value: "B" }, "B")
+        roundFlights(round).map((f) => /* @__PURE__ */ React.createElement("option", { key: f, value: f }, f))
       ), isOverridden && effective !== p.category && /* @__PURE__ */ React.createElement(
         "span",
         {
@@ -1212,10 +1440,31 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
         Toggle,
         {
           value: part.active,
-          onChange: toggleActive,
-          disabled: effectiveLocked
+          onChange: (v) => setPart(p.id, { active: v }),
+          disabled: round.locked
         }
-      )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right", style: { color: part.active ? palette.green : palette.inkSoft } }, part.active ? "$30" : "\u2014"));
+      )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-center" }, /* @__PURE__ */ React.createElement(
+        Toggle,
+        {
+          value: part.inSkins,
+          onChange: (v) => setPart(p.id, { inSkins: v }),
+          disabled: round.locked || !part.active
+        }
+      )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-center" }, /* @__PURE__ */ React.createElement(
+        Toggle,
+        {
+          value: part.inIndividualNet,
+          onChange: (v) => setPart(p.id, { inIndividualNet: v }),
+          disabled: round.locked || !part.active
+        }
+      )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-center" }, /* @__PURE__ */ React.createElement(
+        Toggle,
+        {
+          value: part.inBestBall,
+          onChange: (v) => setPart(p.id, { inBestBall: v }),
+          disabled: round.locked || !part.active
+        }
+      )));
     }))))));
   }
   function KPI({ label, value, sub }) {
@@ -1241,8 +1490,7 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
       sub && /* @__PURE__ */ React.createElement("div", { className: "text-xs", style: { color: palette.inkSoft } }, sub)
     );
   }
-  function CoursePanel({ round, players, updateRound, auditMode }) {
-    const effectiveLocked = round.locked || auditMode;
+  function CoursePanel({ round, players, updateRound }) {
     const setIdx = (h, val) => {
       const arr = [...round.holeIndexes];
       arr[h] = Number(val) || 0;
@@ -1263,8 +1511,8 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
     const coursePar = sumPars(round.pars);
     const teeA = round.teesByCategory?.A || {};
     const teeB = round.teesByCategory?.B || {};
-    const previewByCat = ["A", "B"].map((cat) => {
-      const list = (players || []).filter((p) => flightForRound(round, p) === cat).map((p) => ({
+    const previewByCat = roundFlights(round).map((cat) => {
+      const list = (players || []).filter((p) => round.participants[p.id]?.active && flightForRound(round, p) === cat).map((p) => ({
         id: p.id,
         name: p.name,
         index: p.handicapIndex,
@@ -1272,8 +1520,8 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
       })).sort((a, b) => a.ch - b.ch);
       return { cat, list };
     });
-    return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement(Card, { title: "Tees by flight \u2014 slope, rating, par" }, /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4" }, ["A", "B"].map((cat) => {
-      const t = cat === "A" ? teeA : teeB;
+    return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement(Card, { title: "Tees by flight \u2014 slope, rating, par" }, /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4" }, roundFlights(round).map((cat) => {
+      const t = round.teesByCategory?.[cat] || {};
       const setT = (patch) => setTee(cat, patch);
       return /* @__PURE__ */ React.createElement(
         "div",
@@ -1288,7 +1536,7 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
           {
             value: t.name ?? "",
             onChange: (v) => setT({ name: v }),
-            disabled: effectiveLocked
+            disabled: round.locked
           }
         ))), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-xs uppercase tracking-wider", style: { color: palette.inkSoft } }, "Slope"), /* @__PURE__ */ React.createElement("div", { className: "mt-1" }, /* @__PURE__ */ React.createElement(
           NumberInput,
@@ -1297,7 +1545,7 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
             onChange: (v) => setT({ slopeRating: v === "" ? null : Number(v) }),
             min: 55,
             max: 155,
-            disabled: effectiveLocked
+            disabled: round.locked
           }
         ))), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-xs uppercase tracking-wider", style: { color: palette.inkSoft } }, "Rating"), /* @__PURE__ */ React.createElement("div", { className: "mt-1" }, /* @__PURE__ */ React.createElement(
           NumberInput,
@@ -1305,7 +1553,7 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
             value: t.courseRating ?? "",
             onChange: (v) => setT({ courseRating: v === "" ? null : Number(v) }),
             step: 0.1,
-            disabled: effectiveLocked
+            disabled: round.locked
           }
         ))), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-xs uppercase tracking-wider", style: { color: palette.inkSoft } }, "Course par"), /* @__PURE__ */ React.createElement(
           "div",
@@ -1332,7 +1580,7 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
         onChange: (val) => setIdx(i, val),
         min: 1,
         max: 18,
-        disabled: effectiveLocked
+        disabled: round.locked
       }
     )))), /* @__PURE__ */ React.createElement("tr", { style: { borderTop: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-2 py-2 text-xs uppercase tracking-wider", style: { color: palette.inkSoft } }, "Par"), (round.pars || Array(18).fill(4)).map((v, i) => /* @__PURE__ */ React.createElement("td", { key: i, className: "px-1 py-1" }, /* @__PURE__ */ React.createElement(
       NumberInput,
@@ -1341,7 +1589,7 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
         onChange: (val) => setPar(i, val),
         min: 3,
         max: 6,
-        disabled: effectiveLocked
+        disabled: round.locked
       }
     ))))))), /* @__PURE__ */ React.createElement("div", { className: "text-xs mt-3", style: { color: palette.inkSoft } }, "Stroke index 1 = hardest hole. Indexes must be unique 1\u201318 for handicap allocation to be correct.")), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4" }, previewByCat.map(({ cat, list }) => {
       const t = cat === "A" ? teeA : teeB;
@@ -1356,8 +1604,232 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
       );
     })));
   }
-  function TeamsPanel({ state, round, updateRound, auditMode }) {
-    const effectiveLocked = round.locked || auditMode;
+  const WHEEL_COLORS = [
+    "#0E5C3A",
+    "#B8862E",
+    "#A8421C",
+    "#2B6B3E",
+    "#6B4226",
+    "#1A4A2E",
+    "#8B6914",
+    "#4A5C53",
+    "#C4943A",
+    "#3A6B4A",
+    "#7A4F1C",
+    "#0F3D28",
+    "#9B7420",
+    "#5C3D1E",
+    "#1B5E42",
+    "#8B4513"
+  ];
+  function winnerIndexAt(rot, n) {
+    const seg = 2 * Math.PI / n;
+    const norm = (-rot % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+    return Math.floor(norm / seg) % n;
+  }
+  function SpinWheelCanvas({ players, onResult, disabled, highlightIdx }) {
+    const canvasRef = useRef(null);
+    const rotRef = useRef(0);
+    const animRef = useRef(null);
+    const [spinning, setSpinning] = React.useState(false);
+    const drawWheel = React.useCallback((rot, hlIdx = -1) => {
+      const canvas = canvasRef.current;
+      if (!canvas || players.length === 0) return;
+      const ctx = canvas.getContext("2d");
+      const W = canvas.width, cx = W / 2, cy = W / 2, r = cx - 8;
+      const n = players.length;
+      const seg = 2 * Math.PI / n;
+      ctx.clearRect(0, 0, W, W);
+      for (let i = 0; i < n; i++) {
+        const a0 = rot - Math.PI / 2 + i * seg;
+        const a1 = a0 + seg;
+        const isHL = i === hlIdx;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, r, a0, a1);
+        ctx.closePath();
+        ctx.fillStyle = isHL ? palette.gold : WHEEL_COLORS[i % WHEEL_COLORS.length];
+        ctx.fill();
+        ctx.strokeStyle = isHL ? "#fff" : "#fff";
+        ctx.lineWidth = isHL ? 3 : 1.5;
+        ctx.stroke();
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(a0 + seg / 2);
+        const parts = players[i].name.split(" ");
+        const label = parts[0] + (parts[1] ? " " + parts[1][0] + "." : "");
+        const fontSize = n > 12 ? 10 : n > 8 ? 11 : 12;
+        ctx.font = `bold ${fontSize}px ui-sans-serif,system-ui,sans-serif`;
+        ctx.fillStyle = "#fff";
+        ctx.textAlign = "right";
+        ctx.shadowColor = "rgba(0,0,0,0.5)";
+        ctx.shadowBlur = 3;
+        ctx.fillText(label, r - 8, 4);
+        ctx.restore();
+      }
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+      ctx.strokeStyle = palette.greenDeep;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(cx, cy, 28, 0, 2 * Math.PI);
+      ctx.fillStyle = disabled ? palette.inkSoft : palette.greenDeep;
+      ctx.fill();
+      ctx.strokeStyle = palette.gold;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.font = "bold 10px ui-sans-serif,system-ui";
+      ctx.fillStyle = "#fff";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.shadowBlur = 0;
+      ctx.fillText(spinning ? "..." : "SPIN", cx, cy);
+      ctx.beginPath();
+      ctx.moveTo(cx - 11, 4);
+      ctx.lineTo(cx + 11, 4);
+      ctx.lineTo(cx, 22);
+      ctx.closePath();
+      ctx.fillStyle = palette.gold;
+      ctx.fill();
+      ctx.strokeStyle = "#fff";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }, [players, disabled, spinning]);
+    useEffect(() => {
+      drawWheel(rotRef.current, highlightIdx ?? -1);
+    }, [drawWheel, highlightIdx]);
+    useEffect(() => {
+      return () => {
+        if (animRef.current) cancelAnimationFrame(animRef.current);
+      };
+    }, []);
+    const spin = () => {
+      if (spinning || disabled || players.length === 0) return;
+      setSpinning(true);
+      const n = players.length;
+      const seg = 2 * Math.PI / n;
+      const targetIdx = Math.floor(Math.random() * n);
+      const targetRotMod = (-(targetIdx + 0.5) * seg % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+      const curMod = (rotRef.current % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+      let delta = targetRotMod - curMod;
+      if (delta <= 0) delta += 2 * Math.PI;
+      const extraSpins = (7 + Math.floor(Math.random() * 5)) * 2 * Math.PI;
+      const finalRot = rotRef.current + extraSpins + delta;
+      const duration = 4500;
+      const startTime = performance.now();
+      const startRot = rotRef.current;
+      const animate = (now) => {
+        const t = Math.min((now - startTime) / duration, 1);
+        const ease = 1 - Math.pow(1 - t, 4);
+        const cur = startRot + (finalRot - startRot) * ease;
+        rotRef.current = cur;
+        const hlIdx = t > 0.9 ? winnerIndexAt(cur, n) : -1;
+        drawWheel(cur, hlIdx);
+        if (t < 1) {
+          animRef.current = requestAnimationFrame(animate);
+        } else {
+          setSpinning(false);
+          onResult(players[targetIdx]);
+        }
+      };
+      animRef.current = requestAnimationFrame(animate);
+    };
+    if (players.length === 0) return /* @__PURE__ */ React.createElement("div", { style: { width: 300, height: 300, display: "flex", alignItems: "center", justifyContent: "center", border: `2px dashed ${palette.rule}`, borderRadius: "50%", color: palette.inkSoft, fontSize: 13, flexDirection: "column", gap: 8 } }, /* @__PURE__ */ React.createElement("span", { style: { fontSize: 32 } }, "\u2713"), /* @__PURE__ */ React.createElement("span", null, "Flight completo"));
+    return /* @__PURE__ */ React.createElement(
+      "div",
+      {
+        style: { position: "relative", display: "inline-block", cursor: spinning || disabled ? "default" : "pointer" },
+        onClick: spin,
+        title: spinning ? "" : "Click para girar"
+      },
+      /* @__PURE__ */ React.createElement("canvas", { ref: canvasRef, width: 300, height: 300, style: { display: "block" } })
+    );
+  }
+  function DraftLogModal({ log, flight, roundName, onClose }) {
+    const entries = (log || []).filter((e) => e.flight === flight);
+    return /* @__PURE__ */ React.createElement("div", { style: { position: "fixed", inset: 0, background: "rgba(15,31,23,0.7)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center" }, onClick: onClose }, /* @__PURE__ */ React.createElement("div", { style: { background: palette.panel, borderRadius: 4, width: "min(480px, 95vw)", maxHeight: "80vh", overflow: "auto", padding: 24, boxShadow: "0 8px 32px rgba(0,0,0,0.3)" }, onClick: (e) => e.stopPropagation() }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 } }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, fontFamily: "ui-monospace", color: palette.inkSoft, textTransform: "uppercase", letterSpacing: "0.12em" } }, roundName), /* @__PURE__ */ React.createElement("div", { style: { fontFamily: "Georgia, serif", fontSize: 18, fontWeight: 700, color: palette.greenDeep } }, "Draft Log \xB7 Flight ", flight)), /* @__PURE__ */ React.createElement("button", { onClick: onClose, style: { color: palette.inkSoft, fontSize: 20, background: "none", border: "none", cursor: "pointer" } }, "\u2715")), entries.length === 0 ? /* @__PURE__ */ React.createElement("div", { style: { color: palette.inkSoft, fontStyle: "italic", fontSize: 13 } }, "No hay equipos rifados para este flight.") : /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 10 } }, entries.map((e, i) => /* @__PURE__ */ React.createElement("div", { key: i, style: { border: `1px solid ${palette.rule}`, borderRadius: 3, padding: "10px 14px", background: "#FAFAF7" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "flex-start" } }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, fontFamily: "ui-monospace", color: palette.gold, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 4 } }, e.teamName), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 14, fontWeight: 600, color: palette.ink } }, e.player1Name), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 11, color: palette.inkSoft, margin: "2px 0" } }, "+ pareja"), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 14, fontWeight: 600, color: palette.ink } }, e.player2Name)), /* @__PURE__ */ React.createElement("div", { style: { textAlign: "right" } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 11, color: palette.inkSoft, fontFamily: "ui-monospace" } }, "#", i + 1), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, color: palette.inkSoft, marginTop: 4 } }, new Date(e.ts).toLocaleDateString("es-DO", { weekday: "short", day: "numeric", month: "short" })), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, color: palette.inkSoft } }, new Date(e.ts).toLocaleTimeString("es-DO", { hour: "2-digit", minute: "2-digit" })))))))));
+  }
+  function SpinModal({ flight, bbPlayers, round, updateRound, onClose }) {
+    const localTeamsRef = useRef([...round.teams]);
+    const localLogRef = useRef([...round.draftLog || []]);
+    const alreadyAssigned = new Set(
+      round.teams.filter((t) => t.playerIds.some((id) => bbPlayers.find((p) => p.id === id))).flatMap((t) => t.playerIds)
+    );
+    const initialPool = bbPlayers.filter((p) => !alreadyAssigned.has(p.id));
+    const [pool, setPool] = React.useState(initialPool);
+    const [pending, setPending] = React.useState(null);
+    const [oddSolo, setOddSolo] = React.useState(null);
+    const [done, setDone] = React.useState(false);
+    const [formedTeams, setFormedTeams] = React.useState(
+      round.teams.filter((t) => t.playerIds.some((id) => bbPlayers.find((p) => p.id === id)))
+    );
+    const formTeam = (p1, p2) => {
+      const teamNum = localTeamsRef.current.filter(
+        (t) => t.playerIds.some((id) => bbPlayers.find((p) => p.id === id))
+      ).length + 1;
+      const teamName = `Team ${flight}${teamNum}`;
+      const teamId = "t" + flight + "-" + Date.now().toString(36).slice(-4);
+      const newTeam = { id: teamId, name: teamName, playerIds: [p1.id, p2.id], flight };
+      const logEntry = {
+        flight,
+        ts: (/* @__PURE__ */ new Date()).toISOString(),
+        player1Id: p1.id,
+        player1Name: p1.name,
+        player2Id: p2.id,
+        player2Name: p2.name,
+        teamName
+      };
+      localTeamsRef.current = [...localTeamsRef.current, newTeam];
+      localLogRef.current = [...localLogRef.current, logEntry];
+      updateRound({ teams: localTeamsRef.current, draftLog: localLogRef.current });
+      setFormedTeams(localTeamsRef.current.filter((t) => t.playerIds.some((id) => bbPlayers.find((p) => p.id === id))));
+      return newTeam;
+    };
+    const onSpin = (player) => {
+      if (oddSolo) {
+        formTeam(oddSolo, player);
+        setPool([]);
+        setOddSolo(null);
+        setDone(true);
+        return;
+      }
+      if (!pending) {
+        setPending(player);
+        setPool((prev) => prev.filter((p) => p.id !== player.id));
+      } else {
+        formTeam(pending, player);
+        setPending(null);
+        const newPool = pool.filter((p) => p.id !== player.id);
+        if (newPool.length === 0) {
+          setPool([]);
+          setDone(true);
+        } else if (newPool.length === 1) {
+          const solo = newPool[0];
+          setOddSolo(solo);
+          const refillPool = bbPlayers.filter((p) => p.id !== solo.id);
+          setPool(refillPool);
+        } else {
+          setPool(newPool);
+        }
+      }
+    };
+    return /* @__PURE__ */ React.createElement("div", { style: { position: "fixed", inset: 0, background: "rgba(15,31,23,0.85)", zIndex: 9998, display: "flex", alignItems: "center", justifyContent: "center" } }, /* @__PURE__ */ React.createElement("div", { style: { background: palette.panel, borderRadius: 6, width: "min(820px, 98vw)", maxHeight: "95vh", overflow: "auto", padding: 24, boxShadow: "0 16px 64px rgba(0,0,0,0.5)" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 } }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, fontFamily: "ui-monospace", color: palette.inkSoft, textTransform: "uppercase", letterSpacing: "0.12em" } }, "Sorteo de equipos"), /* @__PURE__ */ React.createElement("div", { style: { fontFamily: "Georgia,serif", fontSize: 22, fontWeight: 700, color: palette.greenDeep } }, "Flight ", flight, oddSolo && /* @__PURE__ */ React.createElement("span", { style: { fontSize: 13, color: palette.gold, marginLeft: 12 } }, "\xB7 Buscando pareja para ", oddSolo.name.split(" ")[0]))), /* @__PURE__ */ React.createElement("button", { onClick: onClose, style: { color: palette.inkSoft, fontSize: 22, background: "none", border: "none", cursor: "pointer" } }, "\u2715")), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: 24, flexWrap: "wrap", alignItems: "flex-start" } }, /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", alignItems: "center", gap: 10 } }, /* @__PURE__ */ React.createElement(SpinWheelCanvas, { players: pool, onResult: onSpin, disabled: done }), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 11, color: palette.inkSoft, textAlign: "center", maxWidth: 300 } }, done ? "\xA1Todos los equipos formados!" : oddSolo ? `Rueda completa \u2014 elige la pareja de ${oddSolo.name.split(" ")[0]}` : pending ? `Esperando pareja de ${pending.name.split(" ")[0]}...` : `${pool.length} jugador${pool.length !== 1 ? "es" : ""} restante${pool.length !== 1 ? "s" : ""} \xB7 Click para girar`)), /* @__PURE__ */ React.createElement("div", { style: { flex: 1, minWidth: 220, display: "flex", flexDirection: "column", gap: 12 } }, pending && !done && !oddSolo && /* @__PURE__ */ React.createElement("div", { style: { padding: "12px 16px", background: "#FAF7EE", border: `2px solid ${palette.gold}`, borderRadius: 4 } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, fontFamily: "ui-monospace", color: palette.gold, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 } }, "Esperando pareja..."), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 15, fontWeight: 700, color: palette.ink } }, pending.name), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 11, color: palette.inkSoft, marginTop: 2 } }, "Gira de nuevo para elegir su compa\xF1ero")), oddSolo && /* @__PURE__ */ React.createElement("div", { style: { padding: "12px 16px", background: "#FFF3E0", border: `2px solid ${palette.alert}`, borderRadius: 4 } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, fontFamily: "ui-monospace", color: palette.alert, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 } }, "Jugador impar"), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 15, fontWeight: 700, color: palette.ink } }, oddSolo.name), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 11, color: palette.inkSoft, marginTop: 2 } }, "La rueda tiene todos los dem\xE1s \u2014 gira para elegir su pareja")), formedTeams.length > 0 && /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, fontFamily: "ui-monospace", color: palette.inkSoft, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 } }, "Equipos formados"), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 6 } }, formedTeams.map((t) => {
+      const p1 = bbPlayers.find((p) => p.id === t.playerIds[0]);
+      const p2 = bbPlayers.find((p) => p.id === t.playerIds[1]);
+      return /* @__PURE__ */ React.createElement("div", { key: t.id, style: { padding: "8px 12px", background: "#F0F7F2", border: `1px solid ${palette.green}33`, borderRadius: 3 } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, fontFamily: "ui-monospace", color: palette.green, marginBottom: 2 } }, t.name), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 13, color: palette.ink } }, p1?.name || "\u2014"), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 13, color: palette.ink } }, p2?.name || "\u2014"));
+    }))), done && /* @__PURE__ */ React.createElement(
+      "button",
+      {
+        onClick: onClose,
+        style: { marginTop: 8, padding: "10px 20px", background: palette.greenDeep, color: "#fff", border: "none", borderRadius: 3, fontWeight: 700, fontSize: 14, cursor: "pointer" }
+      },
+      "Cerrar y guardar \u2713"
+    )))));
+  }
+  function TeamsPanel({ state, round, updateRound }) {
+    const [spinFlight, setSpinFlight] = React.useState(null);
+    const [logModal, setLogModal] = React.useState(null);
     const chOf = (p) => chForPlayer(p, round);
     const bbPlayersByFlight = (flight) => state.players.filter(
       (p) => flightForRound(round, p) === flight && round.participants[p.id]?.active && round.participants[p.id]?.inBestBall
@@ -1368,8 +1840,9 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
         const pl = state.players.find((p) => p.id === pid);
         return pl ? flightForRound(round, pl) : null;
       }).filter(Boolean);
-      if (cats.length === 0) return "A";
-      return cats.every((c) => c === "B") ? "B" : "A";
+      if (cats.length === 0) return roundFlights(round)[0] || "A";
+      const first = roundFlights(round)[0] || "A";
+      return cats.every((c) => c === cats[0]) ? cats[0] : first;
     };
     const teamsByFlight = (flight) => round.teams.filter((t) => teamFlight(t) === flight);
     const addTeam = (flight) => {
@@ -1419,7 +1892,15 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
     const renderFlightColumn = (flight) => {
       const { pool, unassigned, teams } = flightSummary(flight);
       const flightBbPool = pool;
-      return /* @__PURE__ */ React.createElement("div", { key: flight }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-between mb-3" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-2" }, /* @__PURE__ */ React.createElement(Pill, { tone: flight }, flight), /* @__PURE__ */ React.createElement("span", { className: "text-sm font-medium" }, "Flight ", flight), /* @__PURE__ */ React.createElement("span", { className: "text-xs", style: { color: palette.inkSoft } }, pool.length, " players \xB7 ", unassigned.length, " unassigned")), /* @__PURE__ */ React.createElement("div", { className: "flex gap-2" }, /* @__PURE__ */ React.createElement(Btn, { variant: "secondary", onClick: () => addTeam(flight), disabled: effectiveLocked }, "+ Pair"))), /* @__PURE__ */ React.createElement("div", { className: "space-y-3" }, teams.length === 0 && /* @__PURE__ */ React.createElement("div", { className: "text-sm", style: { color: palette.inkSoft, fontStyle: "italic" } }, "No teams yet for Flight ", flight, "."), teams.map((t) => {
+      return /* @__PURE__ */ React.createElement("div", { key: flight }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-between mb-3" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-2" }, /* @__PURE__ */ React.createElement(Pill, { tone: flight }, flight), /* @__PURE__ */ React.createElement("span", { className: "text-sm font-medium" }, "Flight ", flight), /* @__PURE__ */ React.createElement("span", { className: "text-xs", style: { color: palette.inkSoft } }, pool.length, " players \xB7 ", unassigned.length, " unassigned")), /* @__PURE__ */ React.createElement("div", { className: "flex gap-2" }, /* @__PURE__ */ React.createElement(Btn, { variant: "gold", onClick: () => setSpinFlight(flight), disabled: round.locked }, "\u{1F3A1} Rifar"), /* @__PURE__ */ React.createElement(Btn, { variant: "secondary", onClick: () => addTeam(flight), disabled: round.locked }, "+ Pair"), /* @__PURE__ */ React.createElement(
+        "button",
+        {
+          title: "Haz click aqu\xED si quieres ver el log de conformaci\xF3n de equipos",
+          onClick: () => setLogModal(flight),
+          style: { fontSize: 14, color: palette.gold, background: "none", border: `1px solid ${palette.gold}`, borderRadius: "50%", width: 24, height: 24, cursor: "pointer", fontWeight: 700, lineHeight: "22px", textAlign: "center" }
+        },
+        "!"
+      ))), /* @__PURE__ */ React.createElement("div", { className: "space-y-3" }, teams.length === 0 && /* @__PURE__ */ React.createElement("div", { className: "text-sm", style: { color: palette.inkSoft, fontStyle: "italic" } }, "No teams yet for Flight ", flight, "."), teams.map((t) => {
         const teamHcpAvg = t.playerIds.length === 0 ? 0 : t.playerIds.reduce((acc, pid) => {
           const pl = state.players.find((pp) => pp.id === pid);
           return acc + chOf(pl);
@@ -1434,7 +1915,7 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
                 type: "text",
                 value: t.name,
                 onChange: (e) => updateTeam(t.id, { name: e.target.value }),
-                disabled: effectiveLocked,
+                disabled: round.locked,
                 className: "text-sm font-medium uppercase tracking-wider bg-transparent",
                 style: { fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", letterSpacing: "0.12em" }
               }
@@ -1445,7 +1926,7 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
                 onClick: () => removeTeam(t.id),
                 className: "text-xs",
                 style: { color: palette.alert },
-                disabled: effectiveLocked
+                disabled: round.locked
               },
               "Remove"
             ))
@@ -1457,7 +1938,7 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
               className: "flex items-center justify-between py-1 px-2 cursor-pointer",
               style: {
                 borderBottom: `1px dashed ${palette.rule}`,
-                opacity: effectiveLocked ? 0.7 : 1
+                opacity: round.locked ? 0.7 : 1
               }
             },
             /* @__PURE__ */ React.createElement("span", { className: "flex items-center gap-2" }, /* @__PURE__ */ React.createElement(
@@ -1466,7 +1947,7 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
                 type: "checkbox",
                 checked: t.playerIds.includes(p.id),
                 onChange: () => togglePlayerOnTeam(t.id, p.id),
-                disabled: effectiveLocked
+                disabled: round.locked
               }
             ), /* @__PURE__ */ React.createElement("span", { className: "text-sm" }, p.name)),
             /* @__PURE__ */ React.createElement("span", { className: "text-xs", style: { color: palette.inkSoft, fontFamily: "ui-monospace" } }, "ch ", chOf(p))
@@ -1474,44 +1955,32 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
         );
       })));
     };
-    return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("div", { className: "text-xs", style: { color: palette.inkSoft } }, "Best-ball teams are 2-man pairs within the same flight. Use ", /* @__PURE__ */ React.createElement("strong", null, "+ Pair"), " in each flight column to add a team, then check off two players to assign them. Each player can only be on one team per round.")), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-6" }, renderFlightColumn("A"), renderFlightColumn("B")));
+    return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, spinFlight && /* @__PURE__ */ React.createElement(
+      SpinModal,
+      {
+        flight: spinFlight,
+        bbPlayers: bbPlayersByFlight(spinFlight).map((p) => ({ ...p, _flight: spinFlight })),
+        round,
+        updateRound,
+        onClose: () => setSpinFlight(null)
+      }
+    ), logModal && /* @__PURE__ */ React.createElement(
+      DraftLogModal,
+      {
+        log: round.draftLog || [],
+        flight: logModal,
+        roundName: `R${round.number} \xB7 ${round.courseName}`,
+        onClose: () => setLogModal(null)
+      }
+    ), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("div", { className: "text-xs", style: { color: palette.inkSoft } }, "Usa ", /* @__PURE__ */ React.createElement("strong", null, "\u{1F3A1} Rifar"), " para sortear los equipos con la rueda, o ", /* @__PURE__ */ React.createElement("strong", null, "+ Pair"), " para armarlos manualmente. El bot\xF3n ", /* @__PURE__ */ React.createElement("strong", null, "!"), " muestra el log de sorteo de cada flight.")), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-6" }, roundFlights(round).map((f) => renderFlightColumn(f))));
   }
-  function ScoresPanel({ state, round, updateRound, auditMode, setState }) {
-    const effectiveLocked = round.locked || auditMode;
+  function ScoresPanel({ state, round, updateRound }) {
     const fileRef = useRef(null);
-    const jsonRef = useRef(null);
     const chOf = (p) => chForPlayer(p, round);
     const setScore = (pid, h, val) => {
       const arr = [...round.scores[pid] || Array(18).fill("")];
       arr[h] = val === "" ? "" : Number(val);
       updateRound({ scores: { ...round.scores, [pid]: arr } });
-    };
-    const prevRoundsHaveData = round.number > 1 && state.rounds.filter((r) => r.number < round.number).some((r) => Object.values(r.scores || {}).some(
-      (arr) => Array.isArray(arr) && arr.some((s) => s !== "" && s != null)
-    ));
-    const importJson = async (file) => {
-      try {
-        const text = await file.text();
-        const data = JSON.parse(text);
-        if (!data.tournament || !Array.isArray(data.players) || !Array.isArray(data.rounds)) {
-          alert("Not a valid tournament file.");
-          return;
-        }
-        const migrated = migrateState(data);
-        setState(migrated);
-        alert("Backup loaded. Now import the CSV for this round.");
-      } catch (e) {
-        alert("Failed to read JSON: " + e.message);
-      }
-    };
-    const handleImportClick = () => {
-      if (round.number > 1 && !prevRoundsHaveData) {
-        if (confirm("No data from previous rounds detected. Load your latest JSON backup first?\n\nClick OK to load JSON, or Cancel to skip and import CSV directly.")) {
-          jsonRef.current?.click();
-          return;
-        }
-      }
-      fileRef.current?.click();
     };
     const importCSV = async (file) => {
       let text = await file.text();
@@ -1546,8 +2015,19 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
       };
       const header = parseLine(lines[0]);
       const norm = (s) => s.replace(/\s+/g, "").toLowerCase();
-      let nameCol = header.findIndex((h) => /^(player|team|name|golfer)$/i.test(h.trim()));
-      if (nameCol === -1) nameCol = 0;
+      const flightCol = header.findIndex((h) => /^team$/i.test(h.trim()));
+      let nameCol = header.findIndex((h) => /^(player|name|golfer)$/i.test(h.trim()));
+      if (nameCol === -1) nameCol = flightCol !== -1 ? -1 : 0;
+      if (nameCol === -1) {
+        nameCol = header.findIndex((_, i) => i !== flightCol);
+      }
+      const gpFlightMap = (val) => {
+        const v = String(val).trim().toUpperCase();
+        if (v === "1" || v === "A") return "A";
+        if (v === "2" || v === "B") return "B";
+        if (v === "3" || v === "C") return "C";
+        return null;
+      };
       const holeColIdxs = [];
       for (let h = 1; h <= 18; h++) {
         const idx = header.findIndex((col) => {
@@ -1564,6 +2044,7 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
         holeColIdxs.push(idx);
       }
       const newScores = { ...round.scores };
+      const importedIds = /* @__PURE__ */ new Set();
       let imported = 0;
       let unknown = [];
       let zeroed = 0;
@@ -1589,10 +2070,30 @@ Unmatched (skipped): ${unmatched.join(", ")}`;
           continue;
         }
         newScores[player.id] = scores;
+        importedIds.add(player.id);
+        if (flightCol !== -1) {
+          const fl = gpFlightMap(cells[flightCol] ?? "");
+          if (fl) importedIds[player.id + "_flight"] = fl;
+        }
         imported++;
       }
-      updateRound({ scores: newScores });
-      let msg = `Imported scores for ${imported} player(s).`;
+      const newParticipants = { ...round.participants };
+      let flightsUpdated = 0;
+      for (const p of state.players) {
+        const fl = importedIds[p.id + "_flight"];
+        newParticipants[p.id] = {
+          ...newParticipants[p.id],
+          active: importedIds.has(p.id),
+          ...fl ? { flight: fl } : {}
+        };
+        if (fl) flightsUpdated++;
+      }
+      const deactivated = state.players.length - importedIds.size;
+      updateRound({ scores: newScores, participants: newParticipants });
+      let msg = `Imported scores for ${imported} player(s).
+Activated: ${imported} \xB7 Deactivated: ${deactivated}.`;
+      if (flightsUpdated) msg += `
+Flights actualizados desde Golf Pad: ${flightsUpdated} jugador(es).`;
       if (zeroed)
         msg += `
 Skipped ${zeroed} all-zero row(s) \u2014 likely a pre-tournament export. Re-export after play.`;
@@ -1612,12 +2113,11 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
     const hasAnyScore = Object.values(round.scores || {}).some(
       (arr) => Array.isArray(arr) && arr.some((s) => s !== "" && s != null)
     );
-    return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, !auditMode && /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("div", { className: "flex flex-wrap gap-2 items-center" }, /* @__PURE__ */ React.createElement(
+    return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("div", { className: "flex flex-wrap gap-2 items-center" }, /* @__PURE__ */ React.createElement(
       Btn,
       {
         variant: "secondary",
-        onClick: handleImportClick,
-        disabled: effectiveLocked
+        onClick: () => fileRef.current?.click()
       },
       "Import CSV"
     ), /* @__PURE__ */ React.createElement(
@@ -1632,19 +2132,7 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
           e.target.value = "";
         }
       }
-    ), /* @__PURE__ */ React.createElement(
-      "input",
-      {
-        ref: jsonRef,
-        type: "file",
-        accept: ".json,application/json",
-        className: "hidden",
-        onChange: (e) => {
-          if (e.target.files?.[0]) importJson(e.target.files[0]);
-          e.target.value = "";
-        }
-      }
-    ), hasAnyScore && /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(CopyWhatsAppBtn, { round, results: inlineResults, players: state.players }), /* @__PURE__ */ React.createElement(ExportRoundCsvBtn, { round, results: inlineResults, players: state.players })), /* @__PURE__ */ React.createElement("span", { className: "text-xs", style: { color: palette.inkSoft } }, "Accepts Golf Pad export (", /* @__PURE__ */ React.createElement("code", null, '"Team","Hole#1"\u2026"Hole#18","Net"'), ") or simple ", /* @__PURE__ */ React.createElement("code", null, "Player,1,2,\u2026,18"), ". Names match case-insensitively against the roster."))), auditMode && /* @__PURE__ */ React.createElement("div", { className: "text-sm px-1 py-2", style: { color: palette.inkSoft } }, /* @__PURE__ */ React.createElement("strong", null, round.courseName), round.tees?.A?.name && ` \xB7 Flight A: ${round.tees.A.name} (Slope ${round.tees.A.slopeRating || "\u2014"} / Rating ${round.tees.A.courseRating || "\u2014"})`, round.tees?.B?.name && ` \xB7 Flight B: ${round.tees.B.name} (Slope ${round.tees.B.slopeRating || "\u2014"} / Rating ${round.tees.B.courseRating || "\u2014"})`, ` \xB7 Par ${sumPars(round.pars)}`), /* @__PURE__ */ React.createElement(Card, { dense: true }, /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "text-sm", style: { fontVariantNumeric: "tabular-nums", minWidth: 900 } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-2 py-2 font-medium sticky left-0 z-10", style: { background: "#F7F5F0", minWidth: 160 } }, "Player"), /* @__PURE__ */ React.createElement("th", { className: "px-1 py-2 font-medium text-xs", style: { color: palette.inkSoft } }, "CH"), Array.from({ length: 18 }, (_, i) => /* @__PURE__ */ React.createElement("th", { key: i, className: "px-1 py-2 font-medium text-center text-xs" }, i + 1)), /* @__PURE__ */ React.createElement("th", { className: "px-2 py-2 font-medium text-center" }, "Gross"), /* @__PURE__ */ React.createElement("th", { className: "px-2 py-2 font-medium text-center" }, "Net"))), /* @__PURE__ */ React.createElement("tbody", null, activePlayers.map((p) => {
+    ), hasAnyScore && /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(CopyWhatsAppBtn, { round, results: inlineResults, players: state.players }), /* @__PURE__ */ React.createElement(ExportRoundCsvBtn, { round, results: inlineResults, players: state.players })), /* @__PURE__ */ React.createElement("span", { className: "text-xs", style: { color: palette.inkSoft } }, "Accepts Golf Pad export (", /* @__PURE__ */ React.createElement("code", null, '"Team","Hole#1"\u2026"Hole#18","Net"'), ") or simple ", /* @__PURE__ */ React.createElement("code", null, "Player,1,2,\u2026,18"), ". Names match case-insensitively against the roster."))), /* @__PURE__ */ React.createElement(Card, { dense: true }, /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "text-sm", style: { fontVariantNumeric: "tabular-nums", minWidth: 900 } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-2 py-2 font-medium sticky left-0 z-10", style: { background: "#F7F5F0", minWidth: 160 } }, "Player"), /* @__PURE__ */ React.createElement("th", { className: "px-1 py-2 font-medium text-xs", style: { color: palette.inkSoft } }, "CH"), Array.from({ length: 18 }, (_, i) => /* @__PURE__ */ React.createElement("th", { key: i, className: "px-1 py-2 font-medium text-center text-xs" }, i + 1)), /* @__PURE__ */ React.createElement("th", { className: "px-2 py-2 font-medium text-center" }, "Gross"), /* @__PURE__ */ React.createElement("th", { className: "px-2 py-2 font-medium text-center" }, "Net"))), /* @__PURE__ */ React.createElement("tbody", null, activePlayers.map((p) => {
       const sc = round.scores[p.id] || Array(18).fill("");
       const filled = sc.filter((s) => s !== "" && s != null).length;
       const grossTotal = filled === 18 ? sc.reduce((a, b) => a + Number(b), 0) : null;
@@ -1656,11 +2144,11 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
           type: "number",
           value: sc[i] ?? "",
           onChange: (e) => setScore(p.id, i, e.target.value),
-          disabled: effectiveLocked,
+          disabled: round.locked,
           className: "w-10 text-center text-sm py-1",
           style: {
             border: `1px solid ${palette.rule}`,
-            background: effectiveLocked ? "#F7F5F0" : "#fff",
+            background: round.locked ? "#F7F5F0" : "#fff",
             borderRadius: 2,
             fontFamily: "ui-monospace"
           }
@@ -1668,16 +2156,14 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
       ))), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center font-medium" }, grossTotal ?? "\u2014"), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center font-medium", style: { color: palette.green } }, netTotal ?? "\u2014"));
     }))))));
   }
-  function ResultsTab({ state, currentRoundId, setCurrentRoundId, auditMode }) {
+  function ResultsTab({ state, currentRoundId, setCurrentRoundId }) {
     const round = state.rounds.find((r) => r.id === currentRoundId);
-    const [subTab, setSubTab] = useState("Payouts");
     const results = useMemo(
       () => round ? computeRoundResults(round, state.players) : null,
       [round, state.players]
     );
     if (!round || !results) return null;
     const playerById = Object.fromEntries(state.players.map((p) => [p.id, p]));
-    const subs = ["Payouts", "Scores", "Money List"];
     return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement("div", { className: "flex flex-wrap items-center gap-2" }, state.rounds.map((r) => /* @__PURE__ */ React.createElement(
       "button",
       {
@@ -1693,24 +2179,7 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
       },
       "R",
       r.number
-    ))), !auditMode && /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("div", { className: "flex flex-wrap items-center gap-3" }, /* @__PURE__ */ React.createElement("div", { className: "flex-1 min-w-0" }, /* @__PURE__ */ React.createElement("div", { className: "text-xs uppercase tracking-wider", style: { color: palette.inkSoft } }, "Round ", round.number, " \xB7 ", round.courseName), /* @__PURE__ */ React.createElement("div", { className: "text-sm font-medium mt-0.5" }, "Share results with the group or export a CSV ledger")), /* @__PURE__ */ React.createElement(CopyWhatsAppBtn, { round, results, players: state.players }), /* @__PURE__ */ React.createElement(ExportRoundCsvBtn, { round, results, players: state.players }))), auditMode && /* @__PURE__ */ React.createElement("div", { className: "text-sm px-1", style: { color: palette.inkSoft } }, /* @__PURE__ */ React.createElement("strong", null, "Round ", round.number, " \xB7 ", round.courseName), round.tees?.A?.name && ` \xB7 Flight A: ${round.tees.A.name} (Slope ${round.tees.A.slopeRating || "\u2014"} / Rating ${round.tees.A.courseRating || "\u2014"})`, round.tees?.B?.name && ` \xB7 Flight B: ${round.tees.B.name} (Slope ${round.tees.B.slopeRating || "\u2014"} / Rating ${round.tees.B.courseRating || "\u2014"})`, ` \xB7 Par ${sumPars(round.pars)}`), /* @__PURE__ */ React.createElement("div", { className: "flex flex-wrap gap-1" }, subs.map((t) => /* @__PURE__ */ React.createElement(
-      "button",
-      {
-        key: t,
-        onClick: () => setSubTab(t),
-        className: "px-3 py-1.5 text-sm",
-        style: {
-          background: subTab === t ? palette.ink : "transparent",
-          color: subTab === t ? "#fff" : palette.ink,
-          border: `1px solid ${subTab === t ? palette.ink : palette.rule}`,
-          borderRadius: 2
-        }
-      },
-      t
-    ))), subTab === "Payouts" && /* @__PURE__ */ React.createElement(ResultsPayoutsView, { round, results, playerById, state }), subTab === "Scores" && /* @__PURE__ */ React.createElement(ResultsScoresView, { round, results, playerById, state }), subTab === "Money List" && /* @__PURE__ */ React.createElement(ResultsMoneyListView, { round, results, playerById, state }));
-  }
-  function ResultsPayoutsView({ round, results, playerById, state }) {
-    return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-2 md:grid-cols-6 gap-3" }, /* @__PURE__ */ React.createElement(KPI, { label: "Active", value: results.activePlayerIds.length }), /* @__PURE__ */ React.createElement(KPI, { label: "Skins A", value: fmt$(results.potBreakdown.skinsA) }), /* @__PURE__ */ React.createElement(KPI, { label: "Skins B", value: fmt$(results.potBreakdown.skinsB) }), /* @__PURE__ */ React.createElement(KPI, { label: "IN A", value: fmt$(results.indNetA.pot) }), /* @__PURE__ */ React.createElement(KPI, { label: "IN B", value: fmt$(results.indNetB.pot) }), /* @__PURE__ */ React.createElement(KPI, { label: "Best Ball", value: fmt$(results.potBreakdown.bestBall) })), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-4" }, /* @__PURE__ */ React.createElement(SkinsCard, { title: "Skins \xB7 Category A", data: results.skinsA, playerById }), /* @__PURE__ */ React.createElement(SkinsCard, { title: "Skins \xB7 Category B", data: results.skinsB, playerById })), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-4" }, ["A", "B"].map((flight) => {
+    ))), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("div", { className: "flex flex-wrap items-center gap-3" }, /* @__PURE__ */ React.createElement("div", { className: "flex-1 min-w-0" }, /* @__PURE__ */ React.createElement("div", { className: "text-xs uppercase tracking-wider", style: { color: palette.inkSoft } }, "Round ", round.number, " \xB7 ", round.courseName), /* @__PURE__ */ React.createElement("div", { className: "text-sm font-medium mt-0.5" }, "Share results with the group or export a CSV ledger")), /* @__PURE__ */ React.createElement(CopyWhatsAppBtn, { round, results, players: state.players }), /* @__PURE__ */ React.createElement(ExportRoundCsvBtn, { round, results, players: state.players }))), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-2 md:grid-cols-6 gap-3" }, /* @__PURE__ */ React.createElement(KPI, { label: "Active", value: results.activePlayerIds.length }), /* @__PURE__ */ React.createElement(KPI, { label: "Skins A", value: fmt$(results.potBreakdown.skinsA) }), /* @__PURE__ */ React.createElement(KPI, { label: "Skins B", value: fmt$(results.potBreakdown.skinsB) }), /* @__PURE__ */ React.createElement(KPI, { label: "IN A", value: fmt$(results.indNetA.pot) }), /* @__PURE__ */ React.createElement(KPI, { label: "IN B", value: fmt$(results.indNetB.pot) }), /* @__PURE__ */ React.createElement(KPI, { label: "Best Ball", value: fmt$(results.potBreakdown.bestBall) })), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-4" }, /* @__PURE__ */ React.createElement(SkinsCard, { title: "Skins \xB7 Category A", data: results.skinsA, playerById }), /* @__PURE__ */ React.createElement(SkinsCard, { title: "Skins \xB7 Category B", data: results.skinsB, playerById })), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-4" }, ["A", "B"].map((flight) => {
       const data = results[`indNet${flight}`];
       return /* @__PURE__ */ React.createElement(
         Card,
@@ -1743,7 +2212,7 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
         },
         data.teamResults.length === 0 ? /* @__PURE__ */ React.createElement("div", { className: "text-sm", style: { color: palette.inkSoft } }, "No teams yet.") : /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Pos"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Team"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Members"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Net BB"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Team"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Per pl."))), /* @__PURE__ */ React.createElement("tbody", null, data.teamResults.map((t) => /* @__PURE__ */ React.createElement("tr", { key: t.teamId, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, t.position ?? "\u2014"), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 font-medium" }, t.teamName), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-xs", style: { color: palette.inkSoft } }, t.members.map((id) => playerById[id]?.name).join(", ")), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, t.total ?? "\u2014"), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, fmt$(data.teamPayouts[t.teamId] || 0)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right", style: { color: palette.green } }, t.members.length > 0 && data.teamPayouts[t.teamId] ? fmt$((data.teamPayouts[t.teamId] || 0) / t.members.length) : "\u2014"))))))
       );
-    })), /* @__PURE__ */ React.createElement(Card, { title: "Round payout ledger" }, /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Player"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "In"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Skins"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Ind. Net"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Best Ball"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Total won"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Net"))), /* @__PURE__ */ React.createElement("tbody", null, Object.entries(results.ledger).sort(([, a], [, b]) => b.won - a.won || b.net - a.net).map(([pid, l]) => /* @__PURE__ */ React.createElement("tr", { key: pid, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, playerById[pid]?.name), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, fmt$(l.contrib)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, fmt$(l.winSkins)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, fmt$(l.winIN)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, fmt$(l.winBB)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right font-medium" }, fmt$(l.won)), /* @__PURE__ */ React.createElement(
+    })), /* @__PURE__ */ React.createElement(Card, { title: "Round payout ledger" }, /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Player"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "In"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Skins"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Ind. Net"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Best Ball"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Total won"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Net"))), /* @__PURE__ */ React.createElement("tbody", null, Object.entries(results.ledger).map(([pid, l]) => /* @__PURE__ */ React.createElement("tr", { key: pid, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, playerById[pid]?.name), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, fmt$(l.contrib)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, fmt$(l.winSkins)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, fmt$(l.winIN)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, fmt$(l.winBB)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right font-medium" }, fmt$(l.won)), /* @__PURE__ */ React.createElement(
       "td",
       {
         className: "px-3 py-2 text-right font-medium",
@@ -1751,224 +2220,11 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
       },
       l.net >= 0 ? "+" : "",
       fmt$(l.net)
-    ))))))));
-  }
-  function ResultsScoresView({ round, results, playerById, state }) {
-    const coursePar = sumPars(round.pars);
-    const [expandedPlayers, setExpandedPlayers] = useState({});
-    const [expandedTeams, setExpandedTeams] = useState({});
-    const togglePlayer = (pid) => setExpandedPlayers((prev) => ({ ...prev, [pid]: !prev[pid] }));
-    const toggleTeam = (tid) => setExpandedTeams((prev) => ({ ...prev, [tid]: !prev[tid] }));
-    const scoresByFlight = (flight) => {
-      const data = results[`indNet${flight}`];
-      if (!data || data.ranking.length === 0) return [];
-      return data.ranking;
-    };
-    const teamsByFlight = (flight) => {
-      const data = results[`bestBall${flight}`];
-      if (!data) return [];
-      return data.teamResults.filter((t) => t.total != null);
-    };
-    const renderPlayerScorecard = (r) => {
-      const scores = round.scores[r.playerId] || [];
-      if (!allScored(scores)) return null;
-      const pars = round.pars || [];
-      const frontGross = scores.slice(0, 9).reduce((a, b) => a + Number(b), 0);
-      const backGross = scores.slice(9, 18).reduce((a, b) => a + Number(b), 0);
-      const frontPar = pars.slice(0, 9).reduce((a, b) => a + (Number(b) || 0), 0);
-      const backPar = pars.slice(9, 18).reduce((a, b) => a + (Number(b) || 0), 0);
-      return /* @__PURE__ */ React.createElement("tr", null, /* @__PURE__ */ React.createElement("td", { colSpan: 6, className: "px-0 py-0" }, /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto", style: { background: "#FAFAF7" } }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-xs", style: { fontVariantNumeric: "tabular-nums", minWidth: 600 } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 font-medium", style: { color: palette.inkSoft, width: 50 } }, "Hole"), Array.from({ length: 9 }, (_, i) => /* @__PURE__ */ React.createElement("td", { key: i, className: "px-1 py-1 text-center font-medium", style: { width: 32 } }, i + 1)), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center font-medium", style: { background: "#F0EDE5", width: 40 } }, "Out"), Array.from({ length: 9 }, (_, i) => /* @__PURE__ */ React.createElement("td", { key: i + 9, className: "px-1 py-1 text-center font-medium", style: { width: 32 } }, i + 10)), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center font-medium", style: { background: "#F0EDE5", width: 40 } }, "In"), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center font-medium", style: { background: "#E8E4DA", width: 44 } }, "Tot"))), /* @__PURE__ */ React.createElement("tbody", null, /* @__PURE__ */ React.createElement("tr", { style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1", style: { color: palette.inkSoft } }, "Par"), pars.slice(0, 9).map((p, i) => /* @__PURE__ */ React.createElement("td", { key: i, className: "px-1 py-1 text-center", style: { color: palette.inkSoft } }, p)), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center", style: { background: "#F0EDE5", color: palette.inkSoft } }, frontPar), pars.slice(9, 18).map((p, i) => /* @__PURE__ */ React.createElement("td", { key: i, className: "px-1 py-1 text-center", style: { color: palette.inkSoft } }, p)), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center", style: { background: "#F0EDE5", color: palette.inkSoft } }, backPar), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center", style: { background: "#E8E4DA", color: palette.inkSoft } }, coursePar)), /* @__PURE__ */ React.createElement("tr", null, /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 font-medium" }, "Score"), scores.slice(0, 9).map((s, i) => {
-        const diff = Number(s) - (Number(pars[i]) || 0);
-        return /* @__PURE__ */ React.createElement("td", { key: i, className: "px-1 py-1 text-center font-medium", style: {
-          color: diff < 0 ? palette.green : diff > 0 ? palette.alert : palette.ink,
-          background: diff <= -2 ? "#D0F0D8" : diff === -1 ? "#E8F5EB" : diff >= 2 ? "#FCE9E5" : "transparent"
-        } }, s);
-      }), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center font-medium", style: { background: "#F0EDE5" } }, frontGross), scores.slice(9, 18).map((s, i) => {
-        const diff = Number(s) - (Number(pars[i + 9]) || 0);
-        return /* @__PURE__ */ React.createElement("td", { key: i, className: "px-1 py-1 text-center font-medium", style: {
-          color: diff < 0 ? palette.green : diff > 0 ? palette.alert : palette.ink,
-          background: diff <= -2 ? "#D0F0D8" : diff === -1 ? "#E8F5EB" : diff >= 2 ? "#FCE9E5" : "transparent"
-        } }, s);
-      }), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center font-medium", style: { background: "#F0EDE5" } }, backGross), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center font-medium", style: { background: "#E8E4DA" } }, r.gross)))))));
-    };
-    const renderTeamScorecard = (team) => {
-      const pars = round.pars || [];
-      const members = team.members;
-      if (members.length === 0) return null;
-      const memberData = members.map((pid) => {
-        const player = state.players.find((p) => p.id === pid);
-        const ch = chForPlayer(player, round);
-        const scores = round.scores[pid] || [];
-        const nets = round.holeIndexes.map((SI, i) => {
-          const g = scores[i];
-          if (g === "" || g == null) return null;
-          return netOnHole(Number(g), ch, SI);
-        });
-        return { pid, name: playerById[pid]?.name, ch, scores, nets };
-      });
-      const bestPerHole = Array.from({ length: 18 }, (_, h) => {
-        let bestNet = null;
-        let bestPid = null;
-        for (const m of memberData) {
-          if (m.nets[h] != null && (bestNet == null || m.nets[h] < bestNet)) {
-            bestNet = m.nets[h];
-            bestPid = m.pid;
-          }
-        }
-        return bestPid;
-      });
-      const frontPar = pars.slice(0, 9).reduce((a, b) => a + (Number(b) || 0), 0);
-      const backPar = pars.slice(9, 18).reduce((a, b) => a + (Number(b) || 0), 0);
-      return /* @__PURE__ */ React.createElement("tr", null, /* @__PURE__ */ React.createElement("td", { colSpan: 5, className: "px-0 py-0" }, /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto", style: { background: "#FAFAF7" } }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-xs", style: { fontVariantNumeric: "tabular-nums", minWidth: 600 } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 font-medium", style: { color: palette.inkSoft, width: 110 } }, "Hole"), Array.from({ length: 9 }, (_, i) => /* @__PURE__ */ React.createElement("td", { key: i, className: "px-1 py-1 text-center font-medium", style: { width: 32 } }, i + 1)), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center font-medium", style: { background: "#F0EDE5", width: 40 } }, "Out"), Array.from({ length: 9 }, (_, i) => /* @__PURE__ */ React.createElement("td", { key: i + 9, className: "px-1 py-1 text-center font-medium", style: { width: 32 } }, i + 10)), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center font-medium", style: { background: "#F0EDE5", width: 40 } }, "In"), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center font-medium", style: { background: "#E8E4DA", width: 44 } }, "Tot"))), /* @__PURE__ */ React.createElement("tbody", null, /* @__PURE__ */ React.createElement("tr", { style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1", style: { color: palette.inkSoft } }, "Par"), pars.slice(0, 9).map((p, i) => /* @__PURE__ */ React.createElement("td", { key: i, className: "px-1 py-1 text-center", style: { color: palette.inkSoft } }, p)), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center", style: { background: "#F0EDE5", color: palette.inkSoft } }, frontPar), pars.slice(9, 18).map((p, i) => /* @__PURE__ */ React.createElement("td", { key: i, className: "px-1 py-1 text-center", style: { color: palette.inkSoft } }, p)), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center", style: { background: "#F0EDE5", color: palette.inkSoft } }, backPar), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center", style: { background: "#E8E4DA", color: palette.inkSoft } }, coursePar)), memberData.map((m) => {
-        const frontGross = m.scores.slice(0, 9).reduce((a, b) => a + (Number(b) || 0), 0);
-        const backGross = m.scores.slice(9, 18).reduce((a, b) => a + (Number(b) || 0), 0);
-        const totalGross = frontGross + backGross;
-        return /* @__PURE__ */ React.createElement("tr", { key: m.pid, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1" }, /* @__PURE__ */ React.createElement("span", { className: "font-medium" }, m.name), /* @__PURE__ */ React.createElement("span", { className: "ml-1", style: { color: palette.inkSoft } }, "(ch ", m.ch, ")")), m.scores.slice(0, 9).map((s, i) => {
-          const isBest = bestPerHole[i] === m.pid;
-          return /* @__PURE__ */ React.createElement("td", { key: i, className: "px-1 py-1 text-center font-medium", style: {
-            background: isBest ? "#D0F0D8" : "transparent",
-            color: isBest ? palette.green : palette.ink
-          } }, s === "" || s == null ? "\u2014" : s);
-        }), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center", style: { background: "#F0EDE5" } }, frontGross), m.scores.slice(9, 18).map((s, i) => {
-          const isBest = bestPerHole[i + 9] === m.pid;
-          return /* @__PURE__ */ React.createElement("td", { key: i, className: "px-1 py-1 text-center font-medium", style: {
-            background: isBest ? "#D0F0D8" : "transparent",
-            color: isBest ? palette.green : palette.ink
-          } }, s === "" || s == null ? "\u2014" : s);
-        }), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center", style: { background: "#F0EDE5" } }, backGross), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 text-center font-medium", style: { background: "#E8E4DA" } }, totalGross));
-      }))))));
-    };
-    return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-2 md:grid-cols-4 gap-3" }, /* @__PURE__ */ React.createElement(KPI, { label: "Course", value: round.courseName }), /* @__PURE__ */ React.createElement(KPI, { label: "Par", value: coursePar }), /* @__PURE__ */ React.createElement(KPI, { label: "Active", value: results.activePlayerIds.length }), /* @__PURE__ */ React.createElement(KPI, { label: "Date", value: round.date })), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-4" }, ["A", "B"].map((flight) => {
-      const ranking = scoresByFlight(flight);
-      return /* @__PURE__ */ React.createElement(
-        Card,
-        {
-          key: flight,
-          title: `Individual Scores \xB7 Flight ${flight}`,
-          action: /* @__PURE__ */ React.createElement("span", { className: "text-xs", style: { color: palette.inkSoft } }, ranking.length, " players")
-        },
-        ranking.length === 0 ? /* @__PURE__ */ React.createElement("div", { className: "text-sm", style: { color: palette.inkSoft } }, "No scores yet.") : /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium", style: { width: 40 } }, "Pos"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Player"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right", style: { width: 60 } }, "CH"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right", style: { width: 70 } }, "Gross"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right", style: { width: 80 } }, "vs Par"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right", style: { width: 60 } }, "Net"))), /* @__PURE__ */ React.createElement("tbody", null, ranking.map((r) => {
-          const vsPar = r.gross - coursePar;
-          const isExpanded = expandedPlayers[r.playerId];
-          return /* @__PURE__ */ React.createElement(React.Fragment, { key: r.playerId }, /* @__PURE__ */ React.createElement(
-            "tr",
-            {
-              onClick: () => togglePlayer(r.playerId),
-              style: {
-                borderBottom: isExpanded ? "none" : `1px solid ${palette.rule}`,
-                cursor: "pointer"
-              },
-              className: "hover:bg-gray-50 transition-colors"
-            },
-            /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, /* @__PURE__ */ React.createElement(
-              "span",
-              {
-                className: "inline-block w-6 h-6 text-xs leading-6 text-center",
-                style: {
-                  background: r.position === 1 ? palette.gold : r.position === 2 ? palette.green : r.position === 3 ? palette.ink : "transparent",
-                  borderRadius: 999,
-                  color: r.position <= 3 ? "#fff" : palette.inkSoft
-                }
-              },
-              r.position
-            )),
-            /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 font-medium" }, /* @__PURE__ */ React.createElement("span", { className: "flex items-center gap-1" }, /* @__PURE__ */ React.createElement("span", { style: { color: palette.green, fontSize: 10 } }, isExpanded ? "\u25BC" : "\u25B6"), playerById[r.playerId]?.name)),
-            /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right", style: { color: palette.inkSoft } }, r.courseHcp),
-            /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, r.gross),
-            /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right", style: { color: vsPar > 0 ? palette.alert : vsPar < 0 ? palette.green : palette.ink } }, vsPar > 0 ? "+" : "", vsPar),
-            /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right font-medium", style: { color: palette.green } }, r.net)
-          ), isExpanded && renderPlayerScorecard(r));
-        }))))
-      );
-    })), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-4" }, ["A", "B"].map((flight) => {
-      const teams = teamsByFlight(flight);
-      const data = results[`bestBall${flight}`];
-      return /* @__PURE__ */ React.createElement(
-        Card,
-        {
-          key: flight,
-          title: `Best Ball Teams \xB7 Flight ${flight}`,
-          action: /* @__PURE__ */ React.createElement("span", { className: "text-xs", style: { color: palette.inkSoft } }, teams.length, " teams")
-        },
-        teams.length === 0 ? /* @__PURE__ */ React.createElement("div", { className: "text-sm", style: { color: palette.inkSoft } }, "No teams or scores yet.") : /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium", style: { width: 40 } }, "Pos"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Team"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Members"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Net BB"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Payout"))), /* @__PURE__ */ React.createElement("tbody", null, teams.map((t) => {
-          const isExpanded = expandedTeams[t.teamId];
-          return /* @__PURE__ */ React.createElement(React.Fragment, { key: t.teamId }, /* @__PURE__ */ React.createElement(
-            "tr",
-            {
-              onClick: () => toggleTeam(t.teamId),
-              style: {
-                borderBottom: isExpanded ? "none" : `1px solid ${palette.rule}`,
-                cursor: "pointer"
-              },
-              className: "hover:bg-gray-50 transition-colors"
-            },
-            /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, /* @__PURE__ */ React.createElement(
-              "span",
-              {
-                className: "inline-block w-6 h-6 text-xs leading-6 text-center",
-                style: {
-                  background: t.position === 1 ? palette.gold : t.position === 2 ? palette.green : "transparent",
-                  borderRadius: 999,
-                  color: t.position <= 2 ? "#fff" : palette.inkSoft
-                }
-              },
-              t.position
-            )),
-            /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 font-medium" }, /* @__PURE__ */ React.createElement("span", { className: "flex items-center gap-1" }, /* @__PURE__ */ React.createElement("span", { style: { color: palette.green, fontSize: 10 } }, isExpanded ? "\u25BC" : "\u25B6"), t.teamName)),
-            /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-xs", style: { color: palette.inkSoft } }, t.members.map((id) => playerById[id]?.name).join(", ")),
-            /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right font-medium" }, t.total),
-            /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right font-medium", style: { color: palette.green } }, fmt$(data.teamPayouts[t.teamId] || 0))
-          ), isExpanded && renderTeamScorecard(t));
-        }))))
-      );
-    })));
-  }
-  function ResultsMoneyListView({ round, results, playerById, state }) {
-    const moneyList = Object.entries(results.ledger).map(([pid, l]) => ({
-      id: pid,
-      name: playerById[pid]?.name || pid,
-      flight: flightForRound(round, playerById[pid]),
-      ...l
-    })).sort((a, b) => b.won - a.won || b.net - a.net);
-    const totalPot = results.potBreakdown.skinsA + results.potBreakdown.skinsB + results.potBreakdown.individualNet + results.potBreakdown.bestBall;
-    const totalWon = moneyList.reduce((acc, r) => acc + r.won, 0);
-    return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-2 md:grid-cols-4 gap-3" }, /* @__PURE__ */ React.createElement(KPI, { label: "Total pot", value: fmt$(totalPot) }), /* @__PURE__ */ React.createElement(KPI, { label: "Total awarded", value: fmt$(totalWon) }), /* @__PURE__ */ React.createElement(KPI, { label: "House", value: fmt$(results.houseAmount) }), /* @__PURE__ */ React.createElement(KPI, { label: "Players", value: results.activePlayerIds.length })), /* @__PURE__ */ React.createElement(Card, { title: "Money List \u2014 This Round", dense: true }, /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium", style: { width: 40 } }, "#"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Player"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-center", style: { width: 60 } }, "Flight"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Skins"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Ind. Net"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Best Ball"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Total won"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Net P/L"))), /* @__PURE__ */ React.createElement("tbody", null, moneyList.map((r, idx) => /* @__PURE__ */ React.createElement(
-      "tr",
-      {
-        key: r.id,
-        style: {
-          borderBottom: `1px solid ${palette.rule}`,
-          background: r.won > 0 ? "#FAFFF7" : "transparent"
-        }
-      },
-      /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, r.won > 0 ? /* @__PURE__ */ React.createElement(
-        "span",
-        {
-          className: "inline-block w-6 h-6 text-xs leading-6 text-center",
-          style: {
-            background: idx === 0 ? palette.gold : idx === 1 ? palette.green : idx === 2 ? palette.ink : palette.inkSoft,
-            borderRadius: 999,
-            color: "#fff"
-          }
-        },
-        idx + 1
-      ) : /* @__PURE__ */ React.createElement("span", { className: "text-xs", style: { color: palette.inkSoft } }, idx + 1)),
-      /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 font-medium" }, r.name),
-      /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-center" }, /* @__PURE__ */ React.createElement(Pill, { tone: r.flight }, r.flight)),
-      /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right", style: { color: r.winSkins > 0 ? palette.green : palette.inkSoft } }, r.winSkins > 0 ? fmt$(r.winSkins) : "\u2014"),
-      /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right", style: { color: r.winIN > 0 ? palette.green : palette.inkSoft } }, r.winIN > 0 ? fmt$(r.winIN) : "\u2014"),
-      /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right", style: { color: r.winBB > 0 ? palette.green : palette.inkSoft } }, r.winBB > 0 ? fmt$(r.winBB) : "\u2014"),
-      /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right font-medium", style: { color: r.won > 0 ? palette.green : palette.inkSoft } }, r.won > 0 ? fmt$(r.won) : "\u2014"),
-      /* @__PURE__ */ React.createElement(
-        "td",
-        {
-          className: "px-3 py-2 text-right font-medium",
-          style: { color: r.net > 0 ? palette.green : r.net < 0 ? palette.alert : palette.ink }
-        },
-        r.net > 0 ? "+" : "",
-        fmt$(r.net)
-      )
-    )))))));
+    ))))))), (round.draftLog || []).length > 0 && /* @__PURE__ */ React.createElement(Card, { title: "Sorteo de equipos" }, /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-3 gap-4" }, roundFlights(round).map((flight) => {
+      const entries = (round.draftLog || []).filter((e) => e.flight === flight);
+      if (!entries.length) return null;
+      return /* @__PURE__ */ React.createElement("div", { key: flight }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, fontFamily: "ui-monospace", color: palette.inkSoft, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 8 } }, "Flight ", flight), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 6 } }, entries.map((e, i) => /* @__PURE__ */ React.createElement("div", { key: i, style: { padding: "8px 12px", background: "#FAFAF7", border: `1px solid ${palette.rule}`, borderRadius: 3 } }, /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, fontFamily: "ui-monospace", color: palette.gold, marginBottom: 3 } }, e.teamName), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 13, color: palette.ink, fontWeight: 600 } }, e.player1Name), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 11, color: palette.inkSoft } }, "+ ", e.player2Name), /* @__PURE__ */ React.createElement("div", { style: { fontSize: 10, color: palette.inkSoft, marginTop: 4 } }, new Date(e.ts).toLocaleDateString("es-DO", { weekday: "short", day: "numeric", month: "short" }), " \xB7 ", new Date(e.ts).toLocaleTimeString("es-DO", { hour: "2-digit", minute: "2-digit" }))))));
+    }))), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("div", { className: "flex flex-wrap items-center gap-3" }, /* @__PURE__ */ React.createElement("div", { className: "flex-1 min-w-0 text-sm", style: { color: palette.inkSoft } }, "Share results: copy a formatted summary for WhatsApp, or download the round ledger as CSV."), /* @__PURE__ */ React.createElement(CopyWhatsAppBtn, { round, results, players: state.players }), /* @__PURE__ */ React.createElement(ExportRoundCsvBtn, { round, results, players: state.players }))));
   }
   function SkinsCard({ title, data, playerById }) {
     if (!data || data.players.length === 0)
@@ -2072,9 +2328,9 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
     };
     return /* @__PURE__ */ React.createElement(Btn, { variant: "secondary", onClick }, "Export round CSV");
   }
-  function LedgerTab({ state, auditMode }) {
+  function LedgerTab({ state }) {
     const playerById = Object.fromEntries(state.players.map((p) => [p.id, p]));
-    const allResults = state.rounds.filter((r) => r.locked).map((r) => ({
+    const allResults = state.rounds.map((r) => ({
       round: r,
       res: computeRoundResults(r, state.players)
     }));
@@ -2090,14 +2346,10 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
         net: 0,
         perRound: []
       };
-      for (const rd of state.rounds) {
-        const entry = allResults.find((a) => a.round.id === rd.id);
-        if (!entry) {
-          row.perRound.push(null);
-          continue;
-        }
-        const l = entry.res.ledger[p.id];
-        if (!l) {
+      for (const { round, res } of allResults) {
+        const hasScores = Object.keys(round.scores || {}).length > 0;
+        const l = res.ledger[p.id];
+        if (!l || !hasScores) {
           row.perRound.push(null);
           continue;
         }
@@ -2168,7 +2420,7 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
       Card,
       {
         title: "Cumulative ledger",
-        action: !auditMode && /* @__PURE__ */ React.createElement(Btn, { variant: "secondary", onClick: exportCSV }, "Export CSV"),
+        action: /* @__PURE__ */ React.createElement(Btn, { variant: "secondary", onClick: exportCSV }, "Export CSV"),
         dense: true
       },
       /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Player"), state.rounds.map((r) => /* @__PURE__ */ React.createElement("th", { key: r.id, className: "px-3 py-2 font-medium text-right" }, "R", r.number)), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "In"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Skins"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "IN"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "BB"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Won"), /* @__PURE__ */ React.createElement("th", { className: "px-3 py-2 font-medium text-right" }, "Net"))), /* @__PURE__ */ React.createElement("tbody", null, cumulative.slice().sort((a, b) => b.net - a.net).map((r) => /* @__PURE__ */ React.createElement("tr", { key: r.id, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 font-medium" }, r.name), r.perRound.map((v, i) => /* @__PURE__ */ React.createElement(
@@ -2195,78 +2447,6 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
   }
   function DataTab({ state, setState }) {
     const fileRef = useRef(null);
-    const ghKey = "champs_github_config";
-    const loadGH = () => {
-      try {
-        return JSON.parse(localStorage.getItem(ghKey)) || {};
-      } catch {
-        return {};
-      }
-    };
-    const [ghConfig, setGhConfig] = useState(loadGH);
-    const [ghStatus, setGhStatus] = useState(null);
-    const [ghMsg, setGhMsg] = useState("");
-    const [showToken, setShowToken] = useState(false);
-    const saveGH = (patch) => {
-      const next = { ...ghConfig, ...patch };
-      setGhConfig(next);
-      localStorage.setItem(ghKey, JSON.stringify(next));
-    };
-    const publishToGitHub = async () => {
-      const { owner, repo, token, path: filePath } = ghConfig;
-      if (!owner || !repo || !token) {
-        setGhStatus("error");
-        setGhMsg("Configure owner, repo, and token first.");
-        return;
-      }
-      const apiPath = (filePath || "state.json").replace(/^\//, "");
-      const apiBase = `https://api.github.com/repos/${owner}/${repo}/contents/${apiPath}`;
-      const headers = {
-        Authorization: `token ${token}`,
-        Accept: "application/vnd.github.v3+json",
-        "Content-Type": "application/json"
-      };
-      setGhStatus("publishing");
-      setGhMsg("");
-      try {
-        let sha = null;
-        try {
-          const getResp = await fetch(apiBase, { headers });
-          if (getResp.ok) {
-            const data = await getResp.json();
-            sha = data.sha;
-          }
-        } catch {
-        }
-        const content = btoa(unescape(encodeURIComponent(JSON.stringify(state, null, 2))));
-        const body = {
-          message: `Update state.json \u2014 ${(/* @__PURE__ */ new Date()).toLocaleString()}`,
-          content
-        };
-        if (sha) body.sha = sha;
-        const putResp = await fetch(apiBase, {
-          method: "PUT",
-          headers,
-          body: JSON.stringify(body)
-        });
-        if (!putResp.ok) {
-          const err = await putResp.json().catch(() => ({}));
-          throw new Error(err.message || `HTTP ${putResp.status}`);
-        }
-        setGhStatus("ok");
-        setGhMsg(`Published at ${(/* @__PURE__ */ new Date()).toLocaleTimeString()}`);
-        const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `champs_${(state.tournament.name || "tournament").replace(/\s+/g, "_")}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-      } catch (e) {
-        setGhStatus("error");
-        setGhMsg(e.message);
-      }
-    };
     const exportJson = () => {
       const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
@@ -2317,589 +2497,108 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
           e.target.value = "";
         }
       }
-    ), /* @__PURE__ */ React.createElement("div", { className: "flex-1" }), /* @__PURE__ */ React.createElement(Btn, { variant: "ghost", onClick: resetSeed }, "Reset to sample data")), /* @__PURE__ */ React.createElement("div", { className: "text-xs mt-3", style: { color: palette.inkSoft } }, /* @__PURE__ */ React.createElement("strong", null, "Export JSON (backup)"), ": dated filename \u2014 use for personal backups in Drive/OneDrive.", " ", /* @__PURE__ */ React.createElement("strong", null, "Export state.json (for hosting)"), ": fixed filename \u2014 upload this to your GitHub Pages repo so the public audit view auto-loads it. Data lives in browser memory only \u2014 export to preserve across reloads.")), /* @__PURE__ */ React.createElement(Card, { title: "Publish to GitHub Pages" }, /* @__PURE__ */ React.createElement("div", { className: "space-y-3" }, /* @__PURE__ */ React.createElement("div", { className: "text-sm", style: { color: palette.inkSoft } }, "Push ", /* @__PURE__ */ React.createElement("code", { style: { background: "#F0EDE5", padding: "1px 4px", borderRadius: 2 } }, "state.json"), " directly to your GitHub repo so the live audit page updates instantly \u2014 no manual upload needed."), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-3" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "block text-xs font-medium mb-1", style: { color: palette.inkSoft } }, "Owner"), /* @__PURE__ */ React.createElement(
-      "input",
-      {
-        type: "text",
-        placeholder: "felurob",
-        value: ghConfig.owner || "",
-        onChange: (e) => saveGH({ owner: e.target.value.trim() }),
-        className: "w-full px-2 py-1.5 text-sm",
-        style: { border: `1px solid ${palette.rule}`, borderRadius: 2 }
-      }
-    )), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "block text-xs font-medium mb-1", style: { color: palette.inkSoft } }, "Repo"), /* @__PURE__ */ React.createElement(
-      "input",
-      {
-        type: "text",
-        placeholder: "champs-2026",
-        value: ghConfig.repo || "",
-        onChange: (e) => saveGH({ repo: e.target.value.trim() }),
-        className: "w-full px-2 py-1.5 text-sm",
-        style: { border: `1px solid ${palette.rule}`, borderRadius: 2 }
-      }
-    )), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "block text-xs font-medium mb-1", style: { color: palette.inkSoft } }, "File path"), /* @__PURE__ */ React.createElement(
-      "input",
-      {
-        type: "text",
-        placeholder: "state.json",
-        value: ghConfig.path || "",
-        onChange: (e) => saveGH({ path: e.target.value.trim() }),
-        className: "w-full px-2 py-1.5 text-sm",
-        style: { border: `1px solid ${palette.rule}`, borderRadius: 2 }
-      }
-    )), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "block text-xs font-medium mb-1", style: { color: palette.inkSoft } }, "Personal Access Token", /* @__PURE__ */ React.createElement(
-      "button",
-      {
-        onClick: () => setShowToken(!showToken),
-        className: "ml-2 text-xs underline",
-        style: { color: palette.green }
-      },
-      showToken ? "hide" : "show"
-    )), /* @__PURE__ */ React.createElement(
-      "input",
-      {
-        type: showToken ? "text" : "password",
-        placeholder: "ghp_xxxxxxxxxxxx",
-        value: ghConfig.token || "",
-        onChange: (e) => saveGH({ token: e.target.value.trim() }),
-        className: "w-full px-2 py-1.5 text-sm",
-        style: { border: `1px solid ${palette.rule}`, borderRadius: 2 }
-      }
-    ))), /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-3" }, /* @__PURE__ */ React.createElement(
-      Btn,
-      {
-        onClick: publishToGitHub,
-        disabled: ghStatus === "publishing"
-      },
-      ghStatus === "publishing" ? "Publishing\u2026" : "Publish to GitHub"
-    ), ghStatus === "ok" && /* @__PURE__ */ React.createElement("span", { className: "text-sm font-medium", style: { color: palette.green } }, "\u2713 ", ghMsg), ghStatus === "error" && /* @__PURE__ */ React.createElement("span", { className: "text-sm font-medium", style: { color: palette.alert } }, "\u2717 ", ghMsg)), /* @__PURE__ */ React.createElement("div", { className: "text-xs", style: { color: palette.inkSoft } }, /* @__PURE__ */ React.createElement("strong", null, "Setup (one time):"), " Go to ", /* @__PURE__ */ React.createElement("a", { href: "https://github.com/settings/tokens?type=beta", target: "_blank", rel: "noopener", style: { color: palette.green, textDecoration: "underline" } }, "GitHub \u2192 Settings \u2192 Fine-grained tokens"), " \u2192 Generate new token \u2192 select only the ", /* @__PURE__ */ React.createElement("code", { style: { background: "#F0EDE5", padding: "1px 4px", borderRadius: 2 } }, "champs-2026"), " repo \u2192 permissions: Contents (Read and write) \u2192 Generate. Paste the token above. Config is saved in your browser."))), /* @__PURE__ */ React.createElement(Card, { title: "Payout logic \u2014 quick reference" }, /* @__PURE__ */ React.createElement("div", { className: "text-sm space-y-2", style: { color: palette.ink } }, /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Per active player per round:"), " $28 stake into pots = $18 skins + $5 individual net + $5 best ball. Each side game's pot is built from players entered in that game."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Index vs Course Handicap:"), " the Setup tab stores each player's ", /* @__PURE__ */ React.createElement("em", null, "handicap index"), " (GHIN/WHS, e.g. 7.7). Per-round, the Course tab applies slope and rating to derive each player's ", /* @__PURE__ */ React.createElement("em", null, "course handicap"), ":", /* @__PURE__ */ React.createElement("span", { style: { fontFamily: "ui-monospace" } }, " CH = round(Index \xD7 Slope \xF7 113) + (Course Rating \u2212 Par)"), ". All payouts use the course handicap, not the index."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Skins handicap:"), " 75% of ", /* @__PURE__ */ React.createElement("em", null, "course"), " handicap, rounded, capped at \xB118. Used ", /* @__PURE__ */ React.createElement("em", null, "only"), " for skins. Individual net and best ball use the full course handicap."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Skins:"), " separate pots for Cat A and Cat B. Net low wins each hole; ties carry over. Per-skin value = pot \xF7 skins awarded."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Individual net:"), " separate pots for Flight A and Flight B. Within each flight, with N entrants: N\u22653 \u2192 3rd gets fixed $5, remainder 65/35; N=2 \u2192 65/35 of full pot; N=1 \u2192 full pot."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Best ball:"), " 65/35 split. Each team's payout splits equally among its members."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Ties (IN / BB):"), " resolved by USGA count-back. If two or more players or teams tie on total net, compare net on the last 9 holes; if still tied, the last 6; then last 3; then hole 18. Net for each segment uses a proportional handicap allocation (\xBD \xD7 CH for last 9, \u2153 \xD7 CH for last 6, \u2159 \xD7 CH for last 3, 1\u204418 \xD7 CH for hole 18). Skins ties are handled separately by carryover."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Plus indexes:"), " when course handicap is negative, player gives back strokes on the easiest holes (highest stroke index)."))));
+    ), /* @__PURE__ */ React.createElement("div", { className: "flex-1" }), /* @__PURE__ */ React.createElement(Btn, { variant: "ghost", onClick: resetSeed }, "Reset to sample data")), /* @__PURE__ */ React.createElement("div", { className: "text-xs mt-3", style: { color: palette.inkSoft } }, /* @__PURE__ */ React.createElement("strong", null, "Export JSON (backup)"), ": dated filename \u2014 use for personal backups in Drive/OneDrive.", " ", /* @__PURE__ */ React.createElement("strong", null, "Export state.json (for hosting)"), ": fixed filename \u2014 upload this to your GitHub Pages repo so the public audit view auto-loads it. Data lives in browser memory only \u2014 export to preserve across reloads.")), /* @__PURE__ */ React.createElement(Card, { title: "Payout logic \u2014 quick reference" }, /* @__PURE__ */ React.createElement("div", { className: "text-sm space-y-2", style: { color: palette.ink } }, /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Per active player per round:"), " $28 stake into pots = $18 skins + $5 individual net + $5 best ball. Each side game's pot is built from players entered in that game."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Index vs Course Handicap:"), " the Setup tab stores each player's ", /* @__PURE__ */ React.createElement("em", null, "handicap index"), " (GHIN/WHS, e.g. 7.7). Per-round, the Course tab applies slope and rating to derive each player's ", /* @__PURE__ */ React.createElement("em", null, "course handicap"), ":", /* @__PURE__ */ React.createElement("span", { style: { fontFamily: "ui-monospace" } }, " CH = round(Index \xD7 Slope \xF7 113) + (Course Rating \u2212 Par)"), ". All payouts use the course handicap, not the index."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Skins handicap:"), " 75% of ", /* @__PURE__ */ React.createElement("em", null, "course"), " handicap, rounded, capped at \xB118. Used ", /* @__PURE__ */ React.createElement("em", null, "only"), " for skins. Individual net and best ball use the full course handicap."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Skins:"), " separate pots for Cat A and Cat B. Net low wins each hole; ties carry over. Per-skin value = pot \xF7 skins awarded."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Individual net:"), " separate pots for Flight A and Flight B. Within each flight, with N entrants: N\u22653 \u2192 3rd gets fixed $5, remainder 65/35; N=2 \u2192 65/35 of full pot; N=1 \u2192 full pot."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Best ball:"), " 65/35 split. Each team's payout splits equally among its members."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Ties (IN / BB):"), " resolved by USGA count-back. If two or more players or teams tie on total net, compare net on the last 9 holes; if still tied, the last 6; then last 3; then hole 18. Net for each segment uses a proportional handicap allocation (\xBD \xD7 CH for last 9, \u2153 \xD7 CH for last 6, \u2159 \xD7 CH for last 3, 1\u204418 \xD7 CH for hole 18). Skins ties are handled separately by carryover."), /* @__PURE__ */ React.createElement("p", null, /* @__PURE__ */ React.createElement("strong", null, "Plus indexes:"), " when course handicap is negative, player gives back strokes on the easiest holes (highest stroke index)."))));
   }
   function PaymentsTab({ state, setState }) {
-    const tripBuyIn = state.tripBuyIn || { amountPerPlayer: 150, payments: {} };
-    const expectedRoundContrib = (round, playerId) => {
-      if (!round.locked) return 0;
-      const part = round.participants[playerId];
-      if (!part?.active) return 0;
-      return 30;
-    };
-    const perRoundAmount = (round, playerId) => {
-      const part = round.participants[playerId];
-      if (!part?.active) return 0;
-      return 30;
-    };
-    const cumulativeNet = useMemo(() => {
-      const map = Object.fromEntries(state.players.map((p) => [p.id, 0]));
-      for (const r of state.rounds) {
-        if (!r.locked) continue;
-        const res = computeRoundResults(r, state.players);
-        for (const [pid, l] of Object.entries(res.ledger)) {
-          map[pid] = (map[pid] || 0) + l.net;
-        }
-      }
-      return map;
-    }, [state.rounds, state.players]);
-    const updateBuyInAmount = (v) => setState((s) => ({ ...s, tripBuyIn: { ...s.tripBuyIn, amountPerPlayer: Number(v) || 0 } }));
-    const updatePayment = (pid, patch) => setState((s) => ({
-      ...s,
-      tripBuyIn: {
-        ...s.tripBuyIn,
-        payments: {
-          ...s.tripBuyIn.payments,
-          [pid]: { ...s.tripBuyIn.payments?.[pid] || {}, ...patch }
-        }
-      }
-    }));
-    const updateRoundPaid = (rid, pid, paid) => setState((s) => ({
+    const [collapsed, setCollapsed] = React.useState({});
+    const toggleCollapsed = (rid) => setCollapsed((c) => ({ ...c, [rid]: !c[rid] }));
+    const updateRoundParticipant = (rid, pid, patch) => setState((s) => ({
       ...s,
       rounds: s.rounds.map(
         (r) => r.id !== rid ? r : {
           ...r,
           participants: {
             ...r.participants,
-            [pid]: { ...r.participants[pid] || {}, paid }
+            [pid]: { ...r.participants[pid] || {}, ...patch }
           }
         }
       )
     }));
-    const expectedTotal = (playerId) => state.rounds.reduce((acc, r) => acc + perRoundAmount(r, playerId), 0);
-    const totalDue = state.players.reduce((acc, p) => acc + expectedTotal(p.id), 0);
-    const totalPaid = state.players.reduce(
-      (acc, p) => acc + Number(tripBuyIn.payments?.[p.id]?.paid || 0),
-      0
-    );
-    const totalBalance = totalDue - totalPaid;
-    return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement(Card, { title: "Trip-level buy-in" }, /* @__PURE__ */ React.createElement("div", { className: "text-xs px-1 py-2 mb-2", style: { color: palette.inkSoft } }, "Each player's ", /* @__PURE__ */ React.createElement("strong", null, "Due"), " = $30 \xD7 rounds where they're marked Active. Toggle participation in Round \u2192 Participation. Collect payment before each round."), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-3 gap-3 mb-3" }, /* @__PURE__ */ React.createElement(KPI, { label: "Players", value: String(state.players.length) }), /* @__PURE__ */ React.createElement(KPI, { label: "Total due (computed)", value: fmt$(totalDue) }), /* @__PURE__ */ React.createElement(
-      KPI,
-      {
-        label: totalBalance >= 0 ? "Outstanding" : "Surplus",
-        value: fmt$(Math.abs(totalBalance)),
-        sub: `Collected ${fmt$(totalPaid)}`
-      }
-    )), /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Player"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium", style: { width: 70 } }, "Rds"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium", style: { width: 90 } }, "Due"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium", style: { width: 110 } }, "Paid"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium", style: { width: 110 } }, "Balance"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium", style: { width: 130 } }, "Method"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium", style: { width: 140 } }, "Date"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Notes"), /* @__PURE__ */ React.createElement("th", { className: "text-center px-3 py-2 font-medium", style: { width: 90 } }, "Status"))), /* @__PURE__ */ React.createElement("tbody", null, state.players.map((p) => {
-      const pay = tripBuyIn.payments?.[p.id] || {};
-      const due = expectedTotal(p.id);
-      const activeRounds = state.rounds.filter(
-        (r) => r.locked && r.participants[p.id]?.active
-      ).length;
-      const paid = Number(pay.paid || 0);
-      const bal = paid - due;
-      const status = due === 0 ? "\u2014" : bal === 0 && paid > 0 ? "Settled" : bal > 0 ? "Surplus" : paid > 0 ? "Partial" : "Owes";
-      const tone = status === "Settled" ? "open" : status === "Surplus" ? "A" : status === "Partial" ? "B" : status === "\u2014" ? "open" : "locked";
-      return /* @__PURE__ */ React.createElement("tr", { key: p.id, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, p.name), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right", style: { color: palette.inkSoft } }, activeRounds, "/5"), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, fmt$(due)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, /* @__PURE__ */ React.createElement(
-        NumberInput,
-        {
-          value: pay.paid ?? 0,
-          onChange: (v) => updatePayment(p.id, { paid: Number(v) || 0 }),
-          min: 0,
-          step: 5
-        }
-      )), /* @__PURE__ */ React.createElement(
-        "td",
-        {
-          className: "px-3 py-2 text-right",
-          style: { color: bal === 0 ? palette.green : bal > 0 ? palette.green : palette.alert, fontWeight: 600 }
-        },
-        fmt$(bal)
-      ), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, /* @__PURE__ */ React.createElement(
-        "select",
-        {
-          value: pay.method || "",
-          onChange: (e) => updatePayment(p.id, { method: e.target.value }),
-          className: "px-2 py-1 text-sm w-full",
-          style: { border: `1px solid ${palette.rule}`, borderRadius: 2 }
-        },
-        /* @__PURE__ */ React.createElement("option", { value: "" }, "\u2014"),
-        /* @__PURE__ */ React.createElement("option", { value: "Cash" }, "Cash"),
-        /* @__PURE__ */ React.createElement("option", { value: "Zelle" }, "Zelle"),
-        /* @__PURE__ */ React.createElement("option", { value: "Venmo" }, "Venmo"),
-        /* @__PURE__ */ React.createElement("option", { value: "Wire" }, "Wire"),
-        /* @__PURE__ */ React.createElement("option", { value: "Check" }, "Check"),
-        /* @__PURE__ */ React.createElement("option", { value: "Other" }, "Other")
-      )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, /* @__PURE__ */ React.createElement(
-        "input",
-        {
-          type: "date",
-          value: pay.date || "",
-          onChange: (e) => updatePayment(p.id, { date: e.target.value }),
-          className: "px-2 py-1 text-sm w-full",
-          style: { border: `1px solid ${palette.rule}`, borderRadius: 2 }
-        }
-      )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, /* @__PURE__ */ React.createElement(
-        TextInput,
-        {
-          value: pay.notes || "",
-          onChange: (v) => updatePayment(p.id, { notes: v })
-        }
-      )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-center" }, /* @__PURE__ */ React.createElement(Pill, { tone }, status)));
-    }))))), /* @__PURE__ */ React.createElement(Card, { title: "Per-round collection", dense: true }, /* @__PURE__ */ React.createElement("div", { className: "text-xs px-3 py-2", style: { color: palette.inkSoft } }, "$30 per player per round. Check the box once they've paid. Active = playing that round."), /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Player"), state.rounds.map((r) => /* @__PURE__ */ React.createElement(
-      "th",
-      {
-        key: r.id,
-        className: "px-2 py-2 font-medium text-center",
-        style: { minWidth: 90 }
-      },
-      "R",
-      r.number,
-      /* @__PURE__ */ React.createElement("div", { className: "text-xs font-normal", style: { color: palette.inkSoft } }, r.courseName.split(" ").slice(0, 2).join(" "))
-    )), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium", style: { width: 100 } }, "Owed"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium", style: { width: 100 } }, "Paid"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium", style: { width: 100 } }, "Bal"))), /* @__PURE__ */ React.createElement("tbody", null, state.players.map((p) => {
-      let owed = 0;
-      let paid = 0;
-      state.rounds.forEach((r) => {
-        const amt = perRoundAmount(r, p.id);
-        owed += amt;
-        if (r.participants[p.id]?.paid) paid += amt;
-      });
-      const bal = owed - paid;
-      return /* @__PURE__ */ React.createElement("tr", { key: p.id, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, p.name), state.rounds.map((r) => {
-        const part = r.participants[p.id] || {};
-        const amt = perRoundAmount(r, p.id);
-        return /* @__PURE__ */ React.createElement("td", { key: r.id, className: "px-2 py-1 text-center" }, !part.active ? /* @__PURE__ */ React.createElement("span", { style: { color: palette.inkSoft } }, "\u2014") : /* @__PURE__ */ React.createElement("label", { className: "inline-flex items-center gap-1 text-xs" }, /* @__PURE__ */ React.createElement(
-          "input",
-          {
-            type: "checkbox",
-            checked: !!part.paid,
-            onChange: (e) => updateRoundPaid(r.id, p.id, e.target.checked)
-          }
-        ), /* @__PURE__ */ React.createElement("span", { style: { color: part.paid ? palette.green : palette.inkSoft } }, fmt$(amt))));
-      }), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, fmt$(owed)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right", style: { color: paid > 0 ? palette.green : palette.inkSoft } }, fmt$(paid)), /* @__PURE__ */ React.createElement(
-        "td",
-        {
-          className: "px-3 py-2 text-right",
-          style: {
-            color: bal === 0 && owed > 0 ? palette.green : bal > 0 ? palette.alert : palette.inkSoft,
-            fontWeight: 600
-          }
-        },
-        fmt$(bal)
-      ));
-    }), /* @__PURE__ */ React.createElement("tr", { style: { background: "#FAFAF7", fontWeight: 600 } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, "Round totals"), state.rounds.map((r) => {
-      const rOwed = state.players.reduce((a, p) => a + perRoundAmount(r, p.id), 0);
-      const rPaid = state.players.reduce((a, p) => {
-        const amt = perRoundAmount(r, p.id);
-        return a + (r.participants[p.id]?.paid ? amt : 0);
-      }, 0);
-      return /* @__PURE__ */ React.createElement("td", { key: r.id, className: "px-2 py-2 text-center text-xs" }, fmt$(rPaid), " / ", fmt$(rOwed));
-    }), /* @__PURE__ */ React.createElement("td", { colSpan: 3 })))))), /* @__PURE__ */ React.createElement(Card, { title: "Final settlement \u2014 buy-in vs. winnings" }, /* @__PURE__ */ React.createElement("div", { className: "text-xs px-3 py-2", style: { color: palette.inkSoft } }, "Combines trip-level buy-in plus cumulative side-game results. Positive Final = you owe the player at end of trip; negative = player owes Fernando."), /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Player"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium" }, "Buy-in paid"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium" }, "Side-game net"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium" }, "Final"))), /* @__PURE__ */ React.createElement("tbody", null, state.players.map((p) => {
-      const pay = tripBuyIn.payments?.[p.id] || {};
-      const paidIn = Number(pay.paid || 0);
-      const sg = cumulativeNet[p.id] || 0;
-      const final = paidIn + sg;
-      return /* @__PURE__ */ React.createElement("tr", { key: p.id, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, p.name), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, fmt$(paidIn)), /* @__PURE__ */ React.createElement(
-        "td",
-        {
-          className: "px-3 py-2 text-right",
-          style: { color: sg > 0 ? palette.green : sg < 0 ? palette.alert : palette.inkSoft }
-        },
-        fmt$(sg)
-      ), /* @__PURE__ */ React.createElement(
-        "td",
-        {
-          className: "px-3 py-2 text-right",
-          style: { color: final > 0 ? palette.green : final < 0 ? palette.alert : palette.ink, fontWeight: 600 }
-        },
-        fmt$(final)
-      ));
-    }))))));
-  }
-  function RulesTab() {
-    return /* @__PURE__ */ React.createElement("div", { className: "space-y-6 max-w-3xl mx-auto" }, /* @__PURE__ */ React.createElement("div", { className: "pb-4", style: { borderBottom: `2px solid ${palette.gold}` } }, /* @__PURE__ */ React.createElement(
-      "div",
-      {
-        className: "text-[10px] uppercase mb-2",
-        style: {
-          fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
-          letterSpacing: "0.32em",
-          color: palette.gold
-        }
-      },
-      "Champs \xB7 Utah 2026 \xB7 Reglamento"
-    ), /* @__PURE__ */ React.createElement(
-      "h2",
-      {
-        className: "text-2xl md:text-3xl leading-tight",
-        style: {
-          fontFamily: "Georgia, 'Times New Roman', serif",
-          color: palette.greenDeep,
-          letterSpacing: "-0.01em",
-          fontWeight: 500
-        }
-      },
-      "Flights diarios ",
-      /* @__PURE__ */ React.createElement("em", { style: { color: palette.gold } }, "y"),
-      " reglas de desempate"
-    ), /* @__PURE__ */ React.createElement("p", { className: "text-sm mt-2 max-w-xl", style: { color: palette.inkSoft } }, "C\xF3mo se asignan los flights cada d\xEDa durante el torneo y c\xF3mo se resuelven los empates en Individual Net y Best Ball.")), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "flex items-baseline gap-3 mb-1" }, /* @__PURE__ */ React.createElement(
-      "span",
-      {
-        style: {
-          fontFamily: "Georgia, serif",
-          fontStyle: "italic",
-          color: palette.gold,
-          fontSize: 14,
-          letterSpacing: "0.04em"
-        }
-      },
-      "01"
-    ), /* @__PURE__ */ React.createElement(
-      "h3",
-      {
-        className: "text-xl md:text-2xl",
-        style: {
-          fontFamily: "Georgia, serif",
-          fontWeight: 500,
-          color: palette.greenDeep,
-          letterSpacing: "-0.01em"
-        }
-      },
-      "C\xF3mo se arman los flights cada d\xEDa"
-    )), /* @__PURE__ */ React.createElement("p", { className: "text-sm mb-4 max-w-xl", style: { color: palette.inkSoft } }, "El flight de un jugador puede cambiar de un d\xEDa al otro. Lo determina la composici\xF3n real del campo ese d\xEDa."), /* @__PURE__ */ React.createElement(
-      "div",
-      {
-        className: "p-5 mb-3",
-        style: {
-          background: palette.panel,
-          border: `1px solid ${palette.rule}`,
-          borderLeft: `3px solid ${palette.gold}`
-        }
-      },
-      /* @__PURE__ */ React.createElement(
-        "h4",
-        {
-          className: "text-base mb-2",
-          style: { fontFamily: "Georgia, serif", fontWeight: 500, color: palette.ink }
-        },
-        "Default por handicap index"
-      ),
-      /* @__PURE__ */ React.createElement("ul", { className: "text-sm space-y-2", style: { color: palette.ink } }, /* @__PURE__ */ React.createElement("li", { className: "flex gap-2" }, /* @__PURE__ */ React.createElement("span", { style: { color: palette.gold } }, "\u2726"), /* @__PURE__ */ React.createElement("span", null, /* @__PURE__ */ React.createElement("strong", null, "Flight A"), " \xB7 jugadores con \xEDndice ", /* @__PURE__ */ React.createElement("strong", null, "\u2264 12"))), /* @__PURE__ */ React.createElement("li", { className: "flex gap-2" }, /* @__PURE__ */ React.createElement("span", { style: { color: palette.gold } }, "\u2726"), /* @__PURE__ */ React.createElement("span", null, /* @__PURE__ */ React.createElement("strong", null, "Flight B"), " \xB7 jugadores con \xEDndice ", /* @__PURE__ */ React.createElement("strong", null, "\u2265 13"))), /* @__PURE__ */ React.createElement("li", { className: "flex gap-2" }, /* @__PURE__ */ React.createElement("span", { style: { color: palette.gold } }, "\u2726"), /* @__PURE__ */ React.createElement("span", null, "Los plus handicaps (\xEDndice negativo, ej.", " ", /* @__PURE__ */ React.createElement("span", { style: { fontFamily: "ui-monospace, Menlo, monospace" } }, "+1.8"), ") entran en Flight A")))
-    ), /* @__PURE__ */ React.createElement(
-      "div",
-      {
-        className: "p-5 mb-3",
-        style: { background: palette.panel, border: `1px solid ${palette.rule}` }
-      },
-      /* @__PURE__ */ React.createElement(
-        "h4",
-        {
-          className: "text-base mb-2",
-          style: { fontFamily: "Georgia, serif", fontWeight: 500, color: palette.ink }
-        },
-        "Reasignaci\xF3n diaria"
-      ),
-      /* @__PURE__ */ React.createElement("p", { className: "text-sm mb-2", style: { color: palette.ink } }, "Golf Pad recompone los flights cada d\xEDa seg\xFAn los jugadores confirmados de esa ronda. No todos juegan los cinco d\xEDas, as\xED que la composici\xF3n del campo cambia."),
-      /* @__PURE__ */ React.createElement("p", { className: "text-sm", style: { color: palette.ink } }, /* @__PURE__ */ React.createElement("strong", null, "El flight oficial de cada ronda es el que Golf Pad publica antes de la salida"), " \u2014 no el flight est\xE1tico por \xEDndice.")
-    ), /* @__PURE__ */ React.createElement(
-      "div",
-      {
-        className: "p-5",
-        style: { background: palette.panel, border: `1px solid ${palette.rule}` }
-      },
-      /* @__PURE__ */ React.createElement(
-        "h4",
-        {
-          className: "text-base mb-2",
-          style: { fontFamily: "Georgia, serif", fontWeight: 500, color: palette.ink }
-        },
-        "C\xF3mo se publica el lineup"
-      ),
-      /* @__PURE__ */ React.createElement("ul", { className: "text-sm space-y-2", style: { color: palette.ink } }, /* @__PURE__ */ React.createElement("li", { className: "flex gap-2" }, /* @__PURE__ */ React.createElement("span", { style: { color: palette.gold } }, "\u2726"), /* @__PURE__ */ React.createElement("span", null, "Golf Pad asigna flights cuando se confirman los jugadores del d\xEDa")), /* @__PURE__ */ React.createElement("li", { className: "flex gap-2" }, /* @__PURE__ */ React.createElement("span", { style: { color: palette.gold } }, "\u2726"), /* @__PURE__ */ React.createElement("span", null, "El administrador refleja esa asignaci\xF3n en el sistema")), /* @__PURE__ */ React.createElement("li", { className: "flex gap-2" }, /* @__PURE__ */ React.createElement("span", { style: { color: palette.gold } }, "\u2726"), /* @__PURE__ */ React.createElement("span", null, "Para consultar tu flight de la ronda: en este mismo portal ve a", " ", /* @__PURE__ */ React.createElement("strong", null, "Round"), " \u2192 selecciona la ronda del d\xEDa \u2192 tab", " ", /* @__PURE__ */ React.createElement("strong", null, "Course"), ". Abajo aparece la tabla de jugadores por flight con su course handicap calculado para ese tee.")))
-    ), /* @__PURE__ */ React.createElement(
-      "div",
-      {
-        className: "mt-5 pt-4",
-        style: {
-          borderTop: `1px solid ${palette.rule}`,
-          fontFamily: "Georgia, serif",
-          fontStyle: "italic",
-          fontSize: 17,
-          lineHeight: 1.5,
-          color: palette.greenDeep
-        }
-      },
-      /* @__PURE__ */ React.createElement("span", { style: { color: palette.gold, fontSize: 28, lineHeight: 0, verticalAlign: "-8px", marginRight: 4 } }, "\u201C"),
-      "Tu \xEDndice te asigna un flight por defecto, pero qui\xE9n juega hoy define los flights de hoy."
-    )), /* @__PURE__ */ React.createElement("div", { className: "pt-8" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-baseline gap-3 mb-1" }, /* @__PURE__ */ React.createElement(
-      "span",
-      {
-        style: {
-          fontFamily: "Georgia, serif",
-          fontStyle: "italic",
-          color: palette.gold,
-          fontSize: 14,
-          letterSpacing: "0.04em"
-        }
-      },
-      "02"
-    ), /* @__PURE__ */ React.createElement(
-      "h3",
-      {
-        className: "text-xl md:text-2xl",
-        style: {
-          fontFamily: "Georgia, serif",
-          fontWeight: 500,
-          color: palette.greenDeep,
-          letterSpacing: "-0.01em"
-        }
-      },
-      "Desempate \xB7 m\xE9todo USGA ",
-      /* @__PURE__ */ React.createElement("em", null, "count-back")
-    )), /* @__PURE__ */ React.createElement("p", { className: "text-sm mb-4 max-w-xl", style: { color: palette.inkSoft } }, "Aplica en Individual Net y Best Ball. Skins se resuelven solas con carryover hoyo a hoyo."), /* @__PURE__ */ React.createElement(
-      "div",
-      {
-        className: "p-5 mb-3",
-        style: { background: palette.panel, border: `1px solid ${palette.rule}` }
-      },
-      /* @__PURE__ */ React.createElement(
-        "h4",
-        {
-          className: "text-base mb-2",
-          style: { fontFamily: "Georgia, serif", fontWeight: 500, color: palette.ink }
-        },
-        "Cuando hay empate en el net total"
-      ),
-      /* @__PURE__ */ React.createElement("p", { className: "text-sm mb-3", style: { color: palette.ink } }, "Se comparan los jugadores (o equipos) en cuatro niveles sucesivos. El primer nivel que rompa el empate decide la posici\xF3n."),
-      /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: palette.bg, borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2", style: { width: 60 } }), /* @__PURE__ */ React.createElement(
-        "th",
-        {
-          className: "text-left px-3 py-2",
-          style: {
-            fontFamily: "ui-sans-serif",
-            fontSize: 11,
-            fontWeight: 600,
-            textTransform: "uppercase",
-            letterSpacing: "0.1em",
-            color: palette.inkSoft
-          }
-        },
-        "Segmento"
-      ), /* @__PURE__ */ React.createElement(
-        "th",
-        {
-          className: "text-left px-3 py-2",
-          style: {
-            fontFamily: "ui-sans-serif",
-            fontSize: 11,
-            fontWeight: 600,
-            textTransform: "uppercase",
-            letterSpacing: "0.1em",
-            color: palette.inkSoft
-          }
-        },
-        "Handicap aplicado"
-      ))), /* @__PURE__ */ React.createElement("tbody", null, [
-        { lvl: "1", seg: "\xDAltimos 9 hoyos", note: "Hoyos 10 \u2013 18", hcp: "\xBD \xD7 Course Hcp" },
-        { lvl: "2", seg: "\xDAltimos 6 hoyos", note: "Hoyos 13 \u2013 18", hcp: "\u2153 \xD7 Course Hcp" },
-        { lvl: "3", seg: "\xDAltimos 3 hoyos", note: "Hoyos 16 \u2013 18", hcp: "\u2159 \xD7 Course Hcp" },
-        { lvl: "4", seg: "Hoyo 18", note: "Solamente", hcp: "1\u204418 \xD7 Course Hcp" }
-      ].map((row) => /* @__PURE__ */ React.createElement("tr", { key: row.lvl, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-3 align-top" }, /* @__PURE__ */ React.createElement(
-        "span",
-        {
-          style: {
-            fontFamily: "Georgia, serif",
-            fontStyle: "italic",
-            color: palette.gold,
-            fontSize: 22,
-            lineHeight: 1
-          }
-        },
-        row.lvl
-      )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-3 align-top" }, /* @__PURE__ */ React.createElement("div", { style: { fontWeight: 600, color: palette.ink } }, row.seg), /* @__PURE__ */ React.createElement("div", { className: "text-xs mt-1", style: { color: palette.inkSoft } }, row.note)), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-3 align-top" }, /* @__PURE__ */ React.createElement(
-        "span",
-        {
-          style: {
-            fontFamily: "ui-monospace, Menlo, monospace",
-            background: palette.bg,
-            padding: "4px 8px",
-            fontSize: 12.5,
-            color: palette.greenDeep,
-            whiteSpace: "nowrap"
-          }
-        },
-        row.hcp
-      )))))),
-      /* @__PURE__ */ React.createElement(
+    return /* @__PURE__ */ React.createElement("div", { className: "space-y-3" }, state.rounds.map((r) => {
+      const activePlayers = [...state.players].filter((p) => r.participants[p.id]?.active).sort((a, b) => a.name.localeCompare(b.name));
+      const paidCount = activePlayers.filter((p) => r.participants[p.id]?.paid).length;
+      const allPaid = activePlayers.length > 0 && paidCount === activePlayers.length;
+      const isCollapsed = !!collapsed[r.id];
+      return /* @__PURE__ */ React.createElement(
         "div",
         {
-          className: "mt-4 p-4",
-          style: {
-            background: "#F5EFD7",
-            borderLeft: `3px solid ${palette.gold}`
-          }
+          key: r.id,
+          style: { border: `1px solid ${palette.rule}`, borderRadius: 2, background: palette.panel }
         },
         /* @__PURE__ */ React.createElement(
-          "div",
+          "button",
           {
-            className: "text-[10px] uppercase mb-2",
-            style: {
-              fontFamily: "ui-monospace, Menlo, monospace",
-              letterSpacing: "0.2em",
-              color: palette.gold
-            }
+            onClick: () => toggleCollapsed(r.id),
+            className: "w-full flex items-center gap-3 px-4 py-3 text-left",
+            style: { background: "transparent", cursor: "pointer" }
           },
-          "Ejemplo"
+          /* @__PURE__ */ React.createElement(
+            "span",
+            {
+              className: "text-xs",
+              style: { color: palette.inkSoft, fontFamily: "ui-monospace", minWidth: 16 }
+            },
+            isCollapsed ? "\u25B6" : "\u25BC"
+          ),
+          /* @__PURE__ */ React.createElement("span", { className: "font-medium text-sm", style: { color: palette.greenDeep } }, "R", r.number, " \xB7 ", r.courseName),
+          r.date && /* @__PURE__ */ React.createElement("span", { className: "text-xs", style: { color: palette.inkSoft } }, r.date),
+          /* @__PURE__ */ React.createElement("span", { className: "flex-1" }),
+          /* @__PURE__ */ React.createElement(
+            "span",
+            {
+              className: "text-xs font-medium px-2 py-0.5",
+              style: {
+                background: allPaid ? "#DDEBDF" : "#F4E9CD",
+                color: allPaid ? palette.green : palette.gold,
+                borderRadius: 2,
+                fontFamily: "ui-monospace"
+              }
+            },
+            paidCount,
+            "/",
+            activePlayers.length,
+            " pagados"
+          )
         ),
-        /* @__PURE__ */ React.createElement("p", { className: "text-sm mb-2", style: { color: palette.ink } }, "Dos jugadores del Flight A terminan con net 69. Comparamos sus \xFAltimos 9 hoyos:"),
-        /* @__PURE__ */ React.createElement(
-          "table",
-          {
-            className: "w-full text-sm mt-2",
-            style: { fontVariantNumeric: "tabular-nums", borderCollapse: "collapse" }
-          },
-          /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", null, /* @__PURE__ */ React.createElement(
-            "th",
+        !isCollapsed && (activePlayers.length === 0 ? /* @__PURE__ */ React.createElement("div", { className: "px-4 pb-4 text-sm", style: { color: palette.inkSoft, fontStyle: "italic" } }, "No hay jugadores activos \u2014 importa el Golf Pad list en Round \u2192 Participation.") : /* @__PURE__ */ React.createElement("div", { style: { borderTop: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm" }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-4 py-2 font-medium" }, "Jugador"), /* @__PURE__ */ React.createElement("th", { className: "text-center px-3 py-2 font-medium", style: { width: 80 } }, "Pag\xF3"), /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium", style: { width: 120 } }, "M\xE9todo"))), /* @__PURE__ */ React.createElement("tbody", null, activePlayers.map((p) => {
+          const part = r.participants[p.id] || {};
+          return /* @__PURE__ */ React.createElement(
+            "tr",
             {
-              className: "text-left px-2 py-1.5",
+              key: p.id,
               style: {
-                fontSize: 11,
-                fontWeight: 600,
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-                color: palette.greenDeep,
-                borderBottom: `1px solid rgba(184,134,46,0.3)`
+                borderBottom: `1px solid ${palette.rule}`,
+                background: part.paid ? "#F0F7F2" : "transparent"
               }
             },
-            "Jugador"
-          ), /* @__PURE__ */ React.createElement(
-            "th",
-            {
-              className: "text-right px-2 py-1.5",
-              style: {
-                fontSize: 11,
-                fontWeight: 600,
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-                color: palette.greenDeep,
-                borderBottom: `1px solid rgba(184,134,46,0.3)`
+            /* @__PURE__ */ React.createElement("td", { className: "px-4 py-2" }, /* @__PURE__ */ React.createElement("span", null, p.name), /* @__PURE__ */ React.createElement("span", { className: "ml-2 text-xs", style: { color: palette.inkSoft, fontFamily: "ui-monospace" } }, p.handicapIndex)),
+            /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-center" }, /* @__PURE__ */ React.createElement(
+              "input",
+              {
+                type: "checkbox",
+                checked: !!part.paid,
+                onChange: (e) => updateRoundParticipant(r.id, p.id, { paid: e.target.checked }),
+                disabled: r.locked,
+                style: { width: 18, height: 18, cursor: "pointer" }
               }
-            },
-            "Net"
-          ), /* @__PURE__ */ React.createElement(
-            "th",
-            {
-              className: "text-right px-2 py-1.5",
-              style: {
-                fontSize: 11,
-                fontWeight: 600,
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-                color: palette.greenDeep,
-                borderBottom: `1px solid rgba(184,134,46,0.3)`
-              }
-            },
-            "Net \xFAltimos 9"
-          ), /* @__PURE__ */ React.createElement(
-            "th",
-            {
-              className: "text-left px-2 py-1.5",
-              style: {
-                fontSize: 11,
-                fontWeight: 600,
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-                color: palette.greenDeep,
-                borderBottom: `1px solid rgba(184,134,46,0.3)`
-              }
-            },
-            "Resultado"
-          ))),
-          /* @__PURE__ */ React.createElement("tbody", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "rgba(14,92,58,0.06)", fontWeight: 600 } }, /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1.5", style: { borderBottom: `1px solid rgba(184,134,46,0.2)` } }, "Francisco Amauris"), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1.5 text-right", style: { borderBottom: `1px solid rgba(184,134,46,0.2)` } }, "69"), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1.5 text-right", style: { borderBottom: `1px solid rgba(184,134,46,0.2)` } }, "34.5"), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1.5", style: { borderBottom: `1px solid rgba(184,134,46,0.2)` } }, "1\xB0")), /* @__PURE__ */ React.createElement("tr", null, /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1.5" }, "Jay Gonzalez"), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1.5 text-right" }, "69"), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1.5 text-right" }, "35.5"), /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1.5" }, "2\xB0")))
-        ),
-        /* @__PURE__ */ React.createElement("p", { className: "text-sm mt-3", style: { color: palette.ink } }, "Francisco gana 1\xB0 lugar con menor net en los \xFAltimos nueve. No se necesita bajar al nivel 2.")
-      )
-    ), /* @__PURE__ */ React.createElement(
-      "div",
-      {
-        className: "p-5",
-        style: {
-          background: palette.panel,
-          border: `1px solid ${palette.rule}`,
-          borderLeft: `3px solid ${palette.gold}`
-        }
-      },
-      /* @__PURE__ */ React.createElement(
-        "h4",
-        {
-          className: "text-base mb-2",
-          style: { fontFamily: "Georgia, serif", fontWeight: 500, color: palette.ink }
-        },
-        "Posiciones \xFAnicas"
-      ),
-      /* @__PURE__ */ React.createElement("p", { className: "text-sm mb-2", style: { color: palette.ink } }, "El count-back garantiza que cada posici\xF3n tenga un solo ganador.", " ", /* @__PURE__ */ React.createElement("strong", null, "No hay empates compartidos en el podio"), ", ni reparto de premios entre empatados, ni medallas dobles."),
-      /* @__PURE__ */ React.createElement("p", { className: "text-sm", style: { color: palette.ink } }, "Si despu\xE9s de los cuatro niveles dos jugadores siguen exactamente iguales \u2014 escenario virtualmente imposible \u2014 el sistema mantiene el orden original sin pooling.")
-    ), /* @__PURE__ */ React.createElement(
-      "div",
-      {
-        className: "mt-5 pt-4",
-        style: {
-          borderTop: `1px solid ${palette.rule}`,
-          fontFamily: "Georgia, serif",
-          fontStyle: "italic",
-          fontSize: 17,
-          lineHeight: 1.5,
-          color: palette.greenDeep
-        }
-      },
-      /* @__PURE__ */ React.createElement("span", { style: { color: palette.gold, fontSize: 28, lineHeight: 0, verticalAlign: "-8px", marginRight: 4 } }, "\u201C"),
-      "El que juegue mejor en la parte final del campo gana el desempate."
-    )));
+            )),
+            /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, /* @__PURE__ */ React.createElement(
+              "select",
+              {
+                value: part.payMethod || "Cash",
+                onChange: (e) => updateRoundParticipant(r.id, p.id, { payMethod: e.target.value }),
+                disabled: r.locked,
+                className: "px-2 py-1 text-sm",
+                style: { border: `1px solid ${palette.rule}`, borderRadius: 2, background: "#fff", minWidth: 90 }
+              },
+              /* @__PURE__ */ React.createElement("option", { value: "Cash" }, "Cash"),
+              /* @__PURE__ */ React.createElement("option", { value: "Zelle" }, "Zelle"),
+              /* @__PURE__ */ React.createElement("option", { value: "BSC" }, "BSC")
+            ))
+          );
+        })))))
+      );
+    }));
   }
   function App() {
     const audit = useMemo(() => getAuditConfig(), []);
@@ -2937,7 +2636,7 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
         cancelled = true;
       };
     }, [audit.auditMode, audit.statePath]);
-    const visibleTabs = audit.auditMode ? ["Round", "Results", "Payouts", "Reglas"] : ["Setup", "Round", "Results", "Payouts", "Reglas", "Payments", "Data"];
+    const visibleTabs = audit.auditMode ? ["Round", "Results", "Ledger"] : ["Setup", "Round", "Results", "Ledger", "Payments", "Data"];
     useEffect(() => {
       if (audit.auditMode && !visibleTabs.includes(tab)) setTab("Results");
     }, [audit.auditMode, tab]);
@@ -2972,7 +2671,22 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
             style: { color: palette.greenDeep, letterSpacing: "-0.01em" }
           },
           state.tournament.name
-        )), /* @__PURE__ */ React.createElement("div", { className: "flex-1" }), /* @__PURE__ */ React.createElement("nav", { className: "flex flex-wrap gap-1" }, visibleTabs.map((t) => /* @__PURE__ */ React.createElement(
+        )), /* @__PURE__ */ React.createElement("div", { className: "flex-1" }), !audit.auditMode && /* @__PURE__ */ React.createElement(
+          "button",
+          {
+            onClick: () => {
+              const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "state.json";
+              a.click();
+              URL.revokeObjectURL(url);
+            },
+            style: { padding: "6px 14px", background: palette.gold, color: "#fff", border: "none", borderRadius: 2, fontWeight: 700, fontSize: 12, cursor: "pointer", letterSpacing: "0.03em" }
+          },
+          "\u2191 Publish"
+        ), /* @__PURE__ */ React.createElement("nav", { className: "flex flex-wrap gap-1" }, visibleTabs.map((t) => /* @__PURE__ */ React.createElement(
           "button",
           {
             key: t,
@@ -3032,18 +2746,16 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
           state,
           setState,
           currentRoundId,
-          setCurrentRoundId,
-          auditMode: audit.auditMode
+          setCurrentRoundId
         }
       ), tab === "Results" && /* @__PURE__ */ React.createElement(
         ResultsTab,
         {
           state,
           currentRoundId,
-          setCurrentRoundId,
-          auditMode: audit.auditMode
+          setCurrentRoundId
         }
-      ), tab === "Payouts" && /* @__PURE__ */ React.createElement(LedgerTab, { state, auditMode: audit.auditMode }), tab === "Payments" && !audit.auditMode && /* @__PURE__ */ React.createElement(PaymentsTab, { state, setState }), tab === "Reglas" && /* @__PURE__ */ React.createElement(RulesTab, null), tab === "Data" && !audit.auditMode && /* @__PURE__ */ React.createElement(DataTab, { state, setState })),
+      ), tab === "Ledger" && /* @__PURE__ */ React.createElement(LedgerTab, { state }), tab === "Payments" && !audit.auditMode && /* @__PURE__ */ React.createElement(PaymentsTab, { state, setState }), tab === "Data" && !audit.auditMode && /* @__PURE__ */ React.createElement(DataTab, { state, setState })),
       /* @__PURE__ */ React.createElement(
         "footer",
         {
@@ -3054,13 +2766,10 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
       )
     );
   }
-  window.__renderApp = () => {
-    const root = ReactDOM.createRoot(document.getElementById("root"));
-    root.render(React.createElement(App));
-  };
+  window.__renderApp = () => ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
 })();
 
 window.__renderApp();
-</script>
+  </script>
 </body>
 </html>
