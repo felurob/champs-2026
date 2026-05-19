@@ -51,17 +51,21 @@
     return player?.category;
   }
   function chForPlayer(player, round) {
+    const chOv = round?.participants?.[player?.id]?.chOverride;
+    if (chOv != null && chOv !== "" && isFinite(Number(chOv))) return Number(chOv);
     const flight = flightForRound(round, player);
     const teeOverride = round?.participants?.[player?.id]?.teeOverride;
     const tee = teeForPlayer(round, flight, teeOverride);
     return courseHandicap(player?.handicapIndex, tee.slopeRating, tee.courseRating, sumPars(round.pars), tee.ratingPar);
   }
   function chAndTeeForPlayer(player, round) {
+    const chOv = round?.participants?.[player?.id]?.chOverride;
+    const chIsManual = chOv != null && chOv !== "" && isFinite(Number(chOv));
     const flight = flightForRound(round, player);
     const teeOverride = round?.participants?.[player?.id]?.teeOverride;
     const tee = teeForPlayer(round, flight, teeOverride);
-    const ch = courseHandicap(player?.handicapIndex, tee.slopeRating, tee.courseRating, sumPars(round.pars), tee.ratingPar);
-    return { ch, teeName: tee.name || tee._key || flight, teeKey: tee._key || flight, isOverride: !!teeOverride && teeOverride !== flight };
+    const ch = chIsManual ? Number(chOv) : courseHandicap(player?.handicapIndex, tee.slopeRating, tee.courseRating, sumPars(round.pars), tee.ratingPar);
+    return { ch, teeName: tee.name || tee._key || flight, teeKey: tee._key || flight, isOverride: !!teeOverride && teeOverride !== flight, chIsManual };
   }
   const skinsHcp = (h) => clamp(Math.round(0.75 * Number(h)), -18, 18);
   function strokesOnHole(hcp, holeStrokeIndex) {
@@ -514,9 +518,9 @@
         pars: [4, 3, 5, 4, 3, 4, 5, 4, 4, 3, 3, 4, 4, 4, 4, 5, 4, 5],
         holeIndexes: [11, 13, 7, 1, 15, 5, 9, 17, 3, 16, 6, 18, 14, 12, 8, 2, 10, 4],
         teesByCategory: {
-          A: { name: "Blue", slopeRating: 127, courseRating: 71.1, ratingPar: 73 },
-          B: { name: "White", slopeRating: 120, courseRating: 69, ratingPar: 73 },
-          C: { name: "White C", slopeRating: 120, courseRating: 69, ratingPar: 73 }
+          A: { name: "Blue", slopeRating: 127, courseRating: 71.1 },
+          B: { name: "White", slopeRating: 120, courseRating: 69 },
+          C: { name: "White C", slopeRating: 120, courseRating: 69 }
         }
       },
       {
@@ -2136,11 +2140,11 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
           e.target.value = "";
         }
       }
-    )), hasAnyScore && /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(CopyWhatsAppBtn, { round, results: inlineResults, players: state.players }), /* @__PURE__ */ React.createElement(ExportRoundCsvBtn, { round, results: inlineResults, players: state.players })), /* @__PURE__ */ React.createElement("span", { className: "text-xs", style: { color: palette.inkSoft } }, auditMode ? "Scores en tiempo real \u2014 refrescar para ver los \xFAltimos datos." : /* @__PURE__ */ React.createElement(React.Fragment, null, "Accepts Golf Pad export (", /* @__PURE__ */ React.createElement("code", null, '"Team","Hole#1"\u2026"Hole#18","Net"'), ") or simple ", /* @__PURE__ */ React.createElement("code", null, "Player,1,2,\u2026,18"), ". Names match case-insensitively against the roster.")))), /* @__PURE__ */ React.createElement(Card, { dense: true }, /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "text-sm", style: { fontVariantNumeric: "tabular-nums", minWidth: 900 } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-2 py-2 font-medium sticky left-0 z-10", style: { background: "#F7F5F0", minWidth: 160 } }, "Player"), /* @__PURE__ */ React.createElement("th", { className: "px-1 py-2 font-medium text-xs", style: { color: palette.inkSoft, minWidth: 72 } }, "Base"), /* @__PURE__ */ React.createElement("th", { className: "px-1 py-2 font-medium text-xs", style: { color: palette.inkSoft } }, "CH"), Array.from({ length: 18 }, (_, i) => /* @__PURE__ */ React.createElement("th", { key: i, className: "px-1 py-2 font-medium text-center text-xs" }, i + 1)), /* @__PURE__ */ React.createElement("th", { className: "px-2 py-2 font-medium text-center" }, "Gross"), /* @__PURE__ */ React.createElement("th", { className: "px-2 py-2 font-medium text-center" }, "Net"))), /* @__PURE__ */ React.createElement("tbody", null, activePlayers.map((p) => {
+    )), hasAnyScore && /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(CopyWhatsAppBtn, { round, results: inlineResults, players: state.players }), /* @__PURE__ */ React.createElement(ExportRoundCsvBtn, { round, results: inlineResults, players: state.players })), /* @__PURE__ */ React.createElement("span", { className: "text-xs", style: { color: palette.inkSoft } }, auditMode ? "Scores en tiempo real \u2014 refrescar para ver los \xFAltimos datos." : /* @__PURE__ */ React.createElement(React.Fragment, null, "Accepts Golf Pad export (", /* @__PURE__ */ React.createElement("code", null, '"Team","Hole#1"\u2026"Hole#18","Net"'), ") or simple ", /* @__PURE__ */ React.createElement("code", null, "Player,1,2,\u2026,18"), ". Names match case-insensitively against the roster.")))), /* @__PURE__ */ React.createElement(Card, { dense: true }, /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "text-sm", style: { fontVariantNumeric: "tabular-nums", minWidth: 900 } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-2 py-2 font-medium sticky left-0 z-10", style: { background: "#F7F5F0", minWidth: 160 } }, "Player"), /* @__PURE__ */ React.createElement("th", { className: "px-1 py-2 font-medium text-xs", style: { color: palette.inkSoft, minWidth: 72 } }, "Base"), /* @__PURE__ */ React.createElement("th", { className: "px-1 py-2 font-medium text-xs", style: { color: palette.inkSoft } }, "CH"), !auditMode && /* @__PURE__ */ React.createElement("th", { className: "px-1 py-2 font-medium text-xs", style: { color: palette.gold } }, "CH\u270E"), Array.from({ length: 18 }, (_, i) => /* @__PURE__ */ React.createElement("th", { key: i, className: "px-1 py-2 font-medium text-center text-xs" }, i + 1)), /* @__PURE__ */ React.createElement("th", { className: "px-2 py-2 font-medium text-center" }, "Gross"), /* @__PURE__ */ React.createElement("th", { className: "px-2 py-2 font-medium text-center" }, "Net"))), /* @__PURE__ */ React.createElement("tbody", null, activePlayers.map((p) => {
       const sc = round.scores[p.id] || Array(18).fill("");
       const filled = sc.filter((s) => s !== "" && s != null).length;
       const grossTotal = filled === 18 ? sc.reduce((a, b) => a + Number(b), 0) : null;
-      const { ch, teeName, teeKey, isOverride } = chAndTeeForPlayer(p, round);
+      const { ch, teeName, teeKey, isOverride, chIsManual } = chAndTeeForPlayer(p, round);
       const netTotal = grossTotal != null ? grossTotal - ch : null;
       const teeOptions = Object.keys(round.teesByCategory || {});
       const setTeeOverride = (val) => {
@@ -2169,7 +2173,21 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
           }
         },
         teeOptions.map((k) => /* @__PURE__ */ React.createElement("option", { key: k, value: k }, round.teesByCategory[k]?.name || k))
-      )), /* @__PURE__ */ React.createElement("td", { className: "px-1 py-1 text-center text-xs", style: { color: palette.inkSoft } }, ch), Array.from({ length: 18 }, (_, i) => /* @__PURE__ */ React.createElement("td", { key: i, className: "px-0.5 py-0.5" }, /* @__PURE__ */ React.createElement(
+      )), /* @__PURE__ */ React.createElement("td", { className: "px-1 py-1 text-center text-xs", style: { color: chIsManual ? palette.gold : palette.inkSoft, fontWeight: chIsManual ? 700 : 400 } }, ch), !auditMode && /* @__PURE__ */ React.createElement("td", { className: "px-1 py-1 text-center" }, /* @__PURE__ */ React.createElement(
+        "input",
+        {
+          type: "number",
+          value: round.participants[p.id]?.chOverride ?? "",
+          onChange: (e) => {
+            const val = e.target.value;
+            const newParticipants = { ...round.participants, [p.id]: { ...round.participants[p.id], chOverride: val === "" ? void 0 : Number(val) } };
+            updateRound({ participants: newParticipants });
+          },
+          disabled: round.locked,
+          placeholder: "auto",
+          style: { width: 52, padding: "1px 4px", border: `1px solid ${palette.gold}`, borderRadius: 2, fontSize: 11, textAlign: "center", background: round.participants[p.id]?.chOverride != null ? "#FFF3D0" : "#fff" }
+        }
+      )), Array.from({ length: 18 }, (_, i) => /* @__PURE__ */ React.createElement("td", { key: i, className: "px-0.5 py-0.5" }, /* @__PURE__ */ React.createElement(
         "input",
         {
           type: "number",
