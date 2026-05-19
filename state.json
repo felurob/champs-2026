@@ -775,7 +775,8 @@
           "inSkins": true,
           "inIndividualNet": true,
           "inBestBall": true,
-          "flight": "A"
+          "flight": "A",
+          "chOverride": 5
         },
         "p29": {
           "paid": false,
@@ -804,7 +805,8 @@
           "inSkins": true,
           "inIndividualNet": true,
           "inBestBall": true,
-          "flight": "A"
+          "flight": "A",
+          "chOverride": 7
         },
         "p33": {
           "paid": true,
@@ -1532,9 +1534,14 @@
           "courseRating": 72.3
         },
         "B": {
-          "name": "Silver/Copper combo",
-          "slopeRating": 120,
-          "courseRating": 69.3
+          "name": "Silver",
+          "slopeRating": 127,
+          "courseRating": 70.1
+        },
+        "C": {
+          "name": "Silver",
+          "slopeRating": 127,
+          "courseRating": 70.1
         }
       },
       "holeIndexes": [
@@ -1583,11 +1590,12 @@
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "A"
         },
         "p2": {
           "paid": false,
-          "active": true,
+          "active": false,
           "inSkins": true,
           "inIndividualNet": true,
           "inBestBall": true
@@ -1597,11 +1605,12 @@
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "A"
         },
         "p4": {
           "paid": false,
-          "active": true,
+          "active": false,
           "inSkins": true,
           "inIndividualNet": true,
           "inBestBall": true
@@ -1611,25 +1620,28 @@
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "A"
         },
         "p6": {
           "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "B"
         },
         "p7": {
           "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "C"
         },
         "p8": {
           "paid": false,
-          "active": true,
+          "active": false,
           "inSkins": true,
           "inIndividualNet": true,
           "inBestBall": true
@@ -1639,11 +1651,12 @@
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "A"
         },
         "p10": {
           "paid": false,
-          "active": true,
+          "active": false,
           "inSkins": true,
           "inIndividualNet": true,
           "inBestBall": true
@@ -1653,35 +1666,40 @@
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "C"
         },
         "p12": {
           "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "A"
         },
         "p13": {
           "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "B"
         },
         "p14": {
           "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "C"
         },
         "p15": {
           "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "B"
         },
         "p16": {
           "paid": true,
@@ -1689,46 +1707,49 @@
           "inSkins": true,
           "inIndividualNet": true,
           "inBestBall": true,
-          "payMethod": "Zelle"
+          "payMethod": "Zelle",
+          "flight": "C"
         },
         "p17": {
           "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "C"
         },
         "p18": {
           "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "B"
         },
         "p19": {
           "paid": false,
-          "active": true,
+          "active": false,
           "inSkins": true,
           "inIndividualNet": true,
           "inBestBall": true
         },
         "p20": {
           "paid": false,
-          "active": true,
+          "active": false,
           "inSkins": true,
           "inIndividualNet": true,
           "inBestBall": true
         },
         "p21": {
           "paid": false,
-          "active": true,
+          "active": false,
           "inSkins": true,
           "inIndividualNet": true,
           "inBestBall": true
         },
         "p22": {
           "paid": false,
-          "active": true,
+          "active": false,
           "inSkins": true,
           "inIndividualNet": true,
           "inBestBall": true
@@ -1738,60 +1759,66 @@
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "B"
         },
         "p24": {
           "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "C"
         },
         "p25": {
           "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "B"
         },
         "p26": {
           "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "A"
         },
         "p27": {
           "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "C"
         },
         "p28": {
           "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "A"
         },
         "p29": {
           "paid": false,
-          "active": true,
+          "active": false,
           "inSkins": true,
           "inIndividualNet": true,
           "inBestBall": true
         },
         "p30": {
           "paid": false,
-          "active": true,
+          "active": false,
           "inSkins": true,
           "inIndividualNet": true,
           "inBestBall": true
         },
         "p31": {
           "paid": false,
-          "active": true,
+          "active": false,
           "inSkins": true,
           "inIndividualNet": true,
           "inBestBall": true
@@ -1801,26 +1828,39 @@
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "A"
         },
         "p33": {
           "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "B"
         },
         "p34": {
           "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "C"
         }
       },
       "teams": [],
       "draftLog": [],
-      "flightConfig": null,
+      "flightConfig": {
+        "flights": [
+          "A",
+          "B",
+          "C"
+        ],
+        "cutoffs": [
+          12.1,
+          18.3
+        ]
+      },
       "scores": {},
       "locked": false
     },
