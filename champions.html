@@ -15,25 +15,23 @@
   const { useState, useMemo, useRef, useEffect } = React;
   const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
   const categoryFromIndex = (h) => Number(h) <= 12 ? "A" : "B";
-  function courseHandicap(index, slopeRating, courseRating, coursePar) {
+  function courseHandicap(index, slopeRating, courseRating, coursePar, ratingPar) {
     const idx = Number(index);
     if (!isFinite(idx)) return 0;
     const slope = Number(slopeRating) > 0 ? Number(slopeRating) : 113;
-    const base = Math.round(idx * slope / 113);
     const cr = Number(courseRating);
-    const par = Number(coursePar);
-    if (!isFinite(cr) || !isFinite(par)) return base;
-    return base + Math.round(cr - par);
+    const par = Number(ratingPar ?? coursePar);
+    if (!isFinite(cr) || !isFinite(par)) return Math.round(idx * slope / 113);
+    return Math.round(idx * slope / 113 + (cr - par));
   }
   const sumPars = (pars) => Array.isArray(pars) ? pars.reduce((a, b) => a + (Number(b) || 0), 0) : 0;
-  function teeForPlayer(round, category) {
-    const t = round.teesByCategory?.[category];
-    if (t && (t.slopeRating != null || t.courseRating != null)) return t;
-    return {
-      name: "",
-      slopeRating: round.slopeRating ?? 113,
-      courseRating: round.courseRating ?? null
-    };
+  function teeForPlayer(round, category, teeOverride) {
+    const key = teeOverride || category;
+    const t = round.teesByCategory?.[key];
+    if (t && (t.slopeRating != null || t.courseRating != null)) return { ...t, _key: key };
+    const t2 = round.teesByCategory?.[category];
+    if (t2 && (t2.slopeRating != null || t2.courseRating != null)) return { ...t2, _key: category };
+    return { name: "", slopeRating: round.slopeRating ?? 113, courseRating: round.courseRating ?? null, _key: category };
   }
   function roundFlights(round) {
     return round?.flightConfig?.flights || ["A", "B"];
@@ -53,13 +51,17 @@
     return player?.category;
   }
   function chForPlayer(player, round) {
-    const tee = teeForPlayer(round, flightForRound(round, player));
-    return courseHandicap(
-      player?.handicapIndex,
-      tee.slopeRating,
-      tee.courseRating,
-      sumPars(round.pars)
-    );
+    const flight = flightForRound(round, player);
+    const teeOverride = round?.participants?.[player?.id]?.teeOverride;
+    const tee = teeForPlayer(round, flight, teeOverride);
+    return courseHandicap(player?.handicapIndex, tee.slopeRating, tee.courseRating, sumPars(round.pars), tee.ratingPar);
+  }
+  function chAndTeeForPlayer(player, round) {
+    const flight = flightForRound(round, player);
+    const teeOverride = round?.participants?.[player?.id]?.teeOverride;
+    const tee = teeForPlayer(round, flight, teeOverride);
+    const ch = courseHandicap(player?.handicapIndex, tee.slopeRating, tee.courseRating, sumPars(round.pars), tee.ratingPar);
+    return { ch, teeName: tee.name || tee._key || flight, teeKey: tee._key || flight, isOverride: !!teeOverride && teeOverride !== flight };
   }
   const skinsHcp = (h) => clamp(Math.round(0.75 * Number(h)), -18, 18);
   function strokesOnHole(hcp, holeStrokeIndex) {
@@ -465,32 +467,32 @@
   }
   function makeSeed() {
     const players = [
-      { id: "p1", name: "Jose Said Mella Barjan", handicapIndex: 7.7, notes: "" },
+      { id: "p1", name: "Jose Said Mella", handicapIndex: 7.7, notes: "" },
       { id: "p2", name: "Ricardo Luis Mateo", handicapIndex: 15.6, notes: "" },
-      { id: "p3", name: "Felix Olivo", handicapIndex: 12, notes: "" },
+      { id: "p3", name: "Felix Olivo", handicapIndex: 12.1, notes: "" },
       { id: "p4", name: "Jay Gonzalez", handicapIndex: 4.3, notes: "" },
-      { id: "p5", name: "Juan Carlos Pichardo", handicapIndex: 6.4, notes: "" },
-      { id: "p6", name: "Jhonnatan Liriano", handicapIndex: 13.6, notes: "" },
-      { id: "p7", name: "Ian Toro", handicapIndex: 20, notes: "" },
+      { id: "p5", name: "Juan Carlos Pichardo", handicapIndex: 6.9, notes: "" },
+      { id: "p6", name: "Jhonnatan Liriano", handicapIndex: 12.9, notes: "" },
+      { id: "p7", name: "Ian Toro", handicapIndex: 19.9, notes: "" },
       { id: "p8", name: "Olived Gonzalez", handicapIndex: 8, notes: "" },
-      { id: "p9", name: "Renato Liriano", handicapIndex: 9.2, notes: "" },
+      { id: "p9", name: "Renato Liriano", handicapIndex: 8.8, notes: "" },
       { id: "p10", name: "Billy Wilson Santos Calderon", handicapIndex: 10.4, notes: "" },
       { id: "p11", name: "Priamo Lopez", handicapIndex: 18.5, notes: "" },
       { id: "p12", name: "Oswaldo Rodriguez", handicapIndex: 9.3, notes: "" },
       { id: "p13", name: "Joan Jim\xE9nez", handicapIndex: 18.3, notes: "" },
-      { id: "p14", name: "Ernesto Jose Julian", handicapIndex: 25.6, notes: "" },
+      { id: "p14", name: "Ernesto Julian", handicapIndex: 25.6, notes: "" },
       { id: "p15", name: "Raymundo Reyes", handicapIndex: 14.7, notes: "" },
-      { id: "p16", name: "Jose Luis Castillo L\xF3pez", handicapIndex: 27, notes: "" },
+      { id: "p16", name: "Jose Luis Castillo", handicapIndex: 27, notes: "" },
       { id: "p17", name: "Cesar Rojas", handicapIndex: 28, notes: "" },
       { id: "p18", name: "Marx Toro", handicapIndex: 16.7, notes: "" },
       { id: "p19", name: "Yovanny Marte", handicapIndex: 11.2, notes: "" },
       { id: "p20", name: "Francisco Amauris Martinez", handicapIndex: 4.7, notes: "" },
       { id: "p21", name: "Rafael Zorrilla (Pichu)", handicapIndex: 9, notes: "" },
       { id: "p22", name: "Edgar Alma", handicapIndex: -1.8, notes: "Plus handicap" },
-      { id: "p23", name: "Ram\xF3n Villanueva", handicapIndex: 12.9, notes: "" },
+      { id: "p23", name: "Ram\xF3n Villanueva", handicapIndex: 13, notes: "" },
       { id: "p24", name: "Tom Nu\xF1ez", handicapIndex: 25.9, notes: "" },
-      { id: "p25", name: "Elcris Matias", handicapIndex: 16, notes: "" },
-      { id: "p26", name: "Magin Ferreiro", handicapIndex: 11.8, notes: "" },
+      { id: "p25", name: "Elcris Matias", handicapIndex: 14.7, notes: "" },
+      { id: "p26", name: "Magin Ferreiro", handicapIndex: 11, notes: "" },
       { id: "p27", name: "Rafael Rubiera", handicapIndex: 19.8, notes: "" },
       { id: "p28", name: "Fernando Rodriguez", handicapIndex: 5.2, notes: "" },
       { id: "p29", name: "Roberto Rodr\xEDguez", handicapIndex: 9.6, notes: "" },
@@ -512,8 +514,9 @@
         pars: [4, 3, 5, 4, 3, 4, 5, 4, 4, 3, 3, 4, 4, 4, 4, 5, 4, 5],
         holeIndexes: [11, 13, 7, 1, 15, 5, 9, 17, 3, 16, 6, 18, 14, 12, 8, 2, 10, 4],
         teesByCategory: {
-          A: { name: "Blue", slopeRating: 122, courseRating: 70.3 },
-          B: { name: "White", slopeRating: 117, courseRating: 68.1 }
+          A: { name: "Blue", slopeRating: 127, courseRating: 71.1, ratingPar: 73 },
+          B: { name: "White", slopeRating: 120, courseRating: 69, ratingPar: 73 },
+          C: { name: "White C", slopeRating: 120, courseRating: 69, ratingPar: 73 }
         }
       },
       {
@@ -1562,7 +1565,15 @@ ${unmatched.length} nombre(s) sin match ser\xE1n ignorados.` : "")
             style: { border: `1px solid ${palette.rule}`, borderRadius: 2, background: "#fff" }
           },
           coursePar || "\u2014"
-        )))
+        )), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-xs uppercase tracking-wider", title: "Override the par used in CH formula (leave blank to use course par). Useful when Golf Pad rates the course with a different par.", style: { color: palette.gold, cursor: "help" } }, "Rating Par \u24D8"), /* @__PURE__ */ React.createElement("div", { className: "mt-1" }, /* @__PURE__ */ React.createElement(
+          NumberInput,
+          {
+            value: t.ratingPar ?? "",
+            onChange: (v) => setT({ ratingPar: v === "" ? null : Number(v) }),
+            step: 1,
+            disabled: round.locked
+          }
+        ))))
       );
     })), /* @__PURE__ */ React.createElement(
       "div",
@@ -2125,13 +2136,40 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
           e.target.value = "";
         }
       }
-    )), hasAnyScore && /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(CopyWhatsAppBtn, { round, results: inlineResults, players: state.players }), /* @__PURE__ */ React.createElement(ExportRoundCsvBtn, { round, results: inlineResults, players: state.players })), /* @__PURE__ */ React.createElement("span", { className: "text-xs", style: { color: palette.inkSoft } }, auditMode ? "Scores en tiempo real \u2014 refrescar para ver los \xFAltimos datos." : /* @__PURE__ */ React.createElement(React.Fragment, null, "Accepts Golf Pad export (", /* @__PURE__ */ React.createElement("code", null, '"Team","Hole#1"\u2026"Hole#18","Net"'), ") or simple ", /* @__PURE__ */ React.createElement("code", null, "Player,1,2,\u2026,18"), ". Names match case-insensitively against the roster.")))), /* @__PURE__ */ React.createElement(Card, { dense: true }, /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "text-sm", style: { fontVariantNumeric: "tabular-nums", minWidth: 900 } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-2 py-2 font-medium sticky left-0 z-10", style: { background: "#F7F5F0", minWidth: 160 } }, "Player"), /* @__PURE__ */ React.createElement("th", { className: "px-1 py-2 font-medium text-xs", style: { color: palette.inkSoft } }, "CH"), Array.from({ length: 18 }, (_, i) => /* @__PURE__ */ React.createElement("th", { key: i, className: "px-1 py-2 font-medium text-center text-xs" }, i + 1)), /* @__PURE__ */ React.createElement("th", { className: "px-2 py-2 font-medium text-center" }, "Gross"), /* @__PURE__ */ React.createElement("th", { className: "px-2 py-2 font-medium text-center" }, "Net"))), /* @__PURE__ */ React.createElement("tbody", null, activePlayers.map((p) => {
+    )), hasAnyScore && /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(CopyWhatsAppBtn, { round, results: inlineResults, players: state.players }), /* @__PURE__ */ React.createElement(ExportRoundCsvBtn, { round, results: inlineResults, players: state.players })), /* @__PURE__ */ React.createElement("span", { className: "text-xs", style: { color: palette.inkSoft } }, auditMode ? "Scores en tiempo real \u2014 refrescar para ver los \xFAltimos datos." : /* @__PURE__ */ React.createElement(React.Fragment, null, "Accepts Golf Pad export (", /* @__PURE__ */ React.createElement("code", null, '"Team","Hole#1"\u2026"Hole#18","Net"'), ") or simple ", /* @__PURE__ */ React.createElement("code", null, "Player,1,2,\u2026,18"), ". Names match case-insensitively against the roster.")))), /* @__PURE__ */ React.createElement(Card, { dense: true }, /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "text-sm", style: { fontVariantNumeric: "tabular-nums", minWidth: 900 } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-2 py-2 font-medium sticky left-0 z-10", style: { background: "#F7F5F0", minWidth: 160 } }, "Player"), /* @__PURE__ */ React.createElement("th", { className: "px-1 py-2 font-medium text-xs", style: { color: palette.inkSoft, minWidth: 72 } }, "Base"), /* @__PURE__ */ React.createElement("th", { className: "px-1 py-2 font-medium text-xs", style: { color: palette.inkSoft } }, "CH"), Array.from({ length: 18 }, (_, i) => /* @__PURE__ */ React.createElement("th", { key: i, className: "px-1 py-2 font-medium text-center text-xs" }, i + 1)), /* @__PURE__ */ React.createElement("th", { className: "px-2 py-2 font-medium text-center" }, "Gross"), /* @__PURE__ */ React.createElement("th", { className: "px-2 py-2 font-medium text-center" }, "Net"))), /* @__PURE__ */ React.createElement("tbody", null, activePlayers.map((p) => {
       const sc = round.scores[p.id] || Array(18).fill("");
       const filled = sc.filter((s) => s !== "" && s != null).length;
       const grossTotal = filled === 18 ? sc.reduce((a, b) => a + Number(b), 0) : null;
-      const ch = chOf(p);
+      const { ch, teeName, teeKey, isOverride } = chAndTeeForPlayer(p, round);
       const netTotal = grossTotal != null ? grossTotal - ch : null;
-      return /* @__PURE__ */ React.createElement("tr", { key: p.id, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 sticky left-0 z-10", style: { background: "#fff" } }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-2" }, /* @__PURE__ */ React.createElement("span", null, p.name), /* @__PURE__ */ React.createElement(Pill, { tone: flightForRound(round, p) }, flightForRound(round, p)))), /* @__PURE__ */ React.createElement("td", { className: "px-1 py-1 text-center text-xs", style: { color: palette.inkSoft } }, ch), Array.from({ length: 18 }, (_, i) => /* @__PURE__ */ React.createElement("td", { key: i, className: "px-0.5 py-0.5" }, /* @__PURE__ */ React.createElement(
+      const teeOptions = Object.keys(round.teesByCategory || {});
+      const setTeeOverride = (val) => {
+        const flight = flightForRound(round, p);
+        const newParticipants = {
+          ...round.participants,
+          [p.id]: { ...round.participants[p.id], teeOverride: val === flight ? void 0 : val }
+        };
+        updateRound({ participants: newParticipants });
+      };
+      return /* @__PURE__ */ React.createElement("tr", { key: p.id, style: { borderBottom: `1px solid ${palette.rule}`, background: isOverride ? "#FFF8EC" : "transparent" } }, /* @__PURE__ */ React.createElement("td", { className: "px-2 py-1 sticky left-0 z-10", style: { background: isOverride ? "#FFF8EC" : "#fff" } }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-2" }, /* @__PURE__ */ React.createElement("span", null, p.name), /* @__PURE__ */ React.createElement(Pill, { tone: flightForRound(round, p) }, flightForRound(round, p)))), /* @__PURE__ */ React.createElement("td", { className: "px-1 py-1 text-center text-xs" }, auditMode ? /* @__PURE__ */ React.createElement("span", { style: { fontFamily: "ui-monospace", color: isOverride ? palette.gold : palette.inkSoft, fontWeight: isOverride ? 700 : 400 } }, teeName) : /* @__PURE__ */ React.createElement(
+        "select",
+        {
+          value: round.participants[p.id]?.teeOverride || flightForRound(round, p),
+          onChange: (e) => setTeeOverride(e.target.value),
+          disabled: round.locked,
+          style: {
+            border: `1px solid ${isOverride ? palette.gold : palette.rule}`,
+            borderRadius: 2,
+            fontSize: 11,
+            padding: "1px 4px",
+            background: isOverride ? "#FFF3D0" : "#fff",
+            fontWeight: isOverride ? 700 : 400,
+            color: isOverride ? palette.gold : palette.ink,
+            minWidth: 52
+          }
+        },
+        teeOptions.map((k) => /* @__PURE__ */ React.createElement("option", { key: k, value: k }, round.teesByCategory[k]?.name || k))
+      )), /* @__PURE__ */ React.createElement("td", { className: "px-1 py-1 text-center text-xs", style: { color: palette.inkSoft } }, ch), Array.from({ length: 18 }, (_, i) => /* @__PURE__ */ React.createElement("td", { key: i, className: "px-0.5 py-0.5" }, /* @__PURE__ */ React.createElement(
         "input",
         {
           type: "number",
@@ -2172,8 +2210,8 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
       },
       "R",
       r.number
-    ))), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("div", { className: "flex flex-wrap items-center gap-3" }, /* @__PURE__ */ React.createElement("div", { className: "flex-1 min-w-0" }, /* @__PURE__ */ React.createElement("div", { className: "text-xs uppercase tracking-wider", style: { color: palette.inkSoft } }, "Round ", round.number, " \xB7 ", round.courseName), /* @__PURE__ */ React.createElement("div", { className: "text-sm font-medium mt-0.5" }, "Share results with the group or export a CSV ledger")), /* @__PURE__ */ React.createElement(CopyWhatsAppBtn, { round, results, players: state.players }), /* @__PURE__ */ React.createElement(ExportRoundCsvBtn, { round, results, players: state.players }))), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-2 md:grid-cols-6 gap-3" }, /* @__PURE__ */ React.createElement(KPI, { label: "Active", value: results.activePlayerIds.length }), /* @__PURE__ */ React.createElement(KPI, { label: "Skins A", value: fmt$(results.potBreakdown.skinsA) }), /* @__PURE__ */ React.createElement(KPI, { label: "Skins B", value: fmt$(results.potBreakdown.skinsB) }), /* @__PURE__ */ React.createElement(KPI, { label: "IN A", value: fmt$(results.indNetA.pot) }), /* @__PURE__ */ React.createElement(KPI, { label: "IN B", value: fmt$(results.indNetB.pot) }), /* @__PURE__ */ React.createElement(KPI, { label: "Best Ball", value: fmt$(results.potBreakdown.bestBall) })), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-4" }, /* @__PURE__ */ React.createElement(SkinsCard, { title: "Skins \xB7 Category A", data: results.skinsA, playerById }), /* @__PURE__ */ React.createElement(SkinsCard, { title: "Skins \xB7 Category B", data: results.skinsB, playerById })), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-4" }, ["A", "B"].map((flight) => {
-      const data = results[`indNet${flight}`];
+    ))), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("div", { className: "flex flex-wrap items-center gap-3" }, /* @__PURE__ */ React.createElement("div", { className: "flex-1 min-w-0" }, /* @__PURE__ */ React.createElement("div", { className: "text-xs uppercase tracking-wider", style: { color: palette.inkSoft } }, "Round ", round.number, " \xB7 ", round.courseName), /* @__PURE__ */ React.createElement("div", { className: "text-sm font-medium mt-0.5" }, "Share results with the group or export a CSV ledger")), /* @__PURE__ */ React.createElement(CopyWhatsAppBtn, { round, results, players: state.players }), /* @__PURE__ */ React.createElement(ExportRoundCsvBtn, { round, results, players: state.players }))), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-2 md:grid-cols-6 gap-3" }, /* @__PURE__ */ React.createElement(KPI, { label: "Active", value: results.activePlayerIds.length }), results.flights.map((f) => /* @__PURE__ */ React.createElement(KPI, { key: f, label: `Skins ${f}`, value: fmt$(results.potBreakdown[`skins${f}`] || 0) })), /* @__PURE__ */ React.createElement(KPI, { label: "Best Ball", value: fmt$(results.potBreakdown.bestBall) })), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-4" }, results.flights.map((f) => /* @__PURE__ */ React.createElement(SkinsCard, { key: f, title: `Skins \xB7 Flight ${f}`, data: results.skinsByFlight[f], playerById }))), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-4" }, results.flights.map((flight) => {
+      const data = results.indNetByFlight[flight];
       return /* @__PURE__ */ React.createElement(
         Card,
         {
@@ -2194,8 +2232,8 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
           r.position
         )), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, playerById[r.playerId]?.name), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, r.gross), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right font-medium" }, r.net), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right font-medium", style: { color: palette.green } }, fmt$(data.payouts[r.playerId] || 0)))))))
       );
-    })), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-4" }, ["A", "B"].map((flight) => {
-      const data = results[`bestBall${flight}`];
+    })), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-4" }, results.flights.map((flight) => {
+      const data = results.bestBall[flight];
       return /* @__PURE__ */ React.createElement(
         Card,
         {
@@ -2243,39 +2281,35 @@ Fix the spelling on the Setup tab or in the CSV, then re-import.`;
       lines.push(`\u{1F3CC}\uFE0F *${round.courseName}* \u2014 R${round.number} (${round.date})`);
       lines.push(`Active: ${results.activePlayerIds.length}`);
       lines.push("");
-      lines.push(`*Skins A* \u2014 pot ${fmt$(results.potBreakdown.skinsA)} \xB7 per skin ${fmt$(results.skinsA.skinValue)}`);
-      Object.entries(results.skinsA.skinsByPlayer).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).forEach(
-        ([pid, n]) => lines.push(`  \u2022 ${playerById[pid]?.name}: ${n} skins \u2192 ${fmt$(results.skinsA.payouts[pid])}`)
-      );
+      results.flights.forEach((f) => {
+        const skins = results.skinsByFlight[f];
+        if (!skins) return;
+        lines.push(`*Skins ${f}* \u2014 pot ${fmt$(skins.pot)} \xB7 per skin ${fmt$(skins.skinValue)}`);
+        Object.entries(skins.skinsByPlayer).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).forEach(
+          ([pid, n]) => lines.push(`  \u2022 ${playerById[pid]?.name}: ${n} skins \u2192 ${fmt$(skins.payouts[pid])}`)
+        );
+        lines.push("");
+      });
+      results.flights.forEach((f) => {
+        const data = results.indNetByFlight[f];
+        if (!data) return;
+        lines.push(`*Individual Net ${f}* \u2014 pot ${fmt$(data.pot)}`);
+        data.ranking.filter((r) => r.position <= 3 && (data.payouts[r.playerId] || 0) > 0).forEach(
+          (r) => lines.push(`  ${r.position}. ${playerById[r.playerId]?.name} (${r.net}) \u2192 ${fmt$(data.payouts[r.playerId])}`)
+        );
+        lines.push("");
+      });
       lines.push("");
-      lines.push(`*Skins B* \u2014 pot ${fmt$(results.potBreakdown.skinsB)} \xB7 per skin ${fmt$(results.skinsB.skinValue)}`);
-      Object.entries(results.skinsB.skinsByPlayer).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).forEach(
-        ([pid, n]) => lines.push(`  \u2022 ${playerById[pid]?.name}: ${n} skins \u2192 ${fmt$(results.skinsB.payouts[pid])}`)
-      );
-      lines.push("");
-      lines.push(`*Individual Net A* \u2014 pot ${fmt$(results.indNetA.pot)}`);
-      results.indNetA.ranking.filter((r) => r.position <= 3 && (results.indNetA.payouts[r.playerId] || 0) > 0).forEach(
-        (r) => lines.push(`  ${r.position}. ${playerById[r.playerId]?.name} (${r.net}) \u2192 ${fmt$(results.indNetA.payouts[r.playerId])}`)
-      );
-      lines.push("");
-      lines.push(`*Individual Net B* \u2014 pot ${fmt$(results.indNetB.pot)}`);
-      results.indNetB.ranking.filter((r) => r.position <= 3 && (results.indNetB.payouts[r.playerId] || 0) > 0).forEach(
-        (r) => lines.push(`  ${r.position}. ${playerById[r.playerId]?.name} (${r.net}) \u2192 ${fmt$(results.indNetB.payouts[r.playerId])}`)
-      );
-      lines.push("");
-      lines.push(`*Best Ball A* \u2014 pot ${fmt$(results.bestBallA.pot)}`);
-      results.bestBallA.teamResults.filter((t) => (results.bestBallA.teamPayouts[t.teamId] || 0) > 0).forEach(
-        (t) => lines.push(
-          `  ${t.position}. ${t.teamName} (${t.total}) \u2192 ${fmt$(results.bestBallA.teamPayouts[t.teamId])}`
-        )
-      );
-      lines.push("");
-      lines.push(`*Best Ball B* \u2014 pot ${fmt$(results.bestBallB.pot)}`);
-      results.bestBallB.teamResults.filter((t) => (results.bestBallB.teamPayouts[t.teamId] || 0) > 0).forEach(
-        (t) => lines.push(
-          `  ${t.position}. ${t.teamName} (${t.total}) \u2192 ${fmt$(results.bestBallB.teamPayouts[t.teamId])}`
-        )
-      );
+      results.flights.forEach((f) => {
+        const data = results.bestBall[f];
+        if (!data) return;
+        lines.push(`*Best Ball ${f}* \u2014 pot ${fmt$(data.pot)}`);
+        data.teamResults.filter((t) => (data.teamPayouts[t.teamId] || 0) > 0).forEach((t) => {
+          const names = t.members.map((id) => playerById[id]?.name?.split(" ")[0] || id).join(" & ");
+          lines.push(`  ${t.position}. ${names} (${t.total}) \u2192 ${fmt$(data.teamPayouts[t.teamId])}`);
+        });
+        lines.push("");
+      });
       const text = lines.join("\n");
       try {
         await navigator.clipboard.writeText(text);
