@@ -215,7 +215,7 @@
     {
       "id": "p1",
       "name": "Jose Said Mella",
-      "handicapIndex": 7.7,
+      "handicapIndex": 7.3,
       "notes": "",
       "category": "A",
       "categoryOverride": false
@@ -271,7 +271,7 @@
     {
       "id": "p8",
       "name": "Olived Gonzalez",
-      "handicapIndex": 8,
+      "handicapIndex": 6.1,
       "notes": "",
       "category": "A",
       "categoryOverride": false
@@ -279,7 +279,7 @@
     {
       "id": "p9",
       "name": "Renato Liriano",
-      "handicapIndex": 8.8,
+      "handicapIndex": 9.7,
       "notes": "",
       "category": "A",
       "categoryOverride": false
@@ -287,7 +287,7 @@
     {
       "id": "p10",
       "name": "Billy Wilson Santos Calderon",
-      "handicapIndex": 10.4,
+      "handicapIndex": 10.3,
       "notes": "",
       "category": "A",
       "categoryOverride": false
@@ -319,7 +319,7 @@
     {
       "id": "p14",
       "name": "Ernesto Julian",
-      "handicapIndex": 25.6,
+      "handicapIndex": 24,
       "notes": "",
       "category": "B",
       "categoryOverride": false
@@ -335,7 +335,7 @@
     {
       "id": "p16",
       "name": "Jose Luis Castillo",
-      "handicapIndex": 27,
+      "handicapIndex": 24,
       "notes": "",
       "category": "B",
       "categoryOverride": false
@@ -343,7 +343,7 @@
     {
       "id": "p17",
       "name": "Cesar Rojas",
-      "handicapIndex": 28,
+      "handicapIndex": 24,
       "notes": "",
       "category": "B",
       "categoryOverride": false
@@ -359,7 +359,7 @@
     {
       "id": "p19",
       "name": "Yovanny Marte",
-      "handicapIndex": 11.2,
+      "handicapIndex": 11,
       "notes": "",
       "category": "A",
       "categoryOverride": false
@@ -367,7 +367,7 @@
     {
       "id": "p20",
       "name": "Francisco Amauris Martinez",
-      "handicapIndex": 4.7,
+      "handicapIndex": 4.8,
       "notes": "",
       "category": "A",
       "categoryOverride": false
@@ -383,7 +383,7 @@
     {
       "id": "p22",
       "name": "Edgar Alma",
-      "handicapIndex": -1.8,
+      "handicapIndex": -1.7,
       "notes": "Plus handicap",
       "category": "A",
       "categoryOverride": false
@@ -391,7 +391,7 @@
     {
       "id": "p23",
       "name": "Ramón Villanueva",
-      "handicapIndex": 13,
+      "handicapIndex": 13.5,
       "notes": "",
       "category": "B",
       "categoryOverride": false
@@ -399,7 +399,7 @@
     {
       "id": "p24",
       "name": "Tom Nuñez",
-      "handicapIndex": 25.9,
+      "handicapIndex": 24,
       "notes": "",
       "category": "B",
       "categoryOverride": false
@@ -423,7 +423,7 @@
     {
       "id": "p27",
       "name": "Rafael Rubiera",
-      "handicapIndex": 19.8,
+      "handicapIndex": 22,
       "notes": "",
       "category": "B",
       "categoryOverride": false
@@ -431,7 +431,7 @@
     {
       "id": "p28",
       "name": "Fernando Rodriguez",
-      "handicapIndex": 5.2,
+      "handicapIndex": 5.3,
       "notes": "",
       "category": "A",
       "categoryOverride": false
@@ -439,7 +439,7 @@
     {
       "id": "p29",
       "name": "Roberto Rodríguez",
-      "handicapIndex": 9.6,
+      "handicapIndex": 9.2,
       "notes": "",
       "category": "A",
       "categoryOverride": false
@@ -447,15 +447,15 @@
     {
       "id": "p30",
       "name": "Jorge Rojas",
-      "handicapIndex": 17,
+      "handicapIndex": 17.5,
       "notes": "",
       "category": "B",
       "categoryOverride": false
     },
     {
       "id": "p31",
-      "name": "Fermin Enrique Moore Perez",
-      "handicapIndex": 7.9,
+      "name": "Mahler Nuñez",
+      "handicapIndex": 10.5,
       "notes": "",
       "category": "A",
       "categoryOverride": false
@@ -463,7 +463,7 @@
     {
       "id": "p32",
       "name": "Luis Carlo Rodriguez",
-      "handicapIndex": 6.8,
+      "handicapIndex": 7.2,
       "notes": "",
       "category": "A",
       "categoryOverride": false
@@ -761,7 +761,7 @@
           "teeOverride": "B"
         },
         "p27": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
@@ -1601,7 +1601,7 @@
           "inBestBall": true
         },
         "p3": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
@@ -1633,7 +1633,7 @@
           "flight": "B"
         },
         "p7": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
@@ -1664,7 +1664,7 @@
           "inBestBall": true
         },
         "p11": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
@@ -1673,7 +1673,7 @@
           "teeOverride": "B"
         },
         "p12": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
@@ -1681,7 +1681,7 @@
           "flight": "A"
         },
         "p13": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
@@ -1714,7 +1714,7 @@
           "flight": "C"
         },
         "p17": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
@@ -1766,7 +1766,7 @@
           "flight": "B"
         },
         "p24": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
@@ -1774,7 +1774,7 @@
           "flight": "C"
         },
         "p25": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
@@ -1782,7 +1782,7 @@
           "flight": "B"
         },
         "p26": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
@@ -1791,7 +1791,7 @@
           "teeOverride": "B"
         },
         "p27": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
@@ -1836,7 +1836,7 @@
           "flight": "A"
         },
         "p33": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
@@ -1844,7 +1844,7 @@
           "flight": "B"
         },
         "p34": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
@@ -2611,105 +2611,120 @@
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "A"
         },
         "p2": {
           "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "B"
         },
         "p3": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "B"
         },
         "p4": {
           "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "A"
         },
         "p5": {
           "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "A"
         },
         "p6": {
           "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "B"
         },
         "p7": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "C"
         },
         "p8": {
           "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "A"
         },
         "p9": {
           "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "A"
         },
         "p10": {
           "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "B"
         },
         "p11": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "C"
         },
         "p12": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "A"
         },
         "p13": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "C"
         },
         "p14": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "C"
         },
         "p15": {
           "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "B"
         },
         "p16": {
           "paid": true,
@@ -2717,138 +2732,167 @@
           "inSkins": true,
           "inIndividualNet": true,
           "inBestBall": true,
-          "payMethod": "Zelle"
+          "payMethod": "Zelle",
+          "flight": "C"
         },
         "p17": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "C"
         },
         "p18": {
           "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "C"
         },
         "p19": {
           "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "B"
         },
         "p20": {
           "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "A"
         },
         "p21": {
           "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "A"
         },
         "p22": {
           "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "A"
         },
         "p23": {
           "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "B"
         },
         "p24": {
           "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "C"
         },
         "p25": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "B"
         },
         "p26": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "B"
         },
         "p27": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "C"
         },
         "p28": {
           "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "A"
         },
         "p29": {
           "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "A"
         },
         "p30": {
           "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "C"
         },
         "p31": {
           "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "B"
         },
         "p32": {
           "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "A"
         },
         "p33": {
           "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "B"
         },
         "p34": {
           "paid": false,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
-          "inBestBall": true
+          "inBestBall": true,
+          "flight": "C"
         }
       },
       "teams": [],
       "draftLog": [],
-      "flightConfig": null,
+      "flightConfig": {
+        "flights": [
+          "A",
+          "B",
+          "C"
+        ],
+        "cutoffs": [
+          9.7,
+          15.6
+        ]
+      },
       "scores": {},
       "locked": false
     },
@@ -2926,7 +2970,7 @@
           "inBestBall": true
         },
         "p3": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
@@ -2954,7 +2998,7 @@
           "inBestBall": true
         },
         "p7": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
@@ -2982,35 +3026,35 @@
           "inBestBall": true
         },
         "p11": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
           "inBestBall": true
         },
         "p12": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
           "inBestBall": true
         },
         "p13": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
           "inBestBall": true
         },
         "p14": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
           "inBestBall": true
         },
         "p15": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
@@ -3025,7 +3069,7 @@
           "payMethod": "Zelle"
         },
         "p17": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
@@ -3081,21 +3125,21 @@
           "inBestBall": true
         },
         "p25": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
           "inBestBall": true
         },
         "p26": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
           "inBestBall": true
         },
         "p27": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
@@ -3231,7 +3275,7 @@
           "inBestBall": true
         },
         "p3": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
@@ -3259,7 +3303,7 @@
           "inBestBall": true
         },
         "p7": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
@@ -3287,28 +3331,28 @@
           "inBestBall": true
         },
         "p11": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
           "inBestBall": true
         },
         "p12": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
           "inBestBall": true
         },
         "p13": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
           "inBestBall": true
         },
         "p14": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
@@ -3336,7 +3380,7 @@
           "inBestBall": true
         },
         "p18": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
@@ -3392,14 +3436,14 @@
           "inBestBall": true
         },
         "p26": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
           "inBestBall": true
         },
         "p27": {
-          "paid": false,
+          "paid": true,
           "active": true,
           "inSkins": true,
           "inIndividualNet": true,
