@@ -1,0 +1,5555 @@
+{
+  "tournament": {
+    "name": "Champs Utah 2026"
+  },
+  "tripBuyIn": {
+    "amountPerPlayer": 150,
+    "payments": {
+      "p1": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p2": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p3": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p4": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p5": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p6": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p7": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p8": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p9": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p10": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p11": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p12": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p13": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p14": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p15": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p16": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p17": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p18": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p19": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p20": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p21": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p22": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p23": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p24": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p25": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p26": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p27": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p28": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p29": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p30": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p31": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p32": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p33": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      },
+      "p34": {
+        "paid": 0,
+        "method": "",
+        "date": "",
+        "notes": ""
+      }
+    }
+  },
+  "players": [
+    {
+      "id": "p1",
+      "name": "Jose Said Mella",
+      "handicapIndex": 7.3,
+      "notes": "",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p2",
+      "name": "Ricardo Luis Mateo",
+      "handicapIndex": 15.6,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p3",
+      "name": "Felix Olivo",
+      "handicapIndex": 12.1,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p4",
+      "name": "Jay Gonzalez",
+      "handicapIndex": 4.5,
+      "notes": "",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p5",
+      "name": "Juan Carlos Pichardo",
+      "handicapIndex": 7.3,
+      "notes": "",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p6",
+      "name": "Jhonnatan Liriano",
+      "handicapIndex": 12.2,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p7",
+      "name": "Ian Toro",
+      "handicapIndex": 19.9,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p8",
+      "name": "Olived Gonzalez",
+      "handicapIndex": 6.1,
+      "notes": "",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p9",
+      "name": "Renato Liriano",
+      "handicapIndex": 9.5,
+      "notes": "",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p10",
+      "name": "Billy Wilson Santos Calderon",
+      "handicapIndex": 10.3,
+      "notes": "",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p11",
+      "name": "Priamo Lopez",
+      "handicapIndex": 18.5,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p12",
+      "name": "Oswaldo Rodriguez",
+      "handicapIndex": 7.8,
+      "notes": "",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p13",
+      "name": "Joan Jiménez",
+      "handicapIndex": 18.3,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p14",
+      "name": "Ernesto Julian",
+      "handicapIndex": 22.5,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p15",
+      "name": "Raymundo Reyes",
+      "handicapIndex": 14.7,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p16",
+      "name": "Jose Luis Castillo",
+      "handicapIndex": 22.5,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p17",
+      "name": "Cesar Rojas",
+      "handicapIndex": 22.5,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p18",
+      "name": "Marx Toro",
+      "handicapIndex": 16.7,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p19",
+      "name": "Yovanny Marte",
+      "handicapIndex": 11,
+      "notes": "",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p20",
+      "name": "Francisco Amauris Martinez",
+      "handicapIndex": 4.8,
+      "notes": "",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p21",
+      "name": "Rafael Zorrilla (Pichu)",
+      "handicapIndex": 9,
+      "notes": "",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p22",
+      "name": "Edgar Alma",
+      "handicapIndex": -1.7,
+      "notes": "Plus handicap",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p23",
+      "name": "Ramón Villanueva",
+      "handicapIndex": 13.5,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p24",
+      "name": "Tom Nuñez",
+      "handicapIndex": 22,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p25",
+      "name": "Elcris Matias",
+      "handicapIndex": 14.7,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p26",
+      "name": "Magin Ferreiro",
+      "handicapIndex": 11.7,
+      "notes": "",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p27",
+      "name": "Rafael Rubiera",
+      "handicapIndex": 22,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p28",
+      "name": "Fernando Rodriguez",
+      "handicapIndex": 5.3,
+      "notes": "",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p29",
+      "name": "Roberto Rodríguez",
+      "handicapIndex": 9.5,
+      "notes": "",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p30",
+      "name": "Jorge Rojas",
+      "handicapIndex": 17.5,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p31",
+      "name": "Mahler Nuñez",
+      "handicapIndex": 10.5,
+      "notes": "",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p32",
+      "name": "Luis Carlo Rodriguez",
+      "handicapIndex": 7.2,
+      "notes": "",
+      "category": "A",
+      "categoryOverride": false
+    },
+    {
+      "id": "p33",
+      "name": "Ramses Atallah",
+      "handicapIndex": 15,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    },
+    {
+      "id": "p34",
+      "name": "Rene Castillo",
+      "handicapIndex": 22.1,
+      "notes": "",
+      "category": "B",
+      "categoryOverride": false
+    }
+  ],
+  "rounds": [
+    {
+      "id": "r1",
+      "number": 1,
+      "courseName": "Ledges Golf Club",
+      "date": "2026-05-18",
+      "teeTime": "10:10 AM MT",
+      "teesByCategory": {
+        "A": {
+          "name": "Blue",
+          "slopeRating": 122,
+          "courseRating": 70.3
+        },
+        "B": {
+          "name": "White",
+          "slopeRating": 119,
+          "courseRating": 69.3
+        },
+        "C": {
+          "name": "White C",
+          "slopeRating": 113,
+          "courseRating": 72
+        }
+      },
+      "holeIndexes": [
+        11,
+        13,
+        7,
+        1,
+        15,
+        5,
+        9,
+        17,
+        3,
+        16,
+        6,
+        18,
+        14,
+        12,
+        8,
+        2,
+        10,
+        4
+      ],
+      "pars": [
+        4,
+        3,
+        5,
+        4,
+        3,
+        4,
+        5,
+        4,
+        4,
+        3,
+        3,
+        4,
+        4,
+        4,
+        4,
+        5,
+        4,
+        5
+      ],
+      "participants": {
+        "p1": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A"
+        },
+        "p2": {
+          "paid": false,
+          "active": false,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p3": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A",
+          "teeOverride": "B"
+        },
+        "p4": {
+          "paid": false,
+          "active": false,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p5": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A"
+        },
+        "p6": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p7": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C",
+          "teeOverride": "B"
+        },
+        "p8": {
+          "paid": false,
+          "active": false,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p9": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A",
+          "teeOverride": "B"
+        },
+        "p10": {
+          "paid": false,
+          "active": false,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p11": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p12": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A",
+          "teeOverride": "B"
+        },
+        "p13": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p14": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C",
+          "teeOverride": "B"
+        },
+        "p15": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p16": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C",
+          "teeOverride": "B",
+          "payMethod": "Zelle"
+        },
+        "p17": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C",
+          "teeOverride": "B"
+        },
+        "p18": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p19": {
+          "paid": false,
+          "active": false,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p20": {
+          "paid": false,
+          "active": false,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p21": {
+          "paid": false,
+          "active": false,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p22": {
+          "paid": false,
+          "active": false,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p23": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p24": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C",
+          "teeOverride": "B"
+        },
+        "p25": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p26": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A",
+          "teeOverride": "B"
+        },
+        "p27": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C",
+          "teeOverride": "B"
+        },
+        "p28": {
+          "paid": false,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A",
+          "chOverride": 5
+        },
+        "p29": {
+          "paid": false,
+          "active": false,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p30": {
+          "paid": false,
+          "active": false,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p31": {
+          "paid": false,
+          "active": false,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p32": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A",
+          "chOverride": 7
+        },
+        "p33": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p34": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C",
+          "teeOverride": "B"
+        }
+      },
+      "teams": [
+        {
+          "id": "tA-1zz3",
+          "name": "Team A1",
+          "playerIds": [
+            "p9",
+            "p26"
+          ],
+          "flight": "A"
+        },
+        {
+          "id": "tA-2837",
+          "name": "Team A2",
+          "playerIds": [
+            "p1",
+            "p28"
+          ],
+          "flight": "A"
+        },
+        {
+          "id": "tA-2h3a",
+          "name": "Team A3",
+          "playerIds": [
+            "p32",
+            "p5"
+          ],
+          "flight": "A"
+        },
+        {
+          "id": "tA-2q72",
+          "name": "Team A4",
+          "playerIds": [
+            "p12",
+            "p3"
+          ],
+          "flight": "A"
+        },
+        {
+          "id": "tB-4e2u",
+          "name": "Team B1",
+          "playerIds": [
+            "p13",
+            "p25"
+          ],
+          "flight": "B"
+        },
+        {
+          "id": "tB-4sxs",
+          "name": "Team B2",
+          "playerIds": [
+            "p6",
+            "p33"
+          ],
+          "flight": "B"
+        },
+        {
+          "id": "tB-596h",
+          "name": "Team B3",
+          "playerIds": [
+            "p15",
+            "p18"
+          ],
+          "flight": "B"
+        },
+        {
+          "id": "tB-5mcz",
+          "name": "Team B4",
+          "playerIds": [
+            "p11",
+            "p23"
+          ],
+          "flight": "B"
+        },
+        {
+          "id": "tC-640u",
+          "name": "Team C1",
+          "playerIds": [
+            "p16",
+            "p14"
+          ],
+          "flight": "C"
+        },
+        {
+          "id": "tC-6jkx",
+          "name": "Team C2",
+          "playerIds": [
+            "p24",
+            "p17"
+          ],
+          "flight": "C"
+        },
+        {
+          "id": "tC-7au1",
+          "name": "Team C3",
+          "playerIds": [
+            "p27",
+            "p7"
+          ],
+          "flight": "C"
+        },
+        {
+          "id": "tC-7lks",
+          "name": "Team C4",
+          "playerIds": [
+            "p34",
+            "p7"
+          ],
+          "flight": "C"
+        }
+      ],
+      "draftLog": [
+        {
+          "flight": "A",
+          "ts": "2026-05-18T01:58:35.871Z",
+          "player1Id": "p9",
+          "player1Name": "Renato Liriano",
+          "player2Id": "p26",
+          "player2Name": "Magin Ferreiro",
+          "teamName": "Team A1"
+        },
+        {
+          "flight": "A",
+          "ts": "2026-05-18T01:58:46.387Z",
+          "player1Id": "p1",
+          "player1Name": "Jose Said Mella",
+          "player2Id": "p28",
+          "player2Name": "Fernando Rodriguez",
+          "teamName": "Team A2"
+        },
+        {
+          "flight": "A",
+          "ts": "2026-05-18T01:58:58.054Z",
+          "player1Id": "p32",
+          "player1Name": "Luis Carlo Rodriguez",
+          "player2Id": "p5",
+          "player2Name": "Juan Carlos Pichardo",
+          "teamName": "Team A3"
+        },
+        {
+          "flight": "A",
+          "ts": "2026-05-18T01:59:09.854Z",
+          "player1Id": "p12",
+          "player1Name": "Oswaldo Rodriguez",
+          "player2Id": "p3",
+          "player2Name": "Felix Olivo",
+          "teamName": "Team A4"
+        },
+        {
+          "flight": "B",
+          "ts": "2026-05-18T02:00:27.462Z",
+          "player1Id": "p13",
+          "player1Name": "Joan Jiménez",
+          "player2Id": "p25",
+          "player2Name": "Elcris Matias",
+          "teamName": "Team B1"
+        },
+        {
+          "flight": "B",
+          "ts": "2026-05-18T02:00:46.720Z",
+          "player1Id": "p6",
+          "player1Name": "Jhonnatan Liriano",
+          "player2Id": "p33",
+          "player2Name": "Ramses Atallah",
+          "teamName": "Team B2"
+        },
+        {
+          "flight": "B",
+          "ts": "2026-05-18T02:01:07.769Z",
+          "player1Id": "p15",
+          "player1Name": "Raymundo Reyes",
+          "player2Id": "p18",
+          "player2Name": "Marx Toro",
+          "teamName": "Team B3"
+        },
+        {
+          "flight": "B",
+          "ts": "2026-05-18T02:01:24.851Z",
+          "player1Id": "p11",
+          "player1Name": "Priamo Lopez",
+          "player2Id": "p23",
+          "player2Name": "Ramón Villanueva",
+          "teamName": "Team B4"
+        },
+        {
+          "flight": "C",
+          "ts": "2026-05-18T02:01:47.742Z",
+          "player1Id": "p16",
+          "player1Name": "Jose Luis Castillo",
+          "player2Id": "p14",
+          "player2Name": "Ernesto Julian",
+          "teamName": "Team C1"
+        },
+        {
+          "flight": "C",
+          "ts": "2026-05-18T02:02:07.905Z",
+          "player1Id": "p24",
+          "player1Name": "Tom Nuñez",
+          "player2Id": "p17",
+          "player2Name": "Cesar Rojas",
+          "teamName": "Team C2"
+        },
+        {
+          "flight": "C",
+          "ts": "2026-05-18T02:02:43.225Z",
+          "player1Id": "p27",
+          "player1Name": "Rafael Rubiera",
+          "player2Id": "p7",
+          "player2Name": "Ian Toro",
+          "teamName": "Team C3"
+        },
+        {
+          "flight": "C",
+          "ts": "2026-05-18T02:02:57.148Z",
+          "player1Id": "p34",
+          "player1Name": "Rene Castillo",
+          "player2Id": "p7",
+          "player2Name": "Ian Toro",
+          "teamName": "Team C4"
+        }
+      ],
+      "flightConfig": {
+        "flights": [
+          "A",
+          "B",
+          "C"
+        ],
+        "cutoffs": [
+          12.1,
+          18.5
+        ]
+      },
+      "scores": {
+        "p1": [
+          4,
+          4,
+          6,
+          4,
+          3,
+          5,
+          6,
+          5,
+          5,
+          4,
+          5,
+          2,
+          5,
+          6,
+          3,
+          5,
+          6,
+          5
+        ],
+        "p5": [
+          4,
+          4,
+          8,
+          5,
+          3,
+          6,
+          7,
+          4,
+          6,
+          4,
+          6,
+          5,
+          5,
+          5,
+          5,
+          7,
+          4,
+          3
+        ],
+        "p3": [
+          6,
+          4,
+          6,
+          4,
+          3,
+          7,
+          6,
+          5,
+          5,
+          5,
+          6,
+          3,
+          5,
+          4,
+          5,
+          6,
+          6,
+          4
+        ],
+        "p6": [
+          5,
+          6,
+          6,
+          4,
+          2,
+          4,
+          8,
+          4,
+          6,
+          4,
+          6,
+          4,
+          5,
+          6,
+          5,
+          7,
+          3,
+          5
+        ],
+        "p7": [
+          6,
+          4,
+          7,
+          6,
+          5,
+          5,
+          6,
+          4,
+          6,
+          4,
+          7,
+          5,
+          5,
+          5,
+          5,
+          7,
+          5,
+          6
+        ],
+        "p9": [
+          4,
+          4,
+          7,
+          5,
+          4,
+          4,
+          6,
+          5,
+          5,
+          3,
+          6,
+          5,
+          4,
+          6,
+          6,
+          7,
+          10,
+          6
+        ],
+        "p11": [
+          5,
+          3,
+          7,
+          5,
+          7,
+          5,
+          5,
+          5,
+          6,
+          5,
+          8,
+          5,
+          7,
+          6,
+          5,
+          6,
+          6,
+          5
+        ],
+        "p12": [
+          4,
+          4,
+          6,
+          6,
+          4,
+          5,
+          5,
+          4,
+          5,
+          4,
+          5,
+          6,
+          4,
+          5,
+          4,
+          5,
+          5,
+          4
+        ],
+        "p13": [
+          5,
+          6,
+          7,
+          6,
+          6,
+          5,
+          9,
+          4,
+          6,
+          5,
+          7,
+          5,
+          5,
+          6,
+          6,
+          8,
+          8,
+          6
+        ],
+        "p14": [
+          4,
+          7,
+          6,
+          6,
+          5,
+          7,
+          9,
+          6,
+          5,
+          4,
+          8,
+          3,
+          6,
+          5,
+          5,
+          7,
+          5,
+          7
+        ],
+        "p15": [
+          4,
+          5,
+          5,
+          5,
+          5,
+          7,
+          6,
+          5,
+          4,
+          4,
+          5,
+          4,
+          4,
+          5,
+          4,
+          5,
+          5,
+          5
+        ],
+        "p16": [
+          10,
+          7,
+          9,
+          5,
+          4,
+          5,
+          8,
+          4,
+          5,
+          4,
+          8,
+          6,
+          7,
+          4,
+          7,
+          7,
+          7,
+          6
+        ],
+        "p17": [
+          6,
+          4,
+          7,
+          8,
+          3,
+          8,
+          6,
+          6,
+          6,
+          5,
+          8,
+          4,
+          5,
+          7,
+          8,
+          9,
+          6,
+          6
+        ],
+        "p18": [
+          5,
+          5,
+          5,
+          5,
+          3,
+          5,
+          6,
+          5,
+          4,
+          5,
+          6,
+          4,
+          5,
+          5,
+          5,
+          8,
+          5,
+          4
+        ],
+        "p23": [
+          4,
+          4,
+          6,
+          7,
+          4,
+          6,
+          6,
+          4,
+          5,
+          4,
+          6,
+          4,
+          4,
+          4,
+          5,
+          5,
+          4,
+          5
+        ],
+        "p24": [
+          5,
+          8,
+          7,
+          6,
+          5,
+          6,
+          7,
+          6,
+          7,
+          5,
+          6,
+          5,
+          6,
+          6,
+          8,
+          10,
+          6,
+          6
+        ],
+        "p25": [
+          5,
+          5,
+          8,
+          8,
+          4,
+          6,
+          8,
+          6,
+          3,
+          4,
+          5,
+          4,
+          6,
+          7,
+          5,
+          9,
+          5,
+          6
+        ],
+        "p26": [
+          6,
+          4,
+          6,
+          6,
+          3,
+          5,
+          10,
+          6,
+          5,
+          3,
+          6,
+          8,
+          5,
+          5,
+          6,
+          6,
+          6,
+          7
+        ],
+        "p27": [
+          6,
+          4,
+          7,
+          6,
+          5,
+          5,
+          8,
+          4,
+          7,
+          3,
+          8,
+          5,
+          6,
+          5,
+          5,
+          8,
+          7,
+          5
+        ],
+        "p28": [
+          3,
+          5,
+          6,
+          4,
+          3,
+          4,
+          6,
+          4,
+          5,
+          4,
+          6,
+          4,
+          6,
+          5,
+          6,
+          5,
+          4,
+          5
+        ],
+        "p32": [
+          4,
+          3,
+          5,
+          4,
+          6,
+          4,
+          4,
+          4,
+          6,
+          5,
+          6,
+          3,
+          5,
+          4,
+          4,
+          6,
+          5,
+          6
+        ],
+        "p33": [
+          5,
+          4,
+          7,
+          6,
+          3,
+          5,
+          8,
+          5,
+          5,
+          4,
+          7,
+          4,
+          6,
+          5,
+          6,
+          9,
+          10,
+          10
+        ],
+        "p34": [
+          5,
+          5,
+          5,
+          6,
+          4,
+          7,
+          6,
+          6,
+          6,
+          6,
+          6,
+          5,
+          5,
+          4,
+          4,
+          8,
+          6,
+          5
+        ]
+      },
+      "locked": false
+    },
+    {
+      "id": "r2",
+      "number": 2,
+      "courseName": "Conestoga Golf Club",
+      "date": "2026-05-19",
+      "teeTime": "12:10 PM PT",
+      "teesByCategory": {
+        "A": {
+          "name": "Gold",
+          "slopeRating": 132,
+          "courseRating": 72.3
+        },
+        "B": {
+          "name": "Silver",
+          "slopeRating": 127,
+          "courseRating": 70.1
+        },
+        "C": {
+          "name": "Silver",
+          "slopeRating": 127,
+          "courseRating": 70.1
+        }
+      },
+      "holeIndexes": [
+        5,
+        15,
+        9,
+        1,
+        13,
+        3,
+        17,
+        7,
+        11,
+        14,
+        2,
+        16,
+        10,
+        18,
+        8,
+        12,
+        6,
+        4
+      ],
+      "pars": [
+        4,
+        3,
+        4,
+        4,
+        3,
+        5,
+        4,
+        4,
+        5,
+        3,
+        4,
+        5,
+        4,
+        3,
+        4,
+        4,
+        5,
+        4
+      ],
+      "participants": {
+        "p1": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A"
+        },
+        "p2": {
+          "paid": false,
+          "active": false,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p3": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A",
+          "teeOverride": "B"
+        },
+        "p4": {
+          "paid": false,
+          "active": false,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p5": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A"
+        },
+        "p6": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p7": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C"
+        },
+        "p8": {
+          "paid": false,
+          "active": false,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p9": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A",
+          "teeOverride": "B"
+        },
+        "p10": {
+          "paid": false,
+          "active": false,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p11": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C",
+          "teeOverride": "B"
+        },
+        "p12": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A"
+        },
+        "p13": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p14": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C"
+        },
+        "p15": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p16": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "payMethod": "Zelle",
+          "flight": "C"
+        },
+        "p17": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C"
+        },
+        "p18": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p19": {
+          "paid": false,
+          "active": false,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p20": {
+          "paid": false,
+          "active": false,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p21": {
+          "paid": false,
+          "active": false,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p22": {
+          "paid": false,
+          "active": false,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p23": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p24": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C"
+        },
+        "p25": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p26": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A",
+          "teeOverride": "B"
+        },
+        "p27": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C"
+        },
+        "p28": {
+          "paid": false,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A"
+        },
+        "p29": {
+          "paid": false,
+          "active": false,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p30": {
+          "paid": false,
+          "active": false,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p31": {
+          "paid": false,
+          "active": false,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p32": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A"
+        },
+        "p33": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p34": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C"
+        }
+      },
+      "teams": [
+        {
+          "id": "tA-diml",
+          "name": "Team A1",
+          "playerIds": [
+            "p12",
+            "p5"
+          ],
+          "flight": "A"
+        },
+        {
+          "id": "tA-dr30",
+          "name": "Team A2",
+          "playerIds": [
+            "p3",
+            "p1"
+          ],
+          "flight": "A"
+        },
+        {
+          "id": "tA-dzwd",
+          "name": "Team A3",
+          "playerIds": [
+            "p28",
+            "p9"
+          ],
+          "flight": "A"
+        },
+        {
+          "id": "tA-eca7",
+          "name": "Team A4",
+          "playerIds": [
+            "p32",
+            "p26"
+          ],
+          "flight": "A"
+        },
+        {
+          "id": "tB-errl",
+          "name": "Team B1",
+          "playerIds": [
+            "p6",
+            "p23"
+          ],
+          "flight": "B"
+        },
+        {
+          "id": "tB-ezfa",
+          "name": "Team B2",
+          "playerIds": [
+            "p18",
+            "p13"
+          ],
+          "flight": "B"
+        },
+        {
+          "id": "tB-f77e",
+          "name": "Team B3",
+          "playerIds": [
+            "p25",
+            "p33"
+          ],
+          "flight": "B"
+        },
+        {
+          "id": "tB-fc0j",
+          "name": "Team B4",
+          "playerIds": [
+            "p15",
+            "p25"
+          ],
+          "flight": "B"
+        },
+        {
+          "id": "tC-fnni",
+          "name": "Team C1",
+          "playerIds": [
+            "p34",
+            "p17"
+          ],
+          "flight": "C"
+        },
+        {
+          "id": "tC-fvf5",
+          "name": "Team C2",
+          "playerIds": [
+            "p11",
+            "p14"
+          ],
+          "flight": "C"
+        },
+        {
+          "id": "tC-g34x",
+          "name": "Team C3",
+          "playerIds": [
+            "p24",
+            "p27"
+          ],
+          "flight": "C"
+        },
+        {
+          "id": "tC-gb4f",
+          "name": "Team C4",
+          "playerIds": [
+            "p16",
+            "p7"
+          ],
+          "flight": "C"
+        }
+      ],
+      "draftLog": [
+        {
+          "flight": "A",
+          "ts": "2026-05-20T04:02:52.173Z",
+          "player1Id": "p12",
+          "player1Name": "Oswaldo Rodriguez",
+          "player2Id": "p5",
+          "player2Name": "Juan Carlos Pichardo",
+          "teamName": "Team A1"
+        },
+        {
+          "flight": "A",
+          "ts": "2026-05-20T04:03:03.132Z",
+          "player1Id": "p3",
+          "player1Name": "Felix Olivo",
+          "player2Id": "p1",
+          "player2Name": "Jose Said Mella",
+          "teamName": "Team A2"
+        },
+        {
+          "flight": "A",
+          "ts": "2026-05-20T04:03:14.557Z",
+          "player1Id": "p28",
+          "player1Name": "Fernando Rodriguez",
+          "player2Id": "p9",
+          "player2Name": "Renato Liriano",
+          "teamName": "Team A3"
+        },
+        {
+          "flight": "A",
+          "ts": "2026-05-20T04:03:30.607Z",
+          "player1Id": "p32",
+          "player1Name": "Luis Carlo Rodriguez",
+          "player2Id": "p26",
+          "player2Name": "Magin Ferreiro",
+          "teamName": "Team A4"
+        },
+        {
+          "flight": "B",
+          "ts": "2026-05-20T04:03:50.673Z",
+          "player1Id": "p6",
+          "player1Name": "Jhonnatan Liriano",
+          "player2Id": "p23",
+          "player2Name": "Ramón Villanueva",
+          "teamName": "Team B1"
+        },
+        {
+          "flight": "B",
+          "ts": "2026-05-20T04:04:00.598Z",
+          "player1Id": "p18",
+          "player1Name": "Marx Toro",
+          "player2Id": "p13",
+          "player2Name": "Joan Jiménez",
+          "teamName": "Team B2"
+        },
+        {
+          "flight": "B",
+          "ts": "2026-05-20T04:04:10.682Z",
+          "player1Id": "p25",
+          "player1Name": "Elcris Matias",
+          "player2Id": "p33",
+          "player2Name": "Ramses Atallah",
+          "teamName": "Team B3"
+        },
+        {
+          "flight": "B",
+          "ts": "2026-05-20T04:04:16.915Z",
+          "player1Id": "p15",
+          "player1Name": "Raymundo Reyes",
+          "player2Id": "p25",
+          "player2Name": "Elcris Matias",
+          "teamName": "Team B4"
+        },
+        {
+          "flight": "C",
+          "ts": "2026-05-20T04:04:31.998Z",
+          "player1Id": "p34",
+          "player1Name": "Rene Castillo",
+          "player2Id": "p17",
+          "player2Name": "Cesar Rojas",
+          "teamName": "Team C1"
+        },
+        {
+          "flight": "C",
+          "ts": "2026-05-20T04:04:42.065Z",
+          "player1Id": "p11",
+          "player1Name": "Priamo Lopez",
+          "player2Id": "p14",
+          "player2Name": "Ernesto Julian",
+          "teamName": "Team C2"
+        },
+        {
+          "flight": "C",
+          "ts": "2026-05-20T04:04:52.065Z",
+          "player1Id": "p24",
+          "player1Name": "Tom Nuñez",
+          "player2Id": "p27",
+          "player2Name": "Rafael Rubiera",
+          "teamName": "Team C3"
+        },
+        {
+          "flight": "C",
+          "ts": "2026-05-20T04:05:02.415Z",
+          "player1Id": "p16",
+          "player1Name": "Jose Luis Castillo",
+          "player2Id": "p7",
+          "player2Name": "Ian Toro",
+          "teamName": "Team C4"
+        }
+      ],
+      "flightConfig": {
+        "flights": [
+          "A",
+          "B",
+          "C"
+        ],
+        "cutoffs": [
+          12.1,
+          18.3
+        ]
+      },
+      "scores": {
+        "p17": [
+          7,
+          6,
+          5,
+          8,
+          5,
+          10,
+          10,
+          6,
+          6,
+          6,
+          7,
+          9,
+          7,
+          8,
+          6,
+          9,
+          6,
+          5
+        ],
+        "p25": [
+          5,
+          6,
+          6,
+          4,
+          5,
+          7,
+          4,
+          7,
+          6,
+          3,
+          5,
+          6,
+          6,
+          6,
+          5,
+          8,
+          5,
+          6
+        ],
+        "p14": [
+          6,
+          5,
+          8,
+          8,
+          5,
+          10,
+          10,
+          7,
+          7,
+          6,
+          6,
+          8,
+          7,
+          4,
+          6,
+          10,
+          6,
+          7
+        ],
+        "p3": [
+          5,
+          3,
+          4,
+          4,
+          4,
+          6,
+          6,
+          5,
+          7,
+          4,
+          5,
+          5,
+          6,
+          4,
+          7,
+          6,
+          4,
+          5
+        ],
+        "p28": [
+          4,
+          3,
+          6,
+          5,
+          3,
+          7,
+          3,
+          4,
+          6,
+          4,
+          5,
+          7,
+          4,
+          3,
+          4,
+          5,
+          5,
+          5
+        ],
+        "p7": [
+          5,
+          3,
+          5,
+          6,
+          3,
+          8,
+          5,
+          5,
+          6,
+          5,
+          5,
+          6,
+          8,
+          4,
+          6,
+          5,
+          5,
+          5
+        ],
+        "p6": [
+          5,
+          4,
+          9,
+          6,
+          6,
+          6,
+          5,
+          5,
+          7,
+          3,
+          5,
+          7,
+          5,
+          6,
+          5,
+          5,
+          6,
+          5
+        ],
+        "p13": [
+          6,
+          4,
+          8,
+          5,
+          10,
+          9,
+          5,
+          6,
+          7,
+          4,
+          5,
+          8,
+          8,
+          4,
+          7,
+          10,
+          10,
+          4
+        ],
+        "p16": [
+          5,
+          8,
+          8,
+          6,
+          6,
+          8,
+          4,
+          5,
+          7,
+          2,
+          5,
+          8,
+          5,
+          5,
+          5,
+          8,
+          9,
+          4
+        ],
+        "p1": [
+          6,
+          4,
+          5,
+          3,
+          4,
+          6,
+          3,
+          5,
+          7,
+          3,
+          3,
+          7,
+          4,
+          3,
+          4,
+          6,
+          6,
+          4
+        ],
+        "p5": [
+          4,
+          4,
+          5,
+          5,
+          3,
+          5,
+          6,
+          6,
+          5,
+          3,
+          4,
+          6,
+          5,
+          3,
+          7,
+          7,
+          7,
+          4
+        ],
+        "p32": [
+          5,
+          4,
+          4,
+          5,
+          3,
+          6,
+          4,
+          7,
+          6,
+          6,
+          5,
+          8,
+          5,
+          3,
+          6,
+          6,
+          4,
+          5
+        ],
+        "p26": [
+          7,
+          4,
+          4,
+          5,
+          5,
+          5,
+          4,
+          5,
+          6,
+          3,
+          5,
+          5,
+          4,
+          5,
+          5,
+          5,
+          5,
+          5
+        ],
+        "p18": [
+          6,
+          5,
+          5,
+          8,
+          5,
+          8,
+          4,
+          5,
+          6,
+          5,
+          6,
+          6,
+          5,
+          4,
+          5,
+          6,
+          5,
+          5
+        ],
+        "p12": [
+          4,
+          3,
+          5,
+          6,
+          3,
+          5,
+          4,
+          5,
+          5,
+          5,
+          4,
+          4,
+          4,
+          3,
+          5,
+          6,
+          4,
+          5
+        ],
+        "p11": [
+          5,
+          5,
+          6,
+          5,
+          3,
+          8,
+          8,
+          4,
+          6,
+          4,
+          4,
+          5,
+          5,
+          4,
+          5,
+          6,
+          4,
+          5
+        ],
+        "p27": [
+          5,
+          3,
+          8,
+          5,
+          4,
+          6,
+          6,
+          7,
+          8,
+          5,
+          6,
+          5,
+          7,
+          3,
+          6,
+          7,
+          5,
+          6
+        ],
+        "p23": [
+          5,
+          4,
+          3,
+          5,
+          5,
+          8,
+          5,
+          6,
+          6,
+          3,
+          6,
+          5,
+          4,
+          3,
+          5,
+          6,
+          6,
+          5
+        ],
+        "p33": [
+          8,
+          10,
+          6,
+          5,
+          4,
+          8,
+          6,
+          5,
+          8,
+          6,
+          5,
+          6,
+          6,
+          4,
+          5,
+          6,
+          5,
+          5
+        ],
+        "p15": [
+          6,
+          4,
+          5,
+          4,
+          3,
+          6,
+          5,
+          5,
+          6,
+          4,
+          4,
+          5,
+          4,
+          3,
+          5,
+          6,
+          4,
+          6
+        ],
+        "p9": [
+          7,
+          6,
+          4,
+          5,
+          7,
+          6,
+          5,
+          6,
+          6,
+          3,
+          5,
+          5,
+          6,
+          3,
+          5,
+          6,
+          4,
+          5
+        ],
+        "p34": [
+          6,
+          5,
+          10,
+          6,
+          6,
+          7,
+          6,
+          4,
+          6,
+          3,
+          6,
+          7,
+          6,
+          3,
+          8,
+          8,
+          5,
+          4
+        ],
+        "p24": [
+          5,
+          6,
+          6,
+          8,
+          6,
+          7,
+          6,
+          6,
+          7,
+          7,
+          5,
+          7,
+          7,
+          5,
+          6,
+          7,
+          9,
+          7
+        ]
+      },
+      "locked": false
+    },
+    {
+      "id": "r3",
+      "number": 3,
+      "courseName": "Wolf Creek Golf Club",
+      "date": "2026-05-21",
+      "teeTime": "12:00 PM PT",
+      "teesByCategory": {
+        "A": {
+          "name": "Champions",
+          "slopeRating": 138,
+          "courseRating": 70.9
+        },
+        "B": {
+          "name": "Masters",
+          "slopeRating": 134,
+          "courseRating": 68.2
+        },
+        "C": {
+          "name": "Masters",
+          "slopeRating": 134,
+          "courseRating": 68.2
+        }
+      },
+      "holeIndexes": [
+        9,
+        1,
+        7,
+        15,
+        3,
+        11,
+        13,
+        5,
+        17,
+        2,
+        16,
+        8,
+        14,
+        4,
+        18,
+        10,
+        6,
+        12
+      ],
+      "pars": [
+        5,
+        4,
+        3,
+        4,
+        5,
+        4,
+        4,
+        3,
+        4,
+        4,
+        3,
+        5,
+        4,
+        4,
+        3,
+        4,
+        5,
+        4
+      ],
+      "participants": {
+        "p1": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A"
+        },
+        "p2": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p3": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p4": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A"
+        },
+        "p5": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A"
+        },
+        "p6": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p7": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C"
+        },
+        "p8": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A"
+        },
+        "p9": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A"
+        },
+        "p10": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p11": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C"
+        },
+        "p12": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A"
+        },
+        "p13": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C"
+        },
+        "p14": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C"
+        },
+        "p15": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p16": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "payMethod": "Zelle",
+          "flight": "C"
+        },
+        "p17": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C"
+        },
+        "p18": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C"
+        },
+        "p19": {
+          "paid": false,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p20": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A"
+        },
+        "p21": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A"
+        },
+        "p22": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A"
+        },
+        "p23": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p24": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C"
+        },
+        "p25": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p26": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p27": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C"
+        },
+        "p28": {
+          "paid": false,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A"
+        },
+        "p29": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A"
+        },
+        "p30": {
+          "paid": false,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C"
+        },
+        "p31": {
+          "paid": false,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p32": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A"
+        },
+        "p33": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p34": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C"
+        }
+      },
+      "teams": [
+        {
+          "id": "tA-v6db",
+          "name": "Team A1",
+          "playerIds": [
+            "p8",
+            "p21"
+          ],
+          "flight": "A"
+        },
+        {
+          "id": "tA-vdzv",
+          "name": "Team A2",
+          "playerIds": [
+            "p4",
+            "p5"
+          ],
+          "flight": "A"
+        },
+        {
+          "id": "tA-vlse",
+          "name": "Team A3",
+          "playerIds": [
+            "p32",
+            "p1"
+          ],
+          "flight": "A"
+        },
+        {
+          "id": "tA-w4zm",
+          "name": "Team A4",
+          "playerIds": [
+            "p29",
+            "p20"
+          ],
+          "flight": "A"
+        },
+        {
+          "id": "tA-wegl",
+          "name": "Team A5",
+          "playerIds": [
+            "p12",
+            "p9"
+          ],
+          "flight": "A"
+        },
+        {
+          "id": "tA-wp83",
+          "name": "Team A6",
+          "playerIds": [
+            "p22",
+            "p28"
+          ],
+          "flight": "A"
+        },
+        {
+          "id": "tB-x173",
+          "name": "Team B1",
+          "playerIds": [
+            "p10",
+            "p19"
+          ],
+          "flight": "B"
+        },
+        {
+          "id": "tB-x8wf",
+          "name": "Team B2",
+          "playerIds": [
+            "p25",
+            "p6"
+          ],
+          "flight": "B"
+        },
+        {
+          "id": "tB-xgf9",
+          "name": "Team B3",
+          "playerIds": [
+            "p33",
+            "p15"
+          ],
+          "flight": "B"
+        },
+        {
+          "id": "tB-xojm",
+          "name": "Team B4",
+          "playerIds": [
+            "p2",
+            "p26"
+          ],
+          "flight": "B"
+        },
+        {
+          "id": "tB-xzed",
+          "name": "Team B5",
+          "playerIds": [
+            "p31",
+            "p3"
+          ],
+          "flight": "B"
+        },
+        {
+          "id": "tB-y47q",
+          "name": "Team B6",
+          "playerIds": [
+            "p23",
+            "p19"
+          ],
+          "flight": "B"
+        },
+        {
+          "id": "tC-yjff",
+          "name": "Team C1",
+          "playerIds": [
+            "p14",
+            "p11"
+          ],
+          "flight": "C"
+        },
+        {
+          "id": "tC-yrh0",
+          "name": "Team C2",
+          "playerIds": [
+            "p17",
+            "p13"
+          ],
+          "flight": "C"
+        },
+        {
+          "id": "tC-yza9",
+          "name": "Team C3",
+          "playerIds": [
+            "p24",
+            "p16"
+          ],
+          "flight": "C"
+        },
+        {
+          "id": "tC-z79z",
+          "name": "Team C4",
+          "playerIds": [
+            "p34",
+            "p30"
+          ],
+          "flight": "C"
+        },
+        {
+          "id": "tC-zg5w",
+          "name": "Team C5",
+          "playerIds": [
+            "p7",
+            "p18"
+          ],
+          "flight": "C"
+        },
+        {
+          "id": "tC-zl5z",
+          "name": "Team C6",
+          "playerIds": [
+            "p27",
+            "p24"
+          ],
+          "flight": "C"
+        }
+      ],
+      "draftLog": [
+        {
+          "flight": "A",
+          "ts": "2026-05-22T04:19:56.543Z",
+          "player1Id": "p8",
+          "player1Name": "Olived Gonzalez",
+          "player2Id": "p21",
+          "player2Name": "Rafael Zorrilla (Pichu)",
+          "teamName": "Team A1"
+        },
+        {
+          "flight": "A",
+          "ts": "2026-05-22T04:20:06.427Z",
+          "player1Id": "p4",
+          "player1Name": "Jay Gonzalez",
+          "player2Id": "p5",
+          "player2Name": "Juan Carlos Pichardo",
+          "teamName": "Team A2"
+        },
+        {
+          "flight": "A",
+          "ts": "2026-05-22T04:20:16.526Z",
+          "player1Id": "p32",
+          "player1Name": "Luis Carlo Rodriguez",
+          "player2Id": "p1",
+          "player2Name": "Jose Said Mella",
+          "teamName": "Team A3"
+        },
+        {
+          "flight": "A",
+          "ts": "2026-05-22T04:20:41.410Z",
+          "player1Id": "p29",
+          "player1Name": "Roberto Rodríguez",
+          "player2Id": "p20",
+          "player2Name": "Francisco Amauris Martinez",
+          "teamName": "Team A4"
+        },
+        {
+          "flight": "A",
+          "ts": "2026-05-22T04:20:53.685Z",
+          "player1Id": "p12",
+          "player1Name": "Oswaldo Rodriguez",
+          "player2Id": "p9",
+          "player2Name": "Renato Liriano",
+          "teamName": "Team A5"
+        },
+        {
+          "flight": "A",
+          "ts": "2026-05-22T04:21:07.635Z",
+          "player1Id": "p22",
+          "player1Name": "Edgar Alma",
+          "player2Id": "p28",
+          "player2Name": "Fernando Rodriguez",
+          "teamName": "Team A6"
+        },
+        {
+          "flight": "B",
+          "ts": "2026-05-22T04:21:23.151Z",
+          "player1Id": "p10",
+          "player1Name": "Billy Wilson Santos Calderon",
+          "player2Id": "p19",
+          "player2Name": "Yovanny Marte",
+          "teamName": "Team B1"
+        },
+        {
+          "flight": "B",
+          "ts": "2026-05-22T04:21:33.135Z",
+          "player1Id": "p25",
+          "player1Name": "Elcris Matias",
+          "player2Id": "p6",
+          "player2Name": "Jhonnatan Liriano",
+          "teamName": "Team B2"
+        },
+        {
+          "flight": "B",
+          "ts": "2026-05-22T04:21:42.885Z",
+          "player1Id": "p33",
+          "player1Name": "Ramses Atallah",
+          "player2Id": "p15",
+          "player2Name": "Raymundo Reyes",
+          "teamName": "Team B3"
+        },
+        {
+          "flight": "B",
+          "ts": "2026-05-22T04:21:53.410Z",
+          "player1Id": "p2",
+          "player1Name": "Ricardo Luis Mateo",
+          "player2Id": "p26",
+          "player2Name": "Magin Ferreiro",
+          "teamName": "Team B4"
+        },
+        {
+          "flight": "B",
+          "ts": "2026-05-22T04:22:07.477Z",
+          "player1Id": "p31",
+          "player1Name": "Mahler Nuñez",
+          "player2Id": "p3",
+          "player2Name": "Felix Olivo",
+          "teamName": "Team B5"
+        },
+        {
+          "flight": "B",
+          "ts": "2026-05-22T04:22:13.718Z",
+          "player1Id": "p23",
+          "player1Name": "Ramón Villanueva",
+          "player2Id": "p19",
+          "player2Name": "Yovanny Marte",
+          "teamName": "Team B6"
+        },
+        {
+          "flight": "C",
+          "ts": "2026-05-22T04:22:33.435Z",
+          "player1Id": "p14",
+          "player1Name": "Ernesto Julian",
+          "player2Id": "p11",
+          "player2Name": "Priamo Lopez",
+          "teamName": "Team C1"
+        },
+        {
+          "flight": "C",
+          "ts": "2026-05-22T04:22:43.860Z",
+          "player1Id": "p17",
+          "player1Name": "Cesar Rojas",
+          "player2Id": "p13",
+          "player2Name": "Joan Jiménez",
+          "teamName": "Team C2"
+        },
+        {
+          "flight": "C",
+          "ts": "2026-05-22T04:22:53.985Z",
+          "player1Id": "p24",
+          "player1Name": "Tom Nuñez",
+          "player2Id": "p16",
+          "player2Name": "Jose Luis Castillo",
+          "teamName": "Team C3"
+        },
+        {
+          "flight": "C",
+          "ts": "2026-05-22T04:23:04.343Z",
+          "player1Id": "p34",
+          "player1Name": "Rene Castillo",
+          "player2Id": "p30",
+          "player2Name": "Jorge Rojas",
+          "teamName": "Team C4"
+        },
+        {
+          "flight": "C",
+          "ts": "2026-05-22T04:23:15.860Z",
+          "player1Id": "p7",
+          "player1Name": "Ian Toro",
+          "player2Id": "p18",
+          "player2Name": "Marx Toro",
+          "teamName": "Team C5"
+        },
+        {
+          "flight": "C",
+          "ts": "2026-05-22T04:23:22.343Z",
+          "player1Id": "p27",
+          "player1Name": "Rafael Rubiera",
+          "player2Id": "p24",
+          "player2Name": "Tom Nuñez",
+          "teamName": "Team C6"
+        }
+      ],
+      "flightConfig": {
+        "flights": [
+          "A",
+          "B",
+          "C"
+        ],
+        "cutoffs": [
+          9.7,
+          15.6
+        ]
+      },
+      "scores": {
+        "p10": [
+          5,
+          5,
+          4,
+          6,
+          5,
+          6,
+          5,
+          4,
+          5,
+          5,
+          4,
+          10,
+          8,
+          6,
+          4,
+          6,
+          5,
+          5
+        ],
+        "p17": [
+          5,
+          8,
+          5,
+          4,
+          8,
+          9,
+          7,
+          6,
+          7,
+          4,
+          5,
+          10,
+          6,
+          5,
+          3,
+          10,
+          8,
+          9
+        ],
+        "p22": [
+          4,
+          2,
+          4,
+          4,
+          4,
+          3,
+          3,
+          4,
+          4,
+          4,
+          3,
+          4,
+          4,
+          4,
+          3,
+          7,
+          5,
+          4
+        ],
+        "p25": [
+          5,
+          6,
+          4,
+          7,
+          7,
+          6,
+          4,
+          5,
+          10,
+          6,
+          5,
+          7,
+          4,
+          4,
+          3,
+          7,
+          5,
+          4
+        ],
+        "p14": [
+          8,
+          5,
+          7,
+          7,
+          7,
+          8,
+          6,
+          4,
+          5,
+          8,
+          4,
+          7,
+          6,
+          6,
+          7,
+          6,
+          6,
+          5
+        ],
+        "p3": [
+          6,
+          5,
+          4,
+          5,
+          5,
+          5,
+          9,
+          4,
+          5,
+          5,
+          3,
+          7,
+          6,
+          5,
+          3,
+          4,
+          7,
+          6
+        ],
+        "p28": [
+          5,
+          4,
+          4,
+          6,
+          5,
+          6,
+          5,
+          5,
+          4,
+          4,
+          3,
+          5,
+          4,
+          6,
+          3,
+          5,
+          8,
+          6
+        ],
+        "p20": [
+          5,
+          4,
+          4,
+          7,
+          3,
+          4,
+          5,
+          3,
+          4,
+          7,
+          3,
+          5,
+          5,
+          5,
+          3,
+          4,
+          6,
+          6
+        ],
+        "p7": [
+          6,
+          6,
+          6,
+          5,
+          7,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          4,
+          5,
+          5,
+          6,
+          5,
+          6
+        ],
+        "p4": [
+          4,
+          4,
+          3,
+          5,
+          5,
+          5,
+          6,
+          4,
+          5,
+          6,
+          3,
+          4,
+          5,
+          5,
+          4,
+          4,
+          5,
+          4
+        ],
+        "p6": [
+          4,
+          6,
+          4,
+          5,
+          9,
+          5,
+          4,
+          5,
+          8,
+          5,
+          3,
+          6,
+          6,
+          4,
+          4,
+          7,
+          7,
+          4
+        ],
+        "p13": [
+          5,
+          5,
+          7,
+          7,
+          9,
+          6,
+          8,
+          4,
+          6,
+          7,
+          3,
+          5,
+          7,
+          6,
+          4,
+          5,
+          7,
+          5
+        ],
+        "p30": [
+          6,
+          6,
+          6,
+          6,
+          8,
+          5,
+          8,
+          5,
+          4,
+          5,
+          4,
+          8,
+          6,
+          6,
+          6,
+          5,
+          5,
+          5
+        ],
+        "p16": [
+          8,
+          4,
+          5,
+          5,
+          8,
+          7,
+          8,
+          4,
+          4,
+          6,
+          4,
+          8,
+          5,
+          5,
+          3,
+          7,
+          8,
+          8
+        ],
+        "p1": [
+          8,
+          4,
+          3,
+          5,
+          4,
+          4,
+          5,
+          5,
+          4,
+          4,
+          5,
+          5,
+          5,
+          4,
+          2,
+          4,
+          5,
+          4
+        ],
+        "p5": [
+          6,
+          5,
+          6,
+          5,
+          8,
+          6,
+          4,
+          6,
+          6,
+          4,
+          3,
+          4,
+          5,
+          10,
+          3,
+          4,
+          7,
+          4
+        ],
+        "p32": [
+          4,
+          4,
+          7,
+          6,
+          7,
+          5,
+          8,
+          4,
+          6,
+          4,
+          4,
+          6,
+          4,
+          5,
+          3,
+          4,
+          6,
+          6
+        ],
+        "p26": [
+          5,
+          7,
+          3,
+          4,
+          5,
+          7,
+          6,
+          4,
+          5,
+          3,
+          6,
+          7,
+          7,
+          4,
+          5,
+          6,
+          7,
+          4
+        ],
+        "p31": [
+          7,
+          7,
+          3,
+          5,
+          7,
+          5,
+          6,
+          3,
+          5,
+          4,
+          3,
+          6,
+          5,
+          5,
+          4,
+          5,
+          6,
+          5
+        ],
+        "p18": [
+          4,
+          5,
+          5,
+          7,
+          6,
+          4,
+          8,
+          7,
+          4,
+          7,
+          4,
+          6,
+          4,
+          5,
+          3,
+          4,
+          5,
+          5
+        ],
+        "p8": [
+          4,
+          5,
+          4,
+          5,
+          4,
+          6,
+          4,
+          5,
+          4,
+          5,
+          5,
+          4,
+          5,
+          4,
+          4,
+          4,
+          5,
+          4
+        ],
+        "p12": [
+          7,
+          5,
+          5,
+          5,
+          6,
+          5,
+          5,
+          5,
+          4,
+          5,
+          3,
+          5,
+          5,
+          7,
+          4,
+          7,
+          5,
+          4
+        ],
+        "p11": [
+          7,
+          5,
+          6,
+          6,
+          6,
+          5,
+          5,
+          5,
+          7,
+          6,
+          4,
+          8,
+          8,
+          8,
+          5,
+          6,
+          7,
+          6
+        ],
+        "p27": [
+          9,
+          7,
+          4,
+          5,
+          7,
+          5,
+          6,
+          5,
+          4,
+          7,
+          4,
+          8,
+          6,
+          5,
+          2,
+          7,
+          7,
+          7
+        ],
+        "p21": [
+          5,
+          3,
+          4,
+          5,
+          5,
+          4,
+          5,
+          4,
+          5,
+          7,
+          3,
+          6,
+          3,
+          6,
+          3,
+          4,
+          5,
+          5
+        ],
+        "p23": [
+          5,
+          6,
+          4,
+          6,
+          4,
+          5,
+          4,
+          4,
+          5,
+          5,
+          2,
+          7,
+          4,
+          6,
+          4,
+          7,
+          5,
+          7
+        ],
+        "p33": [
+          6,
+          6,
+          4,
+          6,
+          7,
+          5,
+          6,
+          4,
+          7,
+          5,
+          5,
+          4,
+          5,
+          6,
+          3,
+          5,
+          8,
+          4
+        ],
+        "p15": [
+          7,
+          4,
+          4,
+          5,
+          5,
+          6,
+          5,
+          5,
+          5,
+          4,
+          3,
+          5,
+          5,
+          6,
+          4,
+          4,
+          5,
+          5
+        ],
+        "p9": [
+          5,
+          5,
+          3,
+          3,
+          4,
+          4,
+          5,
+          5,
+          8,
+          5,
+          4,
+          8,
+          4,
+          5,
+          4,
+          5,
+          5,
+          7
+        ],
+        "p34": [
+          7,
+          6,
+          7,
+          5,
+          7,
+          5,
+          5,
+          5,
+          6,
+          6,
+          4,
+          7,
+          5,
+          5,
+          4,
+          5,
+          8,
+          8
+        ],
+        "p2": [
+          5,
+          4,
+          5,
+          7,
+          5,
+          6,
+          5,
+          6,
+          4,
+          5,
+          4,
+          5,
+          4,
+          6,
+          3,
+          5,
+          7,
+          5
+        ],
+        "p29": [
+          6,
+          4,
+          3,
+          5,
+          6,
+          6,
+          8,
+          5,
+          5,
+          7,
+          5,
+          4,
+          6,
+          5,
+          4,
+          4,
+          6,
+          5
+        ],
+        "p24": [
+          6,
+          10,
+          10,
+          6,
+          5,
+          6,
+          6,
+          6,
+          6,
+          7,
+          6,
+          5,
+          5,
+          7,
+          4,
+          6,
+          6,
+          6
+        ],
+        "p19": [
+          6,
+          5,
+          4,
+          6,
+          4,
+          4,
+          3,
+          4,
+          5,
+          4,
+          5,
+          5,
+          4,
+          6,
+          3,
+          5,
+          5,
+          4
+        ]
+      },
+      "locked": false
+    },
+    {
+      "id": "r4",
+      "number": 4,
+      "courseName": "Copper Rock Golf Course",
+      "date": "2026-05-22",
+      "teeTime": "10:24 AM MT",
+      "teesByCategory": {
+        "A": {
+          "name": "Black",
+          "slopeRating": 130,
+          "courseRating": 72.1
+        },
+        "B": {
+          "name": "Gold",
+          "slopeRating": 125,
+          "courseRating": 69.2
+        },
+        "C": {
+          "name": "Gold",
+          "slopeRating": 125,
+          "courseRating": 69.2
+        }
+      },
+      "holeIndexes": [
+        16,
+        2,
+        12,
+        14,
+        8,
+        18,
+        4,
+        6,
+        10,
+        7,
+        9,
+        13,
+        1,
+        3,
+        17,
+        11,
+        15,
+        5
+      ],
+      "pars": [
+        5,
+        4,
+        4,
+        3,
+        5,
+        4,
+        3,
+        4,
+        4,
+        4,
+        4,
+        5,
+        4,
+        4,
+        3,
+        5,
+        3,
+        4
+      ],
+      "participants": {
+        "p1": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A"
+        },
+        "p2": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p3": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p4": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A"
+        },
+        "p5": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A"
+        },
+        "p6": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p7": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C",
+          "teeOverride": "B"
+        },
+        "p8": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A"
+        },
+        "p9": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A"
+        },
+        "p10": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p11": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C",
+          "teeOverride": "B"
+        },
+        "p12": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A"
+        },
+        "p13": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C",
+          "teeOverride": "B"
+        },
+        "p14": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C",
+          "teeOverride": "B"
+        },
+        "p15": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p16": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "payMethod": "Zelle",
+          "flight": "C",
+          "teeOverride": "B"
+        },
+        "p17": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C",
+          "teeOverride": "B"
+        },
+        "p18": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C",
+          "teeOverride": "B"
+        },
+        "p19": {
+          "paid": false,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p20": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A"
+        },
+        "p21": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A"
+        },
+        "p22": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A",
+          "playerTee": {
+            "name": "Copper",
+            "slopeRating": 135,
+            "courseRating": 74.9,
+            "ratingPar": 71
+          }
+        },
+        "p23": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p24": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C",
+          "teeOverride": "B"
+        },
+        "p25": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p26": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p27": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C",
+          "teeOverride": "B"
+        },
+        "p28": {
+          "paid": false,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A"
+        },
+        "p29": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A"
+        },
+        "p30": {
+          "paid": false,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C",
+          "teeOverride": "B"
+        },
+        "p31": {
+          "paid": false,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "B"
+        },
+        "p32": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "A"
+        },
+        "p33": {
+          "paid": false,
+          "active": false,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p34": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true,
+          "flight": "C",
+          "teeOverride": "B"
+        }
+      },
+      "teams": [
+        {
+          "id": "tA-x86l",
+          "name": "Team A1",
+          "playerIds": [
+            "p5",
+            "p4"
+          ],
+          "flight": "A"
+        },
+        {
+          "id": "tA-xidq",
+          "name": "Team A2",
+          "playerIds": [
+            "p12",
+            "p1"
+          ],
+          "flight": "A"
+        },
+        {
+          "id": "tA-xqmz",
+          "name": "Team A3",
+          "playerIds": [
+            "p28",
+            "p22"
+          ],
+          "flight": "A"
+        },
+        {
+          "id": "tA-y269",
+          "name": "Team A4",
+          "playerIds": [
+            "p20",
+            "p9"
+          ],
+          "flight": "A"
+        },
+        {
+          "id": "tA-yawm",
+          "name": "Team A5",
+          "playerIds": [
+            "p32",
+            "p21"
+          ],
+          "flight": "A"
+        },
+        {
+          "id": "tA-yj69",
+          "name": "Team A6",
+          "playerIds": [
+            "p8",
+            "p29"
+          ],
+          "flight": "A"
+        },
+        {
+          "id": "tB-yy0i",
+          "name": "Team B1",
+          "playerIds": [
+            "p25",
+            "p2"
+          ],
+          "flight": "B"
+        },
+        {
+          "id": "tB-z5t3",
+          "name": "Team B2",
+          "playerIds": [
+            "p3",
+            "p10"
+          ],
+          "flight": "B"
+        },
+        {
+          "id": "tB-zdty",
+          "name": "Team B3",
+          "playerIds": [
+            "p31",
+            "p23"
+          ],
+          "flight": "B"
+        },
+        {
+          "id": "tB-zlsz",
+          "name": "Team B4",
+          "playerIds": [
+            "p6",
+            "p26"
+          ],
+          "flight": "B"
+        },
+        {
+          "id": "tB-zv1v",
+          "name": "Team B5",
+          "playerIds": [
+            "p19",
+            "p15"
+          ],
+          "flight": "B"
+        },
+        {
+          "id": "tC-08v3",
+          "name": "Team C1",
+          "playerIds": [
+            "p13",
+            "p14"
+          ],
+          "flight": "C"
+        },
+        {
+          "id": "tC-0gt8",
+          "name": "Team C2",
+          "playerIds": [
+            "p16",
+            "p24"
+          ],
+          "flight": "C"
+        },
+        {
+          "id": "tC-0ou3",
+          "name": "Team C3",
+          "playerIds": [
+            "p18",
+            "p17"
+          ],
+          "flight": "C"
+        },
+        {
+          "id": "tC-0wlq",
+          "name": "Team C4",
+          "playerIds": [
+            "p30",
+            "p34"
+          ],
+          "flight": "C"
+        },
+        {
+          "id": "tC-14ea",
+          "name": "Team C5",
+          "playerIds": [
+            "p27",
+            "p11"
+          ],
+          "flight": "C"
+        },
+        {
+          "id": "tC-19ao",
+          "name": "Team C6",
+          "playerIds": [
+            "p7",
+            "p30"
+          ],
+          "flight": "C"
+        }
+      ],
+      "draftLog": [
+        {
+          "flight": "A",
+          "ts": "2026-05-23T02:17:14.157Z",
+          "player1Id": "p5",
+          "player1Name": "Juan Carlos Pichardo",
+          "player2Id": "p4",
+          "player2Name": "Jay Gonzalez",
+          "teamName": "Team A1"
+        },
+        {
+          "flight": "A",
+          "ts": "2026-05-23T02:17:27.374Z",
+          "player1Id": "p12",
+          "player1Name": "Oswaldo Rodriguez",
+          "player2Id": "p1",
+          "player2Name": "Jose Said Mella",
+          "teamName": "Team A2"
+        },
+        {
+          "flight": "A",
+          "ts": "2026-05-23T02:17:38.075Z",
+          "player1Id": "p28",
+          "player1Name": "Fernando Rodriguez",
+          "player2Id": "p22",
+          "player2Name": "Edgar Alma",
+          "teamName": "Team A3"
+        },
+        {
+          "flight": "A",
+          "ts": "2026-05-23T02:17:53.025Z",
+          "player1Id": "p20",
+          "player1Name": "Francisco Amauris Martinez",
+          "player2Id": "p9",
+          "player2Name": "Renato Liriano",
+          "teamName": "Team A4"
+        },
+        {
+          "flight": "A",
+          "ts": "2026-05-23T02:18:04.342Z",
+          "player1Id": "p32",
+          "player1Name": "Luis Carlo Rodriguez",
+          "player2Id": "p21",
+          "player2Name": "Rafael Zorrilla (Pichu)",
+          "teamName": "Team A5"
+        },
+        {
+          "flight": "A",
+          "ts": "2026-05-23T02:18:15.057Z",
+          "player1Id": "p8",
+          "player1Name": "Olived Gonzalez",
+          "player2Id": "p29",
+          "player2Name": "Roberto Rodríguez",
+          "teamName": "Team A6"
+        },
+        {
+          "flight": "B",
+          "ts": "2026-05-23T02:18:34.290Z",
+          "player1Id": "p25",
+          "player1Name": "Elcris Matias",
+          "player2Id": "p2",
+          "player2Name": "Ricardo Luis Mateo",
+          "teamName": "Team B1"
+        },
+        {
+          "flight": "B",
+          "ts": "2026-05-23T02:18:44.391Z",
+          "player1Id": "p3",
+          "player1Name": "Felix Olivo",
+          "player2Id": "p10",
+          "player2Name": "Billy Wilson Santos Calderon",
+          "teamName": "Team B2"
+        },
+        {
+          "flight": "B",
+          "ts": "2026-05-23T02:18:54.791Z",
+          "player1Id": "p31",
+          "player1Name": "Mahler Nuñez",
+          "player2Id": "p23",
+          "player2Name": "Ramón Villanueva",
+          "teamName": "Team B3"
+        },
+        {
+          "flight": "B",
+          "ts": "2026-05-23T02:19:05.123Z",
+          "player1Id": "p6",
+          "player1Name": "Jhonnatan Liriano",
+          "player2Id": "p26",
+          "player2Name": "Magin Ferreiro",
+          "teamName": "Team B4"
+        },
+        {
+          "flight": "B",
+          "ts": "2026-05-23T02:19:17.107Z",
+          "player1Id": "p19",
+          "player1Name": "Yovanny Marte",
+          "player2Id": "p15",
+          "player2Name": "Raymundo Reyes",
+          "teamName": "Team B5"
+        },
+        {
+          "flight": "C",
+          "ts": "2026-05-23T02:19:35.007Z",
+          "player1Id": "p13",
+          "player1Name": "Joan Jiménez",
+          "player2Id": "p14",
+          "player2Name": "Ernesto Julian",
+          "teamName": "Team C1"
+        },
+        {
+          "flight": "C",
+          "ts": "2026-05-23T02:19:45.308Z",
+          "player1Id": "p16",
+          "player1Name": "Jose Luis Castillo",
+          "player2Id": "p24",
+          "player2Name": "Tom Nuñez",
+          "teamName": "Team C2"
+        },
+        {
+          "flight": "C",
+          "ts": "2026-05-23T02:19:55.707Z",
+          "player1Id": "p18",
+          "player1Name": "Marx Toro",
+          "player2Id": "p17",
+          "player2Name": "Cesar Rojas",
+          "teamName": "Team C3"
+        },
+        {
+          "flight": "C",
+          "ts": "2026-05-23T02:20:05.774Z",
+          "player1Id": "p30",
+          "player1Name": "Jorge Rojas",
+          "player2Id": "p34",
+          "player2Name": "Rene Castillo",
+          "teamName": "Team C4"
+        },
+        {
+          "flight": "C",
+          "ts": "2026-05-23T02:20:15.874Z",
+          "player1Id": "p27",
+          "player1Name": "Rafael Rubiera",
+          "player2Id": "p11",
+          "player2Name": "Priamo Lopez",
+          "teamName": "Team C5"
+        },
+        {
+          "flight": "C",
+          "ts": "2026-05-23T02:20:22.224Z",
+          "player1Id": "p7",
+          "player1Name": "Ian Toro",
+          "player2Id": "p30",
+          "player2Name": "Jorge Rojas",
+          "teamName": "Team C6"
+        }
+      ],
+      "flightConfig": {
+        "flights": [
+          "A",
+          "B",
+          "C"
+        ],
+        "cutoffs": [
+          9.5,
+          15.6
+        ]
+      },
+      "scores": {
+        "p10": [
+          4,
+          5,
+          6,
+          4,
+          5,
+          6,
+          3,
+          4,
+          4,
+          6,
+          7,
+          5,
+          6,
+          5,
+          4,
+          6,
+          4,
+          5
+        ],
+        "p17": [
+          7,
+          6,
+          6,
+          4,
+          6,
+          5,
+          4,
+          6,
+          5,
+          9,
+          5,
+          6,
+          6,
+          7,
+          4,
+          7,
+          7,
+          6
+        ],
+        "p22": [
+          4,
+          4,
+          4,
+          4,
+          3,
+          4,
+          3,
+          5,
+          4,
+          5,
+          4,
+          4,
+          4,
+          6,
+          3,
+          5,
+          4,
+          3
+        ],
+        "p25": [
+          5,
+          5,
+          8,
+          4,
+          6,
+          5,
+          7,
+          5,
+          5,
+          5,
+          6,
+          6,
+          7,
+          8,
+          2,
+          4,
+          3,
+          5
+        ],
+        "p14": [
+          5,
+          8,
+          6,
+          5,
+          7,
+          6,
+          3,
+          7,
+          6,
+          6,
+          6,
+          6,
+          8,
+          8,
+          6,
+          7,
+          3,
+          6
+        ],
+        "p3": [
+          6,
+          5,
+          6,
+          4,
+          5,
+          5,
+          4,
+          4,
+          4,
+          4,
+          4,
+          5,
+          5,
+          6,
+          3,
+          5,
+          3,
+          5
+        ],
+        "p28": [
+          5,
+          4,
+          5,
+          3,
+          5,
+          5,
+          3,
+          4,
+          4,
+          6,
+          5,
+          5,
+          4,
+          5,
+          3,
+          5,
+          3,
+          4
+        ],
+        "p20": [
+          6,
+          4,
+          4,
+          3,
+          6,
+          5,
+          4,
+          4,
+          5,
+          5,
+          5,
+          7,
+          9,
+          5,
+          3,
+          4,
+          2,
+          4
+        ],
+        "p7": [
+          6,
+          6,
+          6,
+          3,
+          6,
+          6,
+          5,
+          5,
+          4,
+          5,
+          6,
+          10,
+          4,
+          7,
+          4,
+          7,
+          3,
+          6
+        ],
+        "p4": [
+          5,
+          4,
+          3,
+          4,
+          5,
+          4,
+          3,
+          4,
+          4,
+          4,
+          3,
+          5,
+          4,
+          4,
+          3,
+          6,
+          3,
+          5
+        ],
+        "p6": [
+          4,
+          6,
+          7,
+          2,
+          6,
+          4,
+          5,
+          5,
+          4,
+          6,
+          4,
+          6,
+          4,
+          5,
+          3,
+          7,
+          3,
+          8
+        ],
+        "p13": [
+          6,
+          6,
+          8,
+          4,
+          5,
+          5,
+          5,
+          6,
+          4,
+          6,
+          5,
+          7,
+          6,
+          6,
+          4,
+          7,
+          3,
+          6
+        ],
+        "p30": [
+          5,
+          6,
+          5,
+          4,
+          5,
+          5,
+          5,
+          5,
+          6,
+          6,
+          4,
+          5,
+          6,
+          6,
+          4,
+          7,
+          5,
+          7
+        ],
+        "p16": [
+          4,
+          7,
+          5,
+          4,
+          9,
+          6,
+          4,
+          7,
+          7,
+          5,
+          4,
+          8,
+          8,
+          7,
+          5,
+          6,
+          4,
+          7
+        ],
+        "p1": [
+          5,
+          4,
+          4,
+          3,
+          5,
+          4,
+          3,
+          4,
+          4,
+          5,
+          4,
+          6,
+          5,
+          6,
+          3,
+          5,
+          3,
+          4
+        ],
+        "p5": [
+          5,
+          6,
+          4,
+          3,
+          5,
+          4,
+          3,
+          5,
+          6,
+          5,
+          7,
+          6,
+          6,
+          4,
+          3,
+          7,
+          3,
+          5
+        ],
+        "p32": [
+          5,
+          5,
+          5,
+          3,
+          7,
+          4,
+          4,
+          7,
+          5,
+          4,
+          4,
+          6,
+          4,
+          4,
+          3,
+          5,
+          5,
+          4
+        ],
+        "p26": [
+          5,
+          4,
+          6,
+          3,
+          7,
+          6,
+          3,
+          4,
+          4,
+          5,
+          5,
+          5,
+          5,
+          6,
+          4,
+          5,
+          4,
+          5
+        ],
+        "p31": [
+          5,
+          4,
+          4,
+          4,
+          8,
+          5,
+          4,
+          7,
+          4,
+          4,
+          4,
+          7,
+          6,
+          6,
+          3,
+          6,
+          3,
+          8
+        ],
+        "p18": [
+          5,
+          5,
+          6,
+          5,
+          6,
+          4,
+          3,
+          6,
+          5,
+          5,
+          7,
+          6,
+          6,
+          5,
+          3,
+          7,
+          3,
+          4
+        ],
+        "p8": [
+          5,
+          4,
+          5,
+          3,
+          6,
+          5,
+          4,
+          4,
+          4,
+          8,
+          5,
+          6,
+          5,
+          6,
+          3,
+          5,
+          3,
+          5
+        ],
+        "p12": [
+          4,
+          6,
+          4,
+          4,
+          6,
+          4,
+          3,
+          4,
+          5,
+          5,
+          4,
+          5,
+          6,
+          4,
+          4,
+          6,
+          4,
+          5
+        ],
+        "p11": [
+          6,
+          6,
+          6,
+          5,
+          4,
+          5,
+          4,
+          6,
+          6,
+          5,
+          6,
+          10,
+          6,
+          6,
+          4,
+          7,
+          3,
+          6
+        ],
+        "p27": [
+          7,
+          6,
+          5,
+          4,
+          8,
+          6,
+          3,
+          7,
+          7,
+          5,
+          7,
+          8,
+          6,
+          6,
+          4,
+          6,
+          5,
+          6
+        ],
+        "p21": [
+          5,
+          5,
+          3,
+          3,
+          6,
+          5,
+          5,
+          5,
+          6,
+          4,
+          4,
+          6,
+          8,
+          8,
+          5,
+          6,
+          4,
+          6
+        ],
+        "p23": [
+          3,
+          5,
+          4,
+          5,
+          8,
+          4,
+          6,
+          5,
+          5,
+          5,
+          6,
+          5,
+          5,
+          6,
+          3,
+          4,
+          5,
+          5
+        ],
+        "p15": [
+          6,
+          5,
+          4,
+          5,
+          6,
+          4,
+          3,
+          5,
+          4,
+          6,
+          4,
+          7,
+          5,
+          6,
+          4,
+          6,
+          4,
+          5
+        ],
+        "p9": [
+          6,
+          8,
+          5,
+          5,
+          6,
+          3,
+          4,
+          7,
+          5,
+          6,
+          6,
+          7,
+          7,
+          5,
+          5,
+          6,
+          4,
+          5
+        ],
+        "p34": [
+          7,
+          4,
+          4,
+          3,
+          7,
+          6,
+          4,
+          5,
+          6,
+          6,
+          6,
+          6,
+          6,
+          7,
+          3,
+          6,
+          3,
+          7
+        ],
+        "p2": [
+          5,
+          5,
+          4,
+          3,
+          7,
+          4,
+          5,
+          5,
+          4,
+          4,
+          4,
+          6,
+          4,
+          6,
+          4,
+          6,
+          4,
+          4
+        ],
+        "p29": [
+          5,
+          6,
+          4,
+          3,
+          5,
+          4,
+          6,
+          4,
+          7,
+          5,
+          4,
+          6,
+          4,
+          5,
+          5,
+          6,
+          6,
+          4
+        ],
+        "p24": [
+          7,
+          5,
+          6,
+          6,
+          8,
+          6,
+          6,
+          6,
+          7,
+          6,
+          5,
+          6,
+          5,
+          6,
+          5,
+          9,
+          5,
+          5
+        ],
+        "p19": [
+          4,
+          5,
+          6,
+          3,
+          5,
+          4,
+          4,
+          5,
+          4,
+          7,
+          6,
+          6,
+          5,
+          4,
+          4,
+          5,
+          3,
+          4
+        ]
+      },
+      "locked": false
+    },
+    {
+      "id": "r5",
+      "number": 5,
+      "courseName": "Sand Hollow Championship",
+      "date": "2026-05-23",
+      "teeTime": "10:49 AM MT",
+      "teesByCategory": {
+        "A": {
+          "name": "Championship",
+          "slopeRating": 132,
+          "courseRating": 72.2
+        },
+        "B": {
+          "name": "Fought-Combo",
+          "slopeRating": 116,
+          "courseRating": 67.5
+        }
+      },
+      "holeIndexes": [
+        15,
+        7,
+        17,
+        5,
+        13,
+        1,
+        3,
+        11,
+        9,
+        10,
+        16,
+        2,
+        14,
+        4,
+        8,
+        18,
+        12,
+        6
+      ],
+      "pars": [
+        4,
+        5,
+        3,
+        4,
+        4,
+        4,
+        5,
+        3,
+        4,
+        5,
+        3,
+        4,
+        4,
+        4,
+        3,
+        4,
+        5,
+        4
+      ],
+      "participants": {
+        "p1": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p2": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p3": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p4": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p5": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p6": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p7": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p8": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p9": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p10": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p11": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p12": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p13": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p14": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p15": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p16": {
+          "paid": false,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p17": {
+          "paid": false,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p18": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p19": {
+          "paid": false,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p20": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p21": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p22": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p23": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p24": {
+          "paid": false,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p25": {
+          "paid": false,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p26": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p27": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p28": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p29": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p30": {
+          "paid": false,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p31": {
+          "paid": false,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p32": {
+          "paid": true,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p33": {
+          "paid": false,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        },
+        "p34": {
+          "paid": false,
+          "active": true,
+          "inSkins": true,
+          "inIndividualNet": true,
+          "inBestBall": true
+        }
+      },
+      "teams": [],
+      "draftLog": [],
+      "flightConfig": null,
+      "scores": {},
+      "locked": false
+    }
+  ]
+}
