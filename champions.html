@@ -54,6 +54,11 @@
     const chOv = round?.participants?.[player?.id]?.chOverride;
     if (chOv != null && chOv !== "" && isFinite(Number(chOv))) return Number(chOv);
     const flight = flightForRound(round, player);
+    // Inline tee override for a specific Flight A player (playerTee stored directly in participants)
+    const playerTee = round?.participants?.[player?.id]?.playerTee;
+    if (flight === "A" && playerTee && (playerTee.slopeRating != null || playerTee.courseRating != null)) {
+      return courseHandicap(player?.handicapIndex, playerTee.slopeRating, playerTee.courseRating, sumPars(round.pars), playerTee.ratingPar);
+    }
     const teeOverride = round?.participants?.[player?.id]?.teeOverride;
     const tee = teeForPlayer(round, flight, teeOverride);
     return courseHandicap(player?.handicapIndex, tee.slopeRating, tee.courseRating, sumPars(round.pars), tee.ratingPar);
@@ -62,10 +67,12 @@
     const chOv = round?.participants?.[player?.id]?.chOverride;
     const chIsManual = chOv != null && chOv !== "" && isFinite(Number(chOv));
     const flight = flightForRound(round, player);
+    const playerTee = round?.participants?.[player?.id]?.playerTee;
+    const hasPlayerTee = flight === "A" && playerTee && (playerTee.slopeRating != null || playerTee.courseRating != null);
     const teeOverride = round?.participants?.[player?.id]?.teeOverride;
-    const tee = teeForPlayer(round, flight, teeOverride);
+    const tee = hasPlayerTee ? { ...playerTee, _key: "playerTee" } : teeForPlayer(round, flight, teeOverride);
     const ch = chIsManual ? Number(chOv) : courseHandicap(player?.handicapIndex, tee.slopeRating, tee.courseRating, sumPars(round.pars), tee.ratingPar);
-    return { ch, teeName: tee.name || tee._key || flight, teeKey: tee._key || flight, isOverride: !!teeOverride && teeOverride !== flight, chIsManual };
+    return { ch, teeName: tee.name || tee._key || flight, teeKey: tee._key || flight, isOverride: hasPlayerTee || (!!teeOverride && teeOverride !== flight), chIsManual };
   }
   const skinsHcp = (h) => clamp(Math.round(0.75 * Number(h)), -18, 18);
   function strokesOnHole(hcp, holeStrokeIndex) {
@@ -1494,6 +1501,17 @@ ${unmatched.length} nombre(s) sin match ser\xE1n ignorados.` : "")
     );
   }
   function CoursePanel({ round, players, updateRound }) {
+    const [expandedPlayer, setExpandedPlayer] = React.useState(null);
+    const setPlayerTee = (pid, patch) => {
+      const old = round.participants[pid] || {};
+      if (patch === null) {
+        const { playerTee: _removed, ...rest } = old;
+        updateRound({ participants: { ...round.participants, [pid]: rest } });
+      } else {
+        const oldPT = old.playerTee || {};
+        updateRound({ participants: { ...round.participants, [pid]: { ...old, playerTee: { ...oldPT, ...patch } } } });
+      }
+    };
     const setIdx = (h, val) => {
       const arr = [...round.holeIndexes];
       arr[h] = Number(val) || 0;
@@ -1523,6 +1541,79 @@ ${unmatched.length} nombre(s) sin match ser\xE1n ignorados.` : "")
       })).sort((a, b) => a.ch - b.ch);
       return { cat, list };
     });
+    const renderPlayerRows = (cat, list) => {
+      if (cat !== "A") {
+        return list.map((p) => React.createElement("tr", { key: p.id, style: { borderBottom: `1px solid ${palette.rule}` } },
+          React.createElement("td", { className: "px-3 py-2" }, p.name),
+          React.createElement("td", { className: "px-3 py-2 text-right" }, p.index),
+          React.createElement("td", { className: "px-3 py-2 text-right", style: { fontWeight: 600 } }, p.ch),
+          React.createElement("td", { className: "px-3 py-2 text-right", style: { color: palette.inkSoft } }, skinsHcp(p.ch))
+        ));
+      }
+      return list.flatMap((p) => {
+        const isExpanded = expandedPlayer === p.id;
+        const pt = round.participants[p.id]?.playerTee;
+        const hasOverride = pt && (pt.slopeRating != null || pt.courseRating != null);
+        const rows = [
+          React.createElement("tr", { key: p.id, style: { borderBottom: isExpanded ? "none" : `1px solid ${palette.rule}` } },
+            React.createElement("td", { className: "px-3 py-2" },
+              React.createElement("div", { className: "flex items-center gap-1" },
+                p.name,
+                !round.locked && React.createElement("button", {
+                  onClick: () => setExpandedPlayer(isExpanded ? null : p.id),
+                  title: "Tee personalizado para este jugador",
+                  style: {
+                    marginLeft: 4, fontSize: 10, padding: "1px 5px", borderRadius: 2,
+                    border: `1px solid ${hasOverride ? palette.gold : palette.rule}`,
+                    background: hasOverride ? "#FAF7EE" : "transparent",
+                    color: hasOverride ? palette.gold : palette.inkSoft,
+                    cursor: "pointer", lineHeight: 1.4
+                  }
+                }, hasOverride ? `⛳ ${pt.name || "custom"}` : "⛳")
+              )
+            ),
+            React.createElement("td", { className: "px-3 py-2 text-right" }, p.index),
+            React.createElement("td", { className: "px-3 py-2 text-right", style: { fontWeight: 600, color: hasOverride ? palette.gold : "inherit" } }, p.ch),
+            React.createElement("td", { className: "px-3 py-2 text-right", style: { color: palette.inkSoft } }, skinsHcp(p.ch))
+          )
+        ];
+        if (isExpanded) {
+          rows.push(
+            React.createElement("tr", { key: p.id + "_tee", style: { borderBottom: `1px solid ${palette.rule}`, background: "#FAF7EE" } },
+              React.createElement("td", { colSpan: 4, className: "px-3 pb-3 pt-1" },
+                React.createElement("div", { className: "flex flex-wrap items-end gap-3" },
+                  React.createElement("div", null,
+                    React.createElement("label", { className: "text-xs uppercase tracking-wider", style: { color: palette.inkSoft } }, "Tee"),
+                    React.createElement("div", { className: "mt-1" }, React.createElement(TextInput, { value: pt?.name ?? "", onChange: (v) => setPlayerTee(p.id, { name: v }), disabled: round.locked }))
+                  ),
+                  React.createElement("div", null,
+                    React.createElement("label", { className: "text-xs uppercase tracking-wider", style: { color: palette.inkSoft } }, "Slope"),
+                    React.createElement("div", { className: "mt-1" }, React.createElement(NumberInput, { value: pt?.slopeRating ?? "", onChange: (v) => setPlayerTee(p.id, { slopeRating: v === "" ? null : Number(v) }), min: 55, max: 155, disabled: round.locked }))
+                  ),
+                  React.createElement("div", null,
+                    React.createElement("label", { className: "text-xs uppercase tracking-wider", style: { color: palette.inkSoft } }, "Rating"),
+                    React.createElement("div", { className: "mt-1" }, React.createElement(NumberInput, { value: pt?.courseRating ?? "", onChange: (v) => setPlayerTee(p.id, { courseRating: v === "" ? null : Number(v) }), step: 0.1, disabled: round.locked }))
+                  ),
+                  React.createElement("div", null,
+                    React.createElement("label", { className: "text-xs uppercase tracking-wider", title: "Override del par en la fórmula CH", style: { color: palette.gold, cursor: "help" } }, "Rtg Par \u24D8"),
+                    React.createElement("div", { className: "mt-1" }, React.createElement(NumberInput, { value: pt?.ratingPar ?? "", onChange: (v) => setPlayerTee(p.id, { ratingPar: v === "" ? null : Number(v) }), step: 1, disabled: round.locked }))
+                  ),
+                  !round.locked && hasOverride && React.createElement("button", {
+                    onClick: () => { setPlayerTee(p.id, null); setExpandedPlayer(null); },
+                    style: {
+                      fontSize: 11, padding: "3px 8px", borderRadius: 2,
+                      border: `1px solid ${palette.rule}`, background: "#fff",
+                      color: palette.inkSoft, cursor: "pointer"
+                    }
+                  }, "Clear override")
+                )
+              )
+            )
+          );
+        }
+        return rows;
+      });
+    };
     return /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement(Card, { title: "Tees by flight \u2014 slope, rating, par" }, /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4" }, roundFlights(round).map((cat) => {
       const t = round.teesByCategory?.[cat] || {};
       const setT = (patch) => setTee(cat, patch);
@@ -1611,7 +1702,7 @@ ${unmatched.length} nombre(s) sin match ser\xE1n ignorados.` : "")
           title: `Flight ${cat} \u2014 ${t.name || "(tee not set)"} \xB7 ${list.length} players`,
           dense: true
         },
-        /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, "Player"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium", style: { width: 70 } }, "Index"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium", style: { width: 90 } }, "CH"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium", style: { width: 90 } }, "Skins"))), /* @__PURE__ */ React.createElement("tbody", null, list.map((p) => /* @__PURE__ */ React.createElement("tr", { key: p.id, style: { borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2" }, p.name), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right" }, p.index), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right", style: { fontWeight: 600 } }, p.ch), /* @__PURE__ */ React.createElement("td", { className: "px-3 py-2 text-right", style: { color: palette.inkSoft } }, skinsHcp(p.ch)))))))
+        /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement("table", { className: "w-full text-sm", style: { fontVariantNumeric: "tabular-nums" } }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", { style: { background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` } }, /* @__PURE__ */ React.createElement("th", { className: "text-left px-3 py-2 font-medium" }, cat === "A" ? "Player ⛳" : "Player"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium", style: { width: 70 } }, "Index"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium", style: { width: 90 } }, "CH"), /* @__PURE__ */ React.createElement("th", { className: "text-right px-3 py-2 font-medium", style: { width: 90 } }, "Skins"))), /* @__PURE__ */ React.createElement("tbody", null, renderPlayerRows(cat, list))))
       );
     })));
   }
