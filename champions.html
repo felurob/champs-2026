@@ -12,7 +12,6 @@
 <body>
   <div id="root"></div>
   <script type="text/babel">
-import React, { useState, useMemo, useRef, useEffect } from "react";
 
 /* =====================================================================
    CHAMPS — PAYOUT MANAGER
@@ -3337,7 +3336,7 @@ function PaymentsTab({ state, setState }) {
 
 /* ===================== Root ===================== */
 
-export default function App() {
+function App() {
   const audit = useMemo(() => getAuditConfig(), []);
   const [rawState, rawSetState] = useState(() => makeSeed());
   const [auditMeta, setAuditMeta] = useState({ loaded: false, error: null, fetchedAt: null });
@@ -3520,6 +3519,11 @@ export default function App() {
     </div>
   );
 }
+
+
+const { useState, useMemo, useRef, useEffect } = React;
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(React.createElement(App));
 
   </script>
 </body>
