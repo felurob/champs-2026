@@ -3218,7 +3218,7 @@ function ExportRoundCsvBtn({ round, results, players }) {
 
 /* ===================== Tabs: Ledger ===================== */
 
-function LedgerTab({ state }) {
+function LedgerTab({ state, auditMode }) {
   const playerById = Object.fromEntries(state.players.map((p) => [p.id, p]));
 
   // Compute results for every round, then aggregate per player.
@@ -3304,15 +3304,17 @@ function LedgerTab({ state }) {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-        <KPI label="Total contributions" value={fmt$(totals.contrib)} sub="across all rounds" />
-        <KPI label="Total winnings" value={fmt$(totals.won)} />
-        <KPI
-          label="Reconciliation"
-          value={fmt$(totals.contrib - totals.won)}
-          sub="should be $0.00 when all rounds are complete"
-        />
-      </div>
+      {!auditMode && (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          <KPI label="Total contributions" value={fmt$(totals.contrib)} sub="across all rounds" />
+          <KPI label="Total winnings" value={fmt$(totals.won)} />
+          <KPI
+            label="Reconciliation"
+            value={fmt$(totals.contrib - totals.won)}
+            sub="should be $0.00 when all rounds are complete"
+          />
+        </div>
+      )}
 
       <Card
         title="Cumulative ledger"
@@ -4001,7 +4003,7 @@ function App() {
             setCurrentRoundId={setCurrentRoundId}
           />
         )}
-        {tab === "Ledger" && <LedgerTab state={state} />}
+        {tab === "Ledger" && <LedgerTab state={state} auditMode={audit.auditMode} />}
         {tab === "Payments" && !audit.auditMode && <PaymentsTab state={state} setState={setState} />}
         {tab === "Data" && !audit.auditMode && <DataTab state={state} setState={setState} />}
       </main>
