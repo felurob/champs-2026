@@ -1788,7 +1788,7 @@ function SetupTab({ state, setState }) {
 
 /* ===================== Tabs: Round ===================== */
 
-function RoundTab({ state, setState, currentRoundId, setCurrentRoundId }) {
+function RoundTab({ state, setState, currentRoundId, setCurrentRoundId, auditMode }) {
   const round = state.rounds.find((r) => r.id === currentRoundId);
   const [subTab, setSubTab] = useState("Participation");
   const warnings = useMemo(
@@ -1829,12 +1829,14 @@ function RoundTab({ state, setState, currentRoundId, setCurrentRoundId }) {
         ))}
         <div className="flex-1" />
         <Pill tone={round.locked ? "locked" : "open"}>{round.locked ? "Locked" : "Open"}</Pill>
-        <Btn variant={round.locked ? "secondary" : "danger"} onClick={toggleLock}>
-          {round.locked ? "Unlock round" : "Lock round"}
-        </Btn>
+        {!auditMode && (
+          <Btn variant={round.locked ? "secondary" : "danger"} onClick={toggleLock}>
+            {round.locked ? "Unlock round" : "Lock round"}
+          </Btn>
+        )}
       </div>
 
-      {warnings.length > 0 && (
+      {warnings.length > 0 && !auditMode && (
         <div
           className="px-4 py-3 text-sm"
           style={{ background: "#FBEFE6", color: palette.alert, border: `1px solid #EBC9B0`, borderRadius: 2 }}
@@ -1867,20 +1869,20 @@ function RoundTab({ state, setState, currentRoundId, setCurrentRoundId }) {
       </div>
 
       {subTab === "Participation" && (
-        <ParticipationPanel state={state} round={round} updateRound={updateRound} />
+        <ParticipationPanel state={state} round={round} updateRound={updateRound} auditMode={auditMode} />
       )}
-      {subTab === "Course" && <CoursePanel round={round} players={state.players} updateRound={updateRound} />}
+      {subTab === "Course" && <CoursePanel round={round} players={state.players} updateRound={updateRound} auditMode={auditMode} />}
       {subTab === "Teams" && (
-        <TeamsPanel state={state} round={round} updateRound={updateRound} />
+        <TeamsPanel state={state} round={round} updateRound={updateRound} auditMode={auditMode} />
       )}
       {subTab === "Scores" && (
-        <ScoresPanel state={state} round={round} updateRound={updateRound} />
+        <ScoresPanel state={state} round={round} updateRound={updateRound} auditMode={auditMode} />
       )}
     </div>
   );
 }
 
-function ParticipationPanel({ state, round, updateRound }) {
+function ParticipationPanel({ state, round, updateRound, auditMode }) {
   const setPart = (pid, patch) => {
     const old = round.participants[pid] || {
       active: false,
@@ -1983,23 +1985,25 @@ function ParticipationPanel({ state, round, updateRound }) {
         ))}
       </div>
 
-      <div className="flex gap-2 flex-wrap items-center">
-        <Btn variant="secondary" onClick={() => setAllActive(true)} disabled={round.locked}>
-          All in
-        </Btn>
-        <Btn variant="ghost" onClick={() => setAllActive(false)} disabled={round.locked}>
-          All out
-        </Btn>
-        <Btn variant="ghost" onClick={resetAllFlights} disabled={round.locked}>
-          Reset flights
-        </Btn>
-        <Btn variant="ghost" onClick={resetAllTees} disabled={round.locked}>
-          Reset tees
-        </Btn>
-        <span className="text-xs ml-2" style={{ color: palette.inkSoft }}>
-          The <strong>Flight</strong> column is the assignment for THIS round only — Golf Pad re-flights each day, so override here when needed. The default falls back to the player's static category from their index. The <strong>Tee</strong> column overrides the slope/CR used to compute that player's course handicap (useful when a player chooses a different tee box than their flight's default).
-        </span>
-      </div>
+      {!auditMode && (
+        <div className="flex gap-2 flex-wrap items-center">
+          <Btn variant="secondary" onClick={() => setAllActive(true)} disabled={round.locked || auditMode}>
+            All in
+          </Btn>
+          <Btn variant="ghost" onClick={() => setAllActive(false)} disabled={round.locked || auditMode}>
+            All out
+          </Btn>
+          <Btn variant="ghost" onClick={resetAllFlights} disabled={round.locked || auditMode}>
+            Reset flights
+          </Btn>
+          <Btn variant="ghost" onClick={resetAllTees} disabled={round.locked || auditMode}>
+            Reset tees
+          </Btn>
+          <span className="text-xs ml-2" style={{ color: palette.inkSoft }}>
+            The <strong>Flight</strong> column is the assignment for THIS round only — Golf Pad re-flights each day, so override here when needed. The default falls back to the player's static category from their index. The <strong>Tee</strong> column overrides the slope/CR used to compute that player's course handicap (useful when a player chooses a different tee box than their flight's default).
+          </span>
+        </div>
+      )}
 
       <Card dense>
         <div className="overflow-x-auto">
@@ -2043,7 +2047,7 @@ function ParticipationPanel({ state, round, updateRound }) {
                         <select
                           value={effective || ""}
                           onChange={(e) => setFlight(e.target.value)}
-                          disabled={round.locked || !part.active}
+                          disabled={round.locked || !part.active || auditMode}
                           className="px-2 py-1 text-sm"
                           style={{ border: `1px solid ${palette.rule}`, borderRadius: 2, background: "#fff" }}
                         >
@@ -2078,35 +2082,35 @@ function ParticipationPanel({ state, round, updateRound }) {
                             setPart(p.id, { teeOverride });
                           }
                         }}
-                        disabled={round.locked || !part.active}
+                        disabled={round.locked || !part.active || auditMode}
                       />
                     </td>
                     <td className="px-3 py-2 text-center">
                       <Toggle
                         value={part.active}
                         onChange={(v) => setPart(p.id, { active: v })}
-                        disabled={round.locked}
+                        disabled={round.locked || auditMode}
                       />
                     </td>
                     <td className="px-3 py-2 text-center">
                       <Toggle
                         value={part.inSkins}
                         onChange={(v) => setPart(p.id, { inSkins: v })}
-                        disabled={round.locked || !part.active}
+                        disabled={round.locked || !part.active || auditMode}
                       />
                     </td>
                     <td className="px-3 py-2 text-center">
                       <Toggle
                         value={part.inIndividualNet}
                         onChange={(v) => setPart(p.id, { inIndividualNet: v })}
-                        disabled={round.locked || !part.active}
+                        disabled={round.locked || !part.active || auditMode}
                       />
                     </td>
                     <td className="px-3 py-2 text-center">
                       <Toggle
                         value={part.inBestBall}
                         onChange={(v) => setPart(p.id, { inBestBall: v })}
-                        disabled={round.locked || !part.active}
+                        disabled={round.locked || !part.active || auditMode}
                       />
                     </td>
                   </tr>
@@ -2148,7 +2152,7 @@ function KPI({ label, value, sub }) {
   );
 }
 
-function CoursePanel({ round, players, updateRound }) {
+function CoursePanel({ round, players, updateRound, auditMode }) {
   const setIdx = (h, val) => {
     const arr = [...round.holeIndexes];
     arr[h] = Number(val) || 0;
@@ -2212,7 +2216,7 @@ function CoursePanel({ round, players, updateRound }) {
                       <TextInput
                         value={t.name ?? ""}
                         onChange={(v) => setT({ name: v })}
-                        disabled={round.locked}
+                        disabled={round.locked || auditMode}
                       />
                     </div>
                   </div>
@@ -2226,7 +2230,7 @@ function CoursePanel({ round, players, updateRound }) {
                         onChange={(v) => setT({ slopeRating: v === "" ? null : Number(v) })}
                         min={55}
                         max={155}
-                        disabled={round.locked}
+                        disabled={round.locked || auditMode}
                       />
                     </div>
                   </div>
@@ -2239,7 +2243,7 @@ function CoursePanel({ round, players, updateRound }) {
                         value={t.courseRating ?? ""}
                         onChange={(v) => setT({ courseRating: v === "" ? null : Number(v) })}
                         step={0.1}
-                        disabled={round.locked}
+                        disabled={round.locked || auditMode}
                       />
                     </div>
                   </div>
@@ -2293,7 +2297,7 @@ function CoursePanel({ round, players, updateRound }) {
                       onChange={(val) => setIdx(i, val)}
                       min={1}
                       max={18}
-                      disabled={round.locked}
+                      disabled={round.locked || auditMode}
                     />
                   </td>
                 ))}
@@ -2309,7 +2313,7 @@ function CoursePanel({ round, players, updateRound }) {
                       onChange={(val) => setPar(i, val)}
                       min={3}
                       max={6}
-                      disabled={round.locked}
+                      disabled={round.locked || auditMode}
                     />
                   </td>
                 ))}
@@ -2372,7 +2376,7 @@ function CoursePanel({ round, players, updateRound }) {
   );
 }
 
-function TeamsPanel({ state, round, updateRound }) {
+function TeamsPanel({ state, round, updateRound, auditMode }) {
   const chOf = (p) => chForPlayer(p, round);
 
   const bbPlayersByFlight = (flight) =>
@@ -2472,9 +2476,11 @@ function TeamsPanel({ state, round, updateRound }) {
             </span>
           </div>
           <div className="flex gap-2">
-            <Btn variant="secondary" onClick={() => addTeam(flight)} disabled={round.locked}>
-              + Pair
-            </Btn>
+            {!auditMode && (
+              <Btn variant="secondary" onClick={() => addTeam(flight)} disabled={round.locked}>
+                + Pair
+              </Btn>
+            )}
           </div>
         </div>
 
@@ -2500,7 +2506,7 @@ function TeamsPanel({ state, round, updateRound }) {
                     type="text"
                     value={t.name}
                     onChange={(e) => updateTeam(t.id, { name: e.target.value })}
-                    disabled={round.locked}
+                    disabled={round.locked || auditMode}
                     className="text-sm font-medium uppercase tracking-wider bg-transparent"
                     style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", letterSpacing: "0.12em" }}
                   />
@@ -2514,7 +2520,7 @@ function TeamsPanel({ state, round, updateRound }) {
                       onClick={() => removeTeam(t.id)}
                       className="text-xs"
                       style={{ color: palette.alert }}
-                      disabled={round.locked}
+                      disabled={round.locked || auditMode}
                     >
                       Remove
                     </button>
@@ -2536,7 +2542,7 @@ function TeamsPanel({ state, round, updateRound }) {
                           type="checkbox"
                           checked={t.playerIds.includes(p.id)}
                           onChange={() => togglePlayerOnTeam(t.id, p.id)}
-                          disabled={round.locked}
+                          disabled={round.locked || auditMode}
                         />
                         <span className="text-sm">{p.name}</span>
                       </span>
@@ -2565,11 +2571,50 @@ function TeamsPanel({ state, round, updateRound }) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {FLIGHTS.map((f) => renderFlightColumn(f))}
       </div>
+
+      {Array.isArray(round.draftLog) && round.draftLog.length > 0 && (
+        <Card title="Team formation log" dense>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr style={{ background: "#F7F5F0", borderBottom: `1px solid ${palette.rule}` }}>
+                  <th className="text-left px-3 py-2 font-medium" style={{ width: 80 }}>Flight</th>
+                  <th className="text-left px-3 py-2 font-medium" style={{ width: 120 }}>Team</th>
+                  <th className="text-left px-3 py-2 font-medium">Players</th>
+                  <th className="text-left px-3 py-2 font-medium" style={{ width: 180 }}>Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {round.draftLog.map((entry, i) => {
+                  const ts = entry.ts ? new Date(entry.ts) : null;
+                  const tsLabel = ts && !isNaN(ts.getTime())
+                    ? ts.toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" })
+                    : "—";
+                  return (
+                    <tr key={i} style={{ borderBottom: `1px solid ${palette.rule}` }}>
+                      <td className="px-3 py-2">
+                        <Pill tone={entry.flight}>{entry.flight}</Pill>
+                      </td>
+                      <td className="px-3 py-2 font-medium">{entry.teamName || "—"}</td>
+                      <td className="px-3 py-2" style={{ color: palette.inkSoft }}>
+                        {entry.player1Name}{entry.player2Name ? ` + ${entry.player2Name}` : ""}
+                      </td>
+                      <td className="px-3 py-2 text-xs" style={{ color: palette.inkSoft }}>
+                        {tsLabel}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
     </div>
   );
 }
 
-function ScoresPanel({ state, round, updateRound }) {
+function ScoresPanel({ state, round, updateRound, auditMode }) {
   const fileRef = useRef(null);
   const chOf = (p) => chForPlayer(p, round);
 
@@ -2695,13 +2740,15 @@ function ScoresPanel({ state, round, updateRound }) {
     <div className="space-y-4">
       <Card>
         <div className="flex flex-wrap gap-2 items-center">
-          <Btn
-            variant="secondary"
-            onClick={() => fileRef.current?.click()}
-            disabled={round.locked}
-          >
-            Import CSV
-          </Btn>
+          {!auditMode && (
+            <Btn
+              variant="secondary"
+              onClick={() => fileRef.current?.click()}
+              disabled={round.locked}
+            >
+              Import CSV
+            </Btn>
+          )}
           <input
             ref={fileRef}
             type="file"
@@ -2712,15 +2759,17 @@ function ScoresPanel({ state, round, updateRound }) {
               e.target.value = "";
             }}
           />
-          {hasAnyScore && (
+          {hasAnyScore && !auditMode && (
             <>
               <CopyWhatsAppBtn round={round} results={inlineResults} players={state.players} />
               <ExportRoundCsvBtn round={round} results={inlineResults} players={state.players} />
             </>
           )}
-          <span className="text-xs" style={{ color: palette.inkSoft }}>
-            Accepts Golf Pad export (<code>"Team","Hole#1"…"Hole#18","Net"</code>) or simple <code>Player,1,2,…,18</code>. Names match case-insensitively against the roster.
-          </span>
+          {!auditMode && (
+            <span className="text-xs" style={{ color: palette.inkSoft }}>
+              Accepts Golf Pad export (<code>"Team","Hole#1"…"Hole#18","Net"</code>) or simple <code>Player,1,2,…,18</code>. Names match case-insensitively against the roster.
+            </span>
+          )}
         </div>
       </Card>
 
@@ -2767,7 +2816,7 @@ function ScoresPanel({ state, round, updateRound }) {
                           type="number"
                           value={sc[i] ?? ""}
                           onChange={(e) => setScore(p.id, i, e.target.value)}
-                          disabled={round.locked}
+                          disabled={round.locked || auditMode}
                           className="w-10 text-center text-sm py-1"
                           style={{
                             border: `1px solid ${palette.rule}`,
@@ -3318,7 +3367,7 @@ function LedgerTab({ state, auditMode }) {
 
       <Card
         title="Cumulative ledger"
-        action={<Btn variant="secondary" onClick={exportCSV}>Export CSV</Btn>}
+        action={!auditMode && <Btn variant="secondary" onClick={exportCSV}>Export CSV</Btn>}
         dense
       >
         <div className="overflow-x-auto">
@@ -3588,15 +3637,17 @@ function PaymentsTab({ state, setState }) {
         <div className="text-xs px-1 py-2 mb-2" style={{ color: palette.inkSoft }}>
           Each player's <strong>Due</strong> is computed automatically from their participation across the 5 rounds — sum of $20 skins + $5 individual net + $5 best ball for every round where they're marked Active with the relevant toggles on the Round → Participation tab. Adjust participation first; the totals here update live.
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
-          <KPI label="Players" value={String(state.players.length)} />
-          <KPI label="Total due (computed)" value={fmt$(totalDue)} />
-          <KPI
-            label={totalBalance >= 0 ? "Outstanding" : "Surplus"}
-            value={fmt$(Math.abs(totalBalance))}
-            sub={`Collected ${fmt$(totalPaid)}`}
-          />
-        </div>
+        {!auditMode && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+            <KPI label="Players" value={String(state.players.length)} />
+            <KPI label="Total due (computed)" value={fmt$(totalDue)} />
+            <KPI
+              label={totalBalance >= 0 ? "Outstanding" : "Surplus"}
+              value={fmt$(Math.abs(totalBalance))}
+              sub={`Collected ${fmt$(totalPaid)}`}
+            />
+          </div>
+        )}
         <div className="overflow-x-auto">
           <table className="w-full text-sm" style={{ fontVariantNumeric: "tabular-nums" }}>
             <thead>
@@ -3994,6 +4045,7 @@ function App() {
             setState={setState}
             currentRoundId={currentRoundId}
             setCurrentRoundId={setCurrentRoundId}
+            auditMode={audit.auditMode}
           />
         )}
         {tab === "Results" && (
