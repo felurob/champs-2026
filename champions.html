@@ -22,6 +22,11 @@
 
 /* ---------- Pure logic: handicap + scoring helpers ---------- */
 
+// All flights supported by the app. Adding a flight here propagates to UI,
+// pots, teams, and validation. Categories beyond C would also need new
+// auto-assign rules (see categoryFromIndex) but everything else is generic.
+const FLIGHTS = ["A", "B", "C"];
+
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
 
 // Auto-assign category from HANDICAP INDEX. A: ≤12 (incl. plus). B: ≥13.
@@ -47,7 +52,7 @@ const sumPars = (pars) => (Array.isArray(pars) ? pars.reduce((a, b) => a + (Numb
 
 // Pick the tee a player is using on this round, based on their category.
 // Falls back to round-level slopeRating/courseRating, then to neutral defaults.
-function teeForPlayer(round, category) {
+function teeForCategory(round, category) {
   const t = round.teesByCategory?.[category];
   if (t && (t.slopeRating != null || t.courseRating != null)) return t;
   return {
@@ -57,20 +62,38 @@ function teeForPlayer(round, category) {
   };
 }
 
+// Per-player tee resolution. A player can have an individual tee override
+// (e.g. Roberto played from Signature when his flight was on Championship).
+// The override lives at `round.participants[pid].teeOverride = { name, slopeRating, courseRating }`.
+// If both slope and rating are missing, fall back to the flight tee.
+function teeForPlayer(round, player) {
+  const flight = flightForRound(round, player);
+  const ov = round?.participants?.[player?.id]?.teeOverride;
+  if (ov && (ov.slopeRating != null || ov.courseRating != null)) {
+    // Fill any missing field from the flight tee so calcs always have both.
+    const base = teeForCategory(round, flight);
+    return {
+      name: ov.name ?? base.name,
+      slopeRating: ov.slopeRating ?? base.slopeRating,
+      courseRating: ov.courseRating ?? base.courseRating,
+    };
+  }
+  return teeForCategory(round, flight);
+}
+
 // Per-round flight resolution. Golf Pad re-flights each day depending on who
 // shows up, so each round can override a player's static category. Falls back
 // to player.category if no per-round override is set.
 function flightForRound(round, player) {
   const f = round?.participants?.[player?.id]?.flight;
-  if (f === "A" || f === "B") return f;
+  if (FLIGHTS.includes(f)) return f;
   return player?.category;
 }
 
 // Convenience: full course-handicap calc for a player on a given round.
-// Resolves the player's flight for THIS round (not their static category) so
-// the correct tee is picked.
+// Resolves the player's flight for THIS round AND any per-player tee override.
 function chForPlayer(player, round) {
-  const tee = teeForPlayer(round, flightForRound(round, player));
+  const tee = teeForPlayer(round, player);
   return courseHandicap(
     player?.handicapIndex,
     tee.slopeRating,
@@ -421,21 +444,37 @@ function computeBestBallForFlight(playersAll, round, flight) {
   };
 }
 
-// Legacy/compat: combined view across both flights.
+// Legacy/compat: combined view across all flights.
 function computeBestBall(playersAll, round) {
-  const a = computeBestBallForFlight(playersAll, round, "A");
-  const b = computeBestBallForFlight(playersAll, round, "B");
-  const playerPayouts = { ...a.playerPayouts, ...b.playerPayouts };
+  const byFlight = {};
+  for (const f of FLIGHTS) {
+    byFlight[f] = computeBestBallForFlight(playersAll, round, f);
+  }
+  const playerPayouts = {};
+  const teamResults = [];
+  const teamPayouts = {};
+  const positions = {};
+  const eligibleIds = [];
+  let pot = 0;
+  let houseLeftover = 0;
+  for (const f of FLIGHTS) {
+    Object.assign(playerPayouts, byFlight[f].playerPayouts);
+    teamResults.push(...byFlight[f].teamResults);
+    Object.assign(teamPayouts, byFlight[f].teamPayouts);
+    positions[f] = byFlight[f].positions;
+    eligibleIds.push(...byFlight[f].eligibleIds);
+    pot += byFlight[f].pot;
+    houseLeftover += byFlight[f].houseLeftover;
+  }
   return {
-    A: a,
-    B: b,
-    pot: a.pot + b.pot,
-    teamResults: [...a.teamResults, ...b.teamResults],
-    teamPayouts: { ...a.teamPayouts, ...b.teamPayouts },
+    ...byFlight, // exposes .A, .B, .C
+    pot,
+    teamResults,
+    teamPayouts,
     playerPayouts,
-    positions: { A: a.positions, B: b.positions },
-    eligibleIds: [...a.eligibleIds, ...b.eligibleIds],
-    houseLeftover: a.houseLeftover + b.houseLeftover,
+    positions,
+    eligibleIds,
+    houseLeftover,
   };
 }
 
@@ -461,18 +500,21 @@ function computeRoundResults(round, players) {
       (p) => round.participants[p.id]?.inIndividualNet && p.flight === cat
     );
 
-  const skinsA = computeSkinsForCategory(inSkins("A"), round);
-  const skinsB = computeSkinsForCategory(inSkins("B"), round);
-  const indNetA = computeIndividualNet(inIN("A"), round);
-  const indNetB = computeIndividualNet(inIN("B"), round);
+  // Per-flight side game pots — each flight runs its own Skins / IN / BB.
+  const skinsByFlight = {};
+  const indNetByFlight = {};
+  for (const f of FLIGHTS) {
+    skinsByFlight[f] = computeSkinsForCategory(inSkins(f), round);
+    indNetByFlight[f] = computeIndividualNet(inIN(f), round);
+  }
   // Combined view for backward-compatibility with downstream code that just
   // wants per-player IN payouts:
   const indNet = {
-    eligibleIds: [...indNetA.eligibleIds, ...indNetB.eligibleIds],
-    pot: indNetA.pot + indNetB.pot,
-    ranking: [...indNetA.ranking, ...indNetB.ranking],
-    payouts: { ...indNetA.payouts, ...indNetB.payouts },
-    positions: { A: indNetA.positions, B: indNetB.positions },
+    eligibleIds: FLIGHTS.flatMap((f) => indNetByFlight[f].eligibleIds),
+    pot: FLIGHTS.reduce((a, f) => a + indNetByFlight[f].pot, 0),
+    ranking: FLIGHTS.flatMap((f) => indNetByFlight[f].ranking),
+    payouts: Object.assign({}, ...FLIGHTS.map((f) => indNetByFlight[f].payouts)),
+    positions: Object.fromEntries(FLIGHTS.map((f) => [f, indNetByFlight[f].positions])),
   };
   const bb = computeBestBall(playersCH, round);
 
@@ -481,10 +523,8 @@ function computeRoundResults(round, players) {
   // team-internal split). Hidden from public displays.
   const houseAmount =
     activePlayers.length * 2 +
-    (skinsA.houseLeftover || 0) +
-    (skinsB.houseLeftover || 0) +
-    (indNetA.houseLeftover || 0) +
-    (indNetB.houseLeftover || 0) +
+    FLIGHTS.reduce((a, f) => a + (skinsByFlight[f].houseLeftover || 0), 0) +
+    FLIGHTS.reduce((a, f) => a + (indNetByFlight[f].houseLeftover || 0), 0) +
     (bb.houseLeftover || 0);
 
   // Per-player payout ledger for this round.
@@ -500,8 +540,7 @@ function computeRoundResults(round, players) {
       (part.inSkins ? 20 : 0) +
       (part.inIndividualNet ? 5 : 0) +
       (part.inBestBall ? 5 : 0);
-    const winSkins =
-      (skinsA.payouts[p.id] || 0) + (skinsB.payouts[p.id] || 0);
+    const winSkins = FLIGHTS.reduce((a, f) => a + (skinsByFlight[f].payouts[p.id] || 0), 0);
     const winIN = indNet.payouts[p.id] || 0;
     const winBB = bb.playerPayouts[p.id] || 0;
     const won = winSkins + winIN + winBB;
@@ -516,26 +555,37 @@ function computeRoundResults(round, players) {
     };
   }
 
+  // Back-compat aliases — old code paths read skinsA/skinsB/indNetA/indNetB/bestBallA/bestBallB directly.
   return {
     activePlayerIds: activePlayers.map((p) => p.id),
     coursePar: sumPars(round.pars),
     courseHcps: Object.fromEntries(playersCH.map((p) => [p.id, p.courseHcp])),
     potBreakdown: {
-      skinsA: skinsA.pot,
-      skinsB: skinsB.pot,
+      skinsA: skinsByFlight.A.pot,
+      skinsB: skinsByFlight.B.pot,
+      skinsC: skinsByFlight.C.pot,
       individualNet: indNet.pot,
       bestBall: bb.pot,
       house: houseAmount,
-      total: skinsA.pot + skinsB.pot + indNet.pot + bb.pot + houseAmount,
+      total:
+        FLIGHTS.reduce((a, f) => a + skinsByFlight[f].pot, 0) +
+        indNet.pot +
+        bb.pot +
+        houseAmount,
     },
-    skinsA,
-    skinsB,
+    skinsByFlight,
+    indNetByFlight,
+    skinsA: skinsByFlight.A,
+    skinsB: skinsByFlight.B,
+    skinsC: skinsByFlight.C,
     indNet,
-    indNetA,
-    indNetB,
+    indNetA: indNetByFlight.A,
+    indNetB: indNetByFlight.B,
+    indNetC: indNetByFlight.C,
     bestBall: bb,
     bestBallA: bb.A,
     bestBallB: bb.B,
+    bestBallC: bb.C,
     houseAmount,
     ledger,
   };
@@ -545,7 +595,7 @@ function computeRoundResults(round, players) {
 
 function validateRound(round, players) {
   const warnings = [];
-  for (const cat of ["A", "B"]) {
+  for (const cat of FLIGHTS) {
     const t = round.teesByCategory?.[cat];
     if (!t || !t.slopeRating) {
       warnings.push(`Flight ${cat}: slope rating not set — course handicaps will use neutral 113.`);
@@ -591,7 +641,7 @@ function validateRound(round, players) {
         .filter(Boolean)
     );
     if (cats.size > 1) {
-      warnings.push(`${t.name}: mixes Flight A and Flight B players. Best-ball teams must be same flight.`);
+      warnings.push(`${t.name}: mixes players from different flights. Best-ball teams must be same flight.`);
     }
     if (t.flight && cats.size === 1 && !cats.has(t.flight)) {
       warnings.push(`${t.name}: tagged Flight ${t.flight} but contains Flight ${[...cats][0]} player(s).`);
@@ -764,7 +814,12 @@ function migrateState(data) {
     rounds: data.rounds.map((r) => ({
       ...r,
       teeTime: r.teeTime ?? "",
-      teesByCategory: r.teesByCategory ?? { A: fallbackTee(r), B: fallbackTee(r) },
+      teesByCategory: {
+        A: r.teesByCategory?.A ?? fallbackTee(r),
+        B: r.teesByCategory?.B ?? fallbackTee(r),
+        C: r.teesByCategory?.C ?? r.teesByCategory?.B ?? fallbackTee(r),
+      },
+      extraTees: Array.isArray(r.extraTees) ? r.extraTees : [],
       participants: Object.fromEntries(
         Object.entries(r.participants || {}).map(([pid, part]) => [
           pid,
@@ -777,7 +832,7 @@ function migrateState(data) {
           .map((pid) => data.players.find((p) => p.id === pid)?.category)
           .filter(Boolean);
         const flight =
-          cats.length === 0 ? "A" : cats.every((c) => c === "B") ? "B" : "A";
+          cats.length === 0 ? "A" : cats.every((c) => c === "B") ? "B" : cats.every((c) => c === "C") ? "C" : "A";
         return { ...t, flight };
       }),
     })),
@@ -825,6 +880,7 @@ function Pill({ children, tone = "neutral" }) {
     gold: { bg: "#F4E9CD", fg: palette.gold },
     A: { bg: "#DDEBDF", fg: palette.green },
     B: { bg: "#F4E9CD", fg: palette.gold },
+    C: { bg: "#E0E4F0", fg: "#3A4A7A" },
     locked: { bg: "#E5DCD4", fg: "#5A3A21" },
     open: { bg: "#DDEBDF", fg: palette.green },
   };
@@ -979,6 +1035,202 @@ function Toggle({ value, onChange, disabled, label }) {
       </span>
       {label && <span className="text-sm">{label}</span>}
     </label>
+  );
+}
+
+/* ---------- TeeCell: per-player tee override in Participation table ----------
+   A player can play from a different tee than their flight's default — e.g.
+   a flight-A player choosing to play from the forward Signature box. The
+   override stores { name, slopeRating, courseRating } at
+   round.participants[pid].teeOverride. UI offers:
+     - "Default (flight tee)"  → no override
+     - any other flight's tee as a quick pick (A/B)
+     - "Custom..."             → manual slope/CR/name entry
+*/
+function TeeCell({ round, player, effectiveFlight, onChange, disabled }) {
+  const part = round?.participants?.[player.id] || {};
+  const ov = part.teeOverride;
+  const hasOverride = !!(ov && (ov.slopeRating != null || ov.courseRating != null));
+
+  // Build the dropdown options from the round's flight tees.
+  const flightTees = [];
+  for (const cat of FLIGHTS) {
+    const t = round.teesByCategory?.[cat];
+    if (t && (t.slopeRating != null || t.courseRating != null)) {
+      flightTees.push({ key: cat, label: `Flight ${cat}${t.name ? ` — ${t.name}` : ""}`, tee: t });
+    }
+  }
+  // Extra tees defined at the round level (Setup tab "+ Tee"). They're not
+  // attached to a flight — they show up here as quick-pick override options.
+  const extraTees = (round.extraTees || []).filter(
+    (xt) => xt.slopeRating != null || xt.courseRating != null
+  );
+  const defaultTee = round.teesByCategory?.[effectiveFlight] || {};
+
+  // Determine current dropdown value:
+  //   "default"           → no override
+  //   "flight:A/B/C"      → override matches a flight's tee
+  //   "extra:<id>"        → override matches one of the round's extra tees
+  //   "custom"            → override is something else (ad-hoc per-player)
+  let currentVal = "default";
+  if (hasOverride) {
+    let matched = null;
+    for (const ft of flightTees) {
+      if (
+        Number(ov.slopeRating) === Number(ft.tee.slopeRating) &&
+        Number(ov.courseRating) === Number(ft.tee.courseRating)
+      ) {
+        matched = `flight:${ft.key}`;
+        break;
+      }
+    }
+    if (!matched) {
+      for (const xt of extraTees) {
+        if (
+          Number(ov.slopeRating) === Number(xt.slopeRating) &&
+          Number(ov.courseRating) === Number(xt.courseRating)
+        ) {
+          matched = `extra:${xt.id}`;
+          break;
+        }
+      }
+    }
+    currentVal = matched || "custom";
+  }
+
+  const handleSelect = (val) => {
+    if (val === "default") {
+      onChange(null);
+    } else if (val.startsWith("flight:")) {
+      const cat = val.slice(7);
+      const t = round.teesByCategory?.[cat];
+      if (t) {
+        onChange({
+          name: t.name || `Flight ${cat}`,
+          slopeRating: t.slopeRating ?? null,
+          courseRating: t.courseRating ?? null,
+        });
+      }
+    } else if (val.startsWith("extra:")) {
+      const id = val.slice(6);
+      const xt = extraTees.find((x) => x.id === id);
+      if (xt) {
+        onChange({
+          name: xt.name || "Extra tee",
+          slopeRating: xt.slopeRating ?? null,
+          courseRating: xt.courseRating ?? null,
+        });
+      }
+    } else if (val === "custom") {
+      // Seed with the current flight tee values so the user can tweak.
+      const seed = {
+        name: ov?.name || "",
+        slopeRating: ov?.slopeRating ?? defaultTee.slopeRating ?? "",
+        courseRating: ov?.courseRating ?? defaultTee.courseRating ?? "",
+      };
+      const nameIn = prompt("Tee name (e.g. Signature, Forward):", seed.name || "");
+      if (nameIn === null) return;
+      const slopeIn = prompt("Slope rating (55–155):", String(seed.slopeRating ?? ""));
+      if (slopeIn === null) return;
+      const crIn = prompt("Course rating (e.g. 69.4):", String(seed.courseRating ?? ""));
+      if (crIn === null) return;
+      const slopeN = Number(slopeIn);
+      const crN = Number(crIn);
+      if (!isFinite(slopeN) || slopeN < 55 || slopeN > 155) {
+        alert("Slope must be a number between 55 and 155.");
+        return;
+      }
+      if (!isFinite(crN)) {
+        alert("Course rating must be a number.");
+        return;
+      }
+      onChange({
+        name: nameIn.trim() || "Custom",
+        slopeRating: slopeN,
+        courseRating: crN,
+      });
+    }
+  };
+
+  const editCustom = () => {
+    const seed = {
+      name: ov?.name || "",
+      slopeRating: ov?.slopeRating ?? "",
+      courseRating: ov?.courseRating ?? "",
+    };
+    const nameIn = prompt("Tee name:", seed.name);
+    if (nameIn === null) return;
+    const slopeIn = prompt("Slope rating (55–155):", String(seed.slopeRating));
+    if (slopeIn === null) return;
+    const crIn = prompt("Course rating:", String(seed.courseRating));
+    if (crIn === null) return;
+    const slopeN = Number(slopeIn);
+    const crN = Number(crIn);
+    if (!isFinite(slopeN) || slopeN < 55 || slopeN > 155) {
+      alert("Slope must be a number between 55 and 155.");
+      return;
+    }
+    if (!isFinite(crN)) {
+      alert("Course rating must be a number.");
+      return;
+    }
+    onChange({
+      name: nameIn.trim() || "Custom",
+      slopeRating: slopeN,
+      courseRating: crN,
+    });
+  };
+
+  return (
+    <div className="flex items-center justify-center gap-1">
+      <select
+        value={currentVal}
+        onChange={(e) => handleSelect(e.target.value)}
+        disabled={disabled}
+        className="px-2 py-1 text-sm"
+        style={{ border: `1px solid ${palette.rule}`, borderRadius: 2, background: "#fff", minWidth: 120 }}
+        title={
+          hasOverride
+            ? `Override: ${ov.name || "Custom"} (slope ${ov.slopeRating ?? "—"}, CR ${ov.courseRating ?? "—"})`
+            : `Default (Flight ${effectiveFlight} tee)`
+        }
+      >
+        <option value="default">Default (Flight {effectiveFlight})</option>
+        {flightTees
+          .filter((ft) => ft.key !== effectiveFlight)
+          .map((ft) => (
+            <option key={ft.key} value={`flight:${ft.key}`}>
+              {ft.label}
+            </option>
+          ))}
+        {extraTees.map((xt) => (
+          <option key={xt.id} value={`extra:${xt.id}`}>
+            {xt.name || "Extra tee"} ({xt.courseRating ?? "?"}/{xt.slopeRating ?? "?"})
+          </option>
+        ))}
+        <option value="custom">{currentVal === "custom" ? `Custom: ${ov.name || "—"}` : "Custom..."}</option>
+      </select>
+      {hasOverride && (
+        <span
+          title={`Override active — slope ${ov.slopeRating ?? "—"}, CR ${ov.courseRating ?? "—"}`}
+          className="text-xs"
+          style={{ color: palette.gold, fontWeight: 700 }}
+        >
+          ●
+        </span>
+      )}
+      {currentVal === "custom" && !disabled && (
+        <button
+          type="button"
+          onClick={editCustom}
+          className="text-xs px-1"
+          style={{ color: palette.inkSoft, textDecoration: "underline" }}
+          title="Edit custom slope/CR"
+        >
+          edit
+        </button>
+      )}
+    </div>
   );
 }
 
@@ -1236,8 +1488,9 @@ function SetupTab({ state, setState }) {
                           className="px-2 py-1 text-sm w-full"
                           style={{ border: `1px solid ${palette.rule}`, borderRadius: 2 }}
                         >
-                          <option value="A">A</option>
-                          <option value="B">B</option>
+                          {FLIGHTS.map((f) => (
+                            <option key={f} value={f}>{f}</option>
+                          ))}
                         </select>
                       ) : (
                         <Pill tone={auto}>{auto}</Pill>
@@ -1295,7 +1548,7 @@ function SetupTab({ state, setState }) {
                 <th className="text-left px-3 py-2 font-medium" style={{ width: 130 }}>
                   Tee time
                 </th>
-                <th className="text-left px-3 py-2 font-medium">Tees (A · B)</th>
+                <th className="text-left px-3 py-2 font-medium">Tees (A · B · C)</th>
                 <th className="text-left px-3 py-2 font-medium" style={{ width: 90 }}>
                   Status
                 </th>
@@ -1303,12 +1556,6 @@ function SetupTab({ state, setState }) {
             </thead>
             <tbody>
               {state.rounds.map((r) => {
-                const tA = r.teesByCategory?.A;
-                const tB = r.teesByCategory?.B;
-                const fmtTee = (t) =>
-                  t
-                    ? `${t.name || "—"} (${t.courseRating ?? "?"}/${t.slopeRating ?? "?"})`
-                    : "—";
                 return (
                   <tr key={r.id} style={{ borderBottom: `1px solid ${palette.rule}` }}>
                     <td className="px-3 py-2 font-medium">R{r.number}</td>
@@ -1337,8 +1584,190 @@ function SetupTab({ state, setState }) {
                       />
                     </td>
                     <td className="px-3 py-2 text-xs" style={{ color: palette.inkSoft }}>
-                      <div><Pill tone="A">A</Pill> {fmtTee(tA)}</div>
-                      <div className="mt-1"><Pill tone="B">B</Pill> {fmtTee(tB)}</div>
+                      <div className="space-y-1">
+                        {FLIGHTS.map((f) => {
+                          const t = r.teesByCategory?.[f] || {};
+                          const setTee = (patch) =>
+                            updateRound(r.id, {
+                              teesByCategory: {
+                                ...(r.teesByCategory || {}),
+                                [f]: { ...t, ...patch },
+                              },
+                            });
+                          return (
+                            <div key={f} className="flex items-center gap-1">
+                              <Pill tone={f}>{f}</Pill>
+                              <input
+                                type="text"
+                                value={t.name ?? ""}
+                                onChange={(e) => setTee({ name: e.target.value })}
+                                disabled={r.locked}
+                                placeholder="Tee name"
+                                className="px-1.5 py-0.5 text-xs"
+                                style={{
+                                  border: `1px solid ${palette.rule}`,
+                                  borderRadius: 2,
+                                  background: r.locked ? "#F7F5F0" : "#fff",
+                                  width: 110,
+                                }}
+                              />
+                              <input
+                                type="number"
+                                value={t.courseRating ?? ""}
+                                onChange={(e) =>
+                                  setTee({
+                                    courseRating: e.target.value === "" ? null : Number(e.target.value),
+                                  })
+                                }
+                                disabled={r.locked}
+                                placeholder="CR"
+                                step="0.1"
+                                className="px-1.5 py-0.5 text-xs text-right"
+                                style={{
+                                  border: `1px solid ${palette.rule}`,
+                                  borderRadius: 2,
+                                  background: r.locked ? "#F7F5F0" : "#fff",
+                                  width: 56,
+                                }}
+                                title="Course rating"
+                              />
+                              <span className="text-xs" style={{ color: palette.inkSoft }}>/</span>
+                              <input
+                                type="number"
+                                value={t.slopeRating ?? ""}
+                                onChange={(e) =>
+                                  setTee({
+                                    slopeRating: e.target.value === "" ? null : Number(e.target.value),
+                                  })
+                                }
+                                disabled={r.locked}
+                                placeholder="Slope"
+                                min={55}
+                                max={155}
+                                className="px-1.5 py-0.5 text-xs text-right"
+                                style={{
+                                  border: `1px solid ${palette.rule}`,
+                                  borderRadius: 2,
+                                  background: r.locked ? "#F7F5F0" : "#fff",
+                                  width: 52,
+                                }}
+                                title="Slope rating (55–155)"
+                              />
+                            </div>
+                          );
+                        })}
+                        {/* Extra tees: not bound to a flight, just available as
+                            override options in the Participation tab dropdown. */}
+                        {(r.extraTees || []).map((xt) => {
+                          const updateXTee = (patch) =>
+                            updateRound(r.id, {
+                              extraTees: (r.extraTees || []).map((x) =>
+                                x.id === xt.id ? { ...x, ...patch } : x
+                              ),
+                            });
+                          const removeXTee = () =>
+                            updateRound(r.id, {
+                              extraTees: (r.extraTees || []).filter((x) => x.id !== xt.id),
+                            });
+                          return (
+                            <div key={xt.id} className="flex items-center gap-1">
+                              <Pill tone="neutral">+</Pill>
+                              <input
+                                type="text"
+                                value={xt.name ?? ""}
+                                onChange={(e) => updateXTee({ name: e.target.value })}
+                                disabled={r.locked}
+                                placeholder="Tee name"
+                                className="px-1.5 py-0.5 text-xs"
+                                style={{
+                                  border: `1px solid ${palette.rule}`,
+                                  borderRadius: 2,
+                                  background: r.locked ? "#F7F5F0" : "#fff",
+                                  width: 110,
+                                }}
+                              />
+                              <input
+                                type="number"
+                                value={xt.courseRating ?? ""}
+                                onChange={(e) =>
+                                  updateXTee({
+                                    courseRating: e.target.value === "" ? null : Number(e.target.value),
+                                  })
+                                }
+                                disabled={r.locked}
+                                placeholder="CR"
+                                step="0.1"
+                                className="px-1.5 py-0.5 text-xs text-right"
+                                style={{
+                                  border: `1px solid ${palette.rule}`,
+                                  borderRadius: 2,
+                                  background: r.locked ? "#F7F5F0" : "#fff",
+                                  width: 56,
+                                }}
+                                title="Course rating"
+                              />
+                              <span className="text-xs" style={{ color: palette.inkSoft }}>/</span>
+                              <input
+                                type="number"
+                                value={xt.slopeRating ?? ""}
+                                onChange={(e) =>
+                                  updateXTee({
+                                    slopeRating: e.target.value === "" ? null : Number(e.target.value),
+                                  })
+                                }
+                                disabled={r.locked}
+                                placeholder="Slope"
+                                min={55}
+                                max={155}
+                                className="px-1.5 py-0.5 text-xs text-right"
+                                style={{
+                                  border: `1px solid ${palette.rule}`,
+                                  borderRadius: 2,
+                                  background: r.locked ? "#F7F5F0" : "#fff",
+                                  width: 52,
+                                }}
+                                title="Slope rating (55–155)"
+                              />
+                              <button
+                                type="button"
+                                onClick={removeXTee}
+                                disabled={r.locked}
+                                className="px-1 text-xs"
+                                style={{ color: palette.alert }}
+                                title="Remove this tee"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          );
+                        })}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            updateRound(r.id, {
+                              extraTees: [
+                                ...(r.extraTees || []),
+                                {
+                                  id: "xt-" + Date.now().toString(36).slice(-5),
+                                  name: "",
+                                  slopeRating: null,
+                                  courseRating: null,
+                                },
+                              ],
+                            })
+                          }
+                          disabled={r.locked}
+                          className="px-2 py-0.5 text-xs"
+                          style={{
+                            border: `1px dashed ${palette.rule}`,
+                            borderRadius: 2,
+                            color: palette.inkSoft,
+                            background: "transparent",
+                          }}
+                        >
+                          + Tee
+                        </button>
+                      </div>
                     </td>
                     <td className="px-3 py-2">
                       <Pill tone={r.locked ? "locked" : "open"}>{r.locked ? "Locked" : "Open"}</Pill>
@@ -1350,7 +1779,7 @@ function SetupTab({ state, setState }) {
           </table>
         </div>
         <div className="px-3 py-2 text-xs" style={{ color: palette.inkSoft }}>
-          Tees are configured per flight on each round's <strong>Course</strong> tab. Format above: tee name (rating/slope).
+          Tees editable here (name · CR · Slope) per flight. The <strong>+ Tee</strong> button adds an extra tee box (not tied to any flight) that becomes available in <strong>Round → Participation → Tee</strong> dropdown as a quick override option for individual players.
         </div>
       </Card>
     </div>
@@ -1469,18 +1898,16 @@ function ParticipationPanel({ state, round, updateRound }) {
   // day depending on who's playing).
   const flightOf = (p) => flightForRound(round, p);
   const active = state.players.filter((p) => round.participants[p.id]?.active);
-  const inSkinsA = active.filter(
-    (p) => round.participants[p.id]?.inSkins && flightOf(p) === "A"
+  // Per-flight counts of who's in each side game (used for pot KPIs).
+  const skinsByF = Object.fromEntries(
+    FLIGHTS.map((f) => [f, active.filter((p) => round.participants[p.id]?.inSkins && flightOf(p) === f)])
   );
-  const inSkinsB = active.filter(
-    (p) => round.participants[p.id]?.inSkins && flightOf(p) === "B"
+  const inByF = Object.fromEntries(
+    FLIGHTS.map((f) => [f, active.filter((p) => round.participants[p.id]?.inIndividualNet && flightOf(p) === f)])
   );
-  const inIN = active.filter((p) => round.participants[p.id]?.inIndividualNet);
-  const inINA = inIN.filter((p) => flightOf(p) === "A");
-  const inINB = inIN.filter((p) => flightOf(p) === "B");
-  const inBB = active.filter((p) => round.participants[p.id]?.inBestBall);
-  const inBBA = inBB.filter((p) => flightOf(p) === "A");
-  const inBBB = inBB.filter((p) => flightOf(p) === "B");
+  const bbByF = Object.fromEntries(
+    FLIGHTS.map((f) => [f, active.filter((p) => round.participants[p.id]?.inBestBall && flightOf(p) === f)])
+  );
 
   const setAllActive = (val) =>
     updateRound({
@@ -1513,16 +1940,47 @@ function ParticipationPanel({ state, round, updateRound }) {
     updateRound({ participants: next });
   };
 
+  // Same idea for per-player tee overrides.
+  const resetAllTees = () => {
+    if (!confirm("Clear per-player tee overrides for all players in this round?")) return;
+    const next = { ...round.participants };
+    for (const pid of Object.keys(next)) {
+      if (next[pid].teeOverride) {
+        const { teeOverride, ...rest } = next[pid];
+        next[pid] = rest;
+      }
+    }
+    updateRound({ participants: next });
+  };
+
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 md:grid-cols-7 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <KPI label="Active" value={active.length} />
-        <KPI label="Skins A pot" value={fmt$(inSkinsA.length * 18)} sub={`${inSkinsA.length} pl.`} />
-        <KPI label="Skins B pot" value={fmt$(inSkinsB.length * 18)} sub={`${inSkinsB.length} pl.`} />
-        <KPI label="IN A pot" value={fmt$(inINA.length * 5)} sub={`${inINA.length} pl.`} />
-        <KPI label="IN B pot" value={fmt$(inINB.length * 5)} sub={`${inINB.length} pl.`} />
-        <KPI label="BB A pot" value={fmt$(inBBA.length * 5)} sub={`${inBBA.length} pl.`} />
-        <KPI label="BB B pot" value={fmt$(inBBB.length * 5)} sub={`${inBBB.length} pl.`} />
+        {FLIGHTS.map((f) => (
+          <KPI
+            key={`skins-${f}`}
+            label={`Skins ${f}`}
+            value={fmt$(skinsByF[f].length * 18)}
+            sub={`${skinsByF[f].length} pl.`}
+          />
+        ))}
+        {FLIGHTS.map((f) => (
+          <KPI
+            key={`in-${f}`}
+            label={`IN ${f}`}
+            value={fmt$(inByF[f].length * 5)}
+            sub={`${inByF[f].length} pl.`}
+          />
+        ))}
+        {FLIGHTS.map((f) => (
+          <KPI
+            key={`bb-${f}`}
+            label={`BB ${f}`}
+            value={fmt$(bbByF[f].length * 5)}
+            sub={`${bbByF[f].length} pl.`}
+          />
+        ))}
       </div>
 
       <div className="flex gap-2 flex-wrap items-center">
@@ -1535,8 +1993,11 @@ function ParticipationPanel({ state, round, updateRound }) {
         <Btn variant="ghost" onClick={resetAllFlights} disabled={round.locked}>
           Reset flights
         </Btn>
+        <Btn variant="ghost" onClick={resetAllTees} disabled={round.locked}>
+          Reset tees
+        </Btn>
         <span className="text-xs ml-2" style={{ color: palette.inkSoft }}>
-          The <strong>Flight</strong> column is the assignment for THIS round only — Golf Pad re-flights each day, so override here when needed. The default falls back to the player's static category from their index.
+          The <strong>Flight</strong> column is the assignment for THIS round only — Golf Pad re-flights each day, so override here when needed. The default falls back to the player's static category from their index. The <strong>Tee</strong> column overrides the slope/CR used to compute that player's course handicap (useful when a player chooses a different tee box than their flight's default).
         </span>
       </div>
 
@@ -1548,6 +2009,7 @@ function ParticipationPanel({ state, round, updateRound }) {
                 <th className="text-left px-3 py-2 font-medium">Player</th>
                 <th className="px-3 py-2 font-medium">Index</th>
                 <th className="px-3 py-2 font-medium">Flight (this round)</th>
+                <th className="px-3 py-2 font-medium">Tee (this round)</th>
                 <th className="px-3 py-2 font-medium">Active</th>
                 <th className="px-3 py-2 font-medium">Skins</th>
                 <th className="px-3 py-2 font-medium">Ind. Net</th>
@@ -1558,7 +2020,7 @@ function ParticipationPanel({ state, round, updateRound }) {
               {state.players.map((p) => {
                 const part = round.participants[p.id] || {};
                 const effective = flightForRound(round, p);
-                const isOverridden = part.flight === "A" || part.flight === "B";
+                const isOverridden = FLIGHTS.includes(part.flight);
                 const setFlight = (val) => {
                   if (val === "" || val === p.category) {
                     // Selecting the static category clears the override entirely.
@@ -1585,8 +2047,9 @@ function ParticipationPanel({ state, round, updateRound }) {
                           className="px-2 py-1 text-sm"
                           style={{ border: `1px solid ${palette.rule}`, borderRadius: 2, background: "#fff" }}
                         >
-                          <option value="A">A</option>
-                          <option value="B">B</option>
+                          {FLIGHTS.map((f) => (
+                            <option key={f} value={f}>{f}</option>
+                          ))}
                         </select>
                         {isOverridden && effective !== p.category && (
                           <span
@@ -1598,6 +2061,25 @@ function ParticipationPanel({ state, round, updateRound }) {
                           </span>
                         )}
                       </div>
+                    </td>
+                    <td className="px-3 py-2 text-center">
+                      <TeeCell
+                        round={round}
+                        player={p}
+                        effectiveFlight={effective}
+                        onChange={(teeOverride) => {
+                          if (teeOverride == null) {
+                            // Clear override
+                            const { teeOverride: _, ...rest } = part;
+                            updateRound({
+                              participants: { ...round.participants, [p.id]: rest },
+                            });
+                          } else {
+                            setPart(p.id, { teeOverride });
+                          }
+                        }}
+                        disabled={round.locked || !part.active}
+                      />
                     </td>
                     <td className="px-3 py-2 text-center">
                       <Toggle
@@ -1685,18 +2167,21 @@ function CoursePanel({ round, players, updateRound }) {
     updateRound({ teesByCategory: next });
   };
   const coursePar = sumPars(round.pars);
-  const teeA = round.teesByCategory?.A || {};
-  const teeB = round.teesByCategory?.B || {};
 
-  const previewByCat = ["A", "B"].map((cat) => {
+  const previewByCat = FLIGHTS.map((cat) => {
     const list = (players || [])
       .filter((p) => flightForRound(round, p) === cat)
-      .map((p) => ({
-        id: p.id,
-        name: p.name,
-        index: p.handicapIndex,
-        ch: chForPlayer(p, round),
-      }))
+      .map((p) => {
+        const ov = round?.participants?.[p.id]?.teeOverride;
+        const hasOv = !!(ov && (ov.slopeRating != null || ov.courseRating != null));
+        return {
+          id: p.id,
+          name: p.name,
+          index: p.handicapIndex,
+          ch: chForPlayer(p, round),
+          teeOverride: hasOv ? ov : null,
+        };
+      })
       .sort((a, b) => a.ch - b.ch);
     return { cat, list };
   });
@@ -1704,9 +2189,9 @@ function CoursePanel({ round, players, updateRound }) {
   return (
     <div className="space-y-4">
       <Card title="Tees by flight — slope, rating, par">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {["A", "B"].map((cat) => {
-            const t = cat === "A" ? teeA : teeB;
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {FLIGHTS.map((cat) => {
+            const t = round.teesByCategory?.[cat] || {};
             const setT = (patch) => setTee(cat, patch);
             return (
               <div
@@ -1859,7 +2344,18 @@ function CoursePanel({ round, players, updateRound }) {
                   <tbody>
                     {list.map((p) => (
                       <tr key={p.id} style={{ borderBottom: `1px solid ${palette.rule}` }}>
-                        <td className="px-3 py-2">{p.name}</td>
+                        <td className="px-3 py-2">
+                          {p.name}
+                          {p.teeOverride && (
+                            <span
+                              title={`Tee override: ${p.teeOverride.name || "Custom"} — slope ${p.teeOverride.slopeRating ?? "—"}, CR ${p.teeOverride.courseRating ?? "—"}`}
+                              className="ml-1 text-xs"
+                              style={{ color: palette.gold, fontWeight: 700 }}
+                            >
+                              ●
+                            </span>
+                          )}
+                        </td>
                         <td className="px-3 py-2 text-right">{p.index}</td>
                         <td className="px-3 py-2 text-right" style={{ fontWeight: 600 }}>{p.ch}</td>
                         <td className="px-3 py-2 text-right" style={{ color: palette.inkSoft }}>{skinsHcp(p.ch)}</td>
@@ -1897,7 +2393,11 @@ function TeamsPanel({ state, round, updateRound }) {
       })
       .filter(Boolean);
     if (cats.length === 0) return "A";
-    return cats.every((c) => c === "B") ? "B" : "A";
+    // All members agree → that flight; otherwise default to A.
+    for (const f of FLIGHTS) {
+      if (cats.every((c) => c === f)) return f;
+    }
+    return "A";
   };
 
   const teamsByFlight = (flight) => round.teams.filter((t) => teamFlight(t) === flight);
@@ -2062,9 +2562,8 @@ function TeamsPanel({ state, round, updateRound }) {
         </div>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {renderFlightColumn("A")}
-        {renderFlightColumn("B")}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {FLIGHTS.map((f) => renderFlightColumn(f))}
       </div>
     </div>
   );
@@ -2342,21 +2841,29 @@ function ResultsTab({ state, currentRoundId, setCurrentRoundId }) {
 
       <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
         <KPI label="Active" value={results.activePlayerIds.length} />
-        <KPI label="Skins A" value={fmt$(results.potBreakdown.skinsA)} />
-        <KPI label="Skins B" value={fmt$(results.potBreakdown.skinsB)} />
-        <KPI label="IN A" value={fmt$(results.indNetA.pot)} />
-        <KPI label="IN B" value={fmt$(results.indNetB.pot)} />
+        {FLIGHTS.map((f) => (
+          <KPI key={`skins-${f}`} label={`Skins ${f}`} value={fmt$(results.skinsByFlight[f].pot)} />
+        ))}
+        {FLIGHTS.map((f) => (
+          <KPI key={`in-${f}`} label={`IN ${f}`} value={fmt$(results.indNetByFlight[f].pot)} />
+        ))}
         <KPI label="Best Ball" value={fmt$(results.potBreakdown.bestBall)} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <SkinsCard title="Skins · Category A" data={results.skinsA} playerById={playerById} />
-        <SkinsCard title="Skins · Category B" data={results.skinsB} playerById={playerById} />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {FLIGHTS.map((f) => (
+          <SkinsCard
+            key={`skins-card-${f}`}
+            title={`Skins · Category ${f}`}
+            data={results.skinsByFlight[f]}
+            playerById={playerById}
+          />
+        ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {["A", "B"].map((flight) => {
-          const data = results[`indNet${flight}`];
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {FLIGHTS.map((flight) => {
+          const data = results.indNetByFlight[flight];
           return (
             <Card
               key={flight}
@@ -2425,9 +2932,9 @@ function ResultsTab({ state, currentRoundId, setCurrentRoundId }) {
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {["A", "B"].map((flight) => {
-          const data = results[`bestBall${flight}`];
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {FLIGHTS.map((flight) => {
+          const data = results.bestBall[flight];
           return (
             <Card
               key={flight}
@@ -2622,54 +3129,45 @@ function CopyWhatsAppBtn({ round, results, players }) {
     const lines = [];
     lines.push(`🏌️ *${round.courseName}* — R${round.number} (${round.date})`);
     lines.push(`Active: ${results.activePlayerIds.length}`);
-    lines.push("");
-    lines.push(`*Skins A* — pot ${fmt$(results.potBreakdown.skinsA)} · per skin ${fmt$(results.skinsA.skinValue)}`);
-    Object.entries(results.skinsA.skinsByPlayer)
-      .filter(([, v]) => v > 0)
-      .sort((a, b) => b[1] - a[1])
-      .forEach(([pid, n]) =>
-        lines.push(`  • ${playerById[pid]?.name}: ${n} skins → ${fmt$(results.skinsA.payouts[pid])}`)
-      );
-    lines.push("");
-    lines.push(`*Skins B* — pot ${fmt$(results.potBreakdown.skinsB)} · per skin ${fmt$(results.skinsB.skinValue)}`);
-    Object.entries(results.skinsB.skinsByPlayer)
-      .filter(([, v]) => v > 0)
-      .sort((a, b) => b[1] - a[1])
-      .forEach(([pid, n]) =>
-        lines.push(`  • ${playerById[pid]?.name}: ${n} skins → ${fmt$(results.skinsB.payouts[pid])}`)
-      );
-    lines.push("");
-    lines.push(`*Individual Net A* — pot ${fmt$(results.indNetA.pot)}`);
-    results.indNetA.ranking
-      .filter((r) => r.position <= 3 && (results.indNetA.payouts[r.playerId] || 0) > 0)
-      .forEach((r) =>
-        lines.push(`  ${r.position}. ${playerById[r.playerId]?.name} (${r.net}) → ${fmt$(results.indNetA.payouts[r.playerId])}`)
-      );
-    lines.push("");
-    lines.push(`*Individual Net B* — pot ${fmt$(results.indNetB.pot)}`);
-    results.indNetB.ranking
-      .filter((r) => r.position <= 3 && (results.indNetB.payouts[r.playerId] || 0) > 0)
-      .forEach((r) =>
-        lines.push(`  ${r.position}. ${playerById[r.playerId]?.name} (${r.net}) → ${fmt$(results.indNetB.payouts[r.playerId])}`)
-      );
-    lines.push("");
-    lines.push(`*Best Ball A* — pot ${fmt$(results.bestBallA.pot)}`);
-    results.bestBallA.teamResults
-      .filter((t) => (results.bestBallA.teamPayouts[t.teamId] || 0) > 0)
-      .forEach((t) =>
-        lines.push(
-          `  ${t.position}. ${t.teamName} (${t.total}) → ${fmt$(results.bestBallA.teamPayouts[t.teamId])}`
-        )
-      );
-    lines.push("");
-    lines.push(`*Best Ball B* — pot ${fmt$(results.bestBallB.pot)}`);
-    results.bestBallB.teamResults
-      .filter((t) => (results.bestBallB.teamPayouts[t.teamId] || 0) > 0)
-      .forEach((t) =>
-        lines.push(
-          `  ${t.position}. ${t.teamName} (${t.total}) → ${fmt$(results.bestBallB.teamPayouts[t.teamId])}`
-        )
-      );
+
+    for (const f of FLIGHTS) {
+      const skins = results.skinsByFlight[f];
+      if (skins.pot === 0) continue;
+      lines.push("");
+      lines.push(`*Skins ${f}* — pot ${fmt$(skins.pot)} · per skin ${fmt$(skins.skinValue)}`);
+      Object.entries(skins.skinsByPlayer)
+        .filter(([, v]) => v > 0)
+        .sort((a, b) => b[1] - a[1])
+        .forEach(([pid, n]) =>
+          lines.push(`  • ${playerById[pid]?.name}: ${n} skins → ${fmt$(skins.payouts[pid])}`)
+        );
+    }
+
+    for (const f of FLIGHTS) {
+      const ind = results.indNetByFlight[f];
+      if (ind.pot === 0) continue;
+      lines.push("");
+      lines.push(`*Individual Net ${f}* — pot ${fmt$(ind.pot)}`);
+      ind.ranking
+        .filter((r) => r.position <= 3 && (ind.payouts[r.playerId] || 0) > 0)
+        .forEach((r) =>
+          lines.push(`  ${r.position}. ${playerById[r.playerId]?.name} (${r.net}) → ${fmt$(ind.payouts[r.playerId])}`)
+        );
+    }
+
+    for (const f of FLIGHTS) {
+      const bb = results.bestBall[f];
+      if (bb.pot === 0) continue;
+      lines.push("");
+      lines.push(`*Best Ball ${f}* — pot ${fmt$(bb.pot)}`);
+      bb.teamResults
+        .filter((t) => (bb.teamPayouts[t.teamId] || 0) > 0)
+        .forEach((t) =>
+          lines.push(
+            `  ${t.position}. ${t.teamName} (${t.total}) → ${fmt$(bb.teamPayouts[t.teamId])}`
+          )
+        );
+    }
     const text = lines.join("\n");
     try {
       await navigator.clipboard.writeText(text);
