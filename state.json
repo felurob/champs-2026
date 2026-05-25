@@ -1519,7 +1519,8 @@
           5
         ]
       },
-      "locked": false
+      "locked": false,
+      "extraTees": []
     },
     {
       "id": "r2",
@@ -2545,7 +2546,8 @@
           7
         ]
       },
-      "locked": false
+      "locked": false,
+      "extraTees": []
     },
     {
       "id": "r3",
@@ -3906,7 +3908,8 @@
           4
         ]
       },
-      "locked": false
+      "locked": false,
+      "extraTees": []
     },
     {
       "id": "r4",
@@ -4160,6 +4163,11 @@
             "slopeRating": 135,
             "courseRating": 74.9,
             "ratingPar": 71
+          },
+          "teeOverride": {
+            "name": "Copper",
+            "slopeRating": 135,
+            "courseRating": 74.9
           }
         },
         "p23": {
@@ -5245,7 +5253,8 @@
           4
         ]
       },
-      "locked": false
+      "locked": false,
+      "extraTees": []
     },
     {
       "id": "r5",
@@ -5357,7 +5366,12 @@
           "inSkins": true,
           "inIndividualNet": true,
           "inBestBall": true,
-          "flight": "B"
+          "flight": "B",
+          "teeOverride": {
+            "name": "Signature",
+            "slopeRating": 125,
+            "courseRating": 69.4
+          }
         },
         "p7": {
           "paid": true,
@@ -5482,7 +5496,12 @@
           "inSkins": true,
           "inIndividualNet": true,
           "inBestBall": true,
-          "flight": "B"
+          "flight": "B",
+          "teeOverride": {
+            "name": "Signature",
+            "slopeRating": 125,
+            "courseRating": 69.4
+          }
         },
         "p22": {
           "paid": true,
@@ -5493,6 +5512,11 @@
           "flight": "A",
           "playerTee": {
             "name": "Pro",
+            "slopeRating": 137,
+            "courseRating": 74
+          },
+          "teeOverride": {
+            "name": "Tournament",
             "slopeRating": 137,
             "courseRating": 74
           }
@@ -5519,7 +5543,12 @@
           "inSkins": true,
           "inIndividualNet": true,
           "inBestBall": true,
-          "flight": "B"
+          "flight": "B",
+          "teeOverride": {
+            "name": "Signature",
+            "slopeRating": 125,
+            "courseRating": 69.4
+          }
         },
         "p26": {
           "paid": true,
@@ -5527,7 +5556,12 @@
           "inSkins": true,
           "inIndividualNet": true,
           "inBestBall": true,
-          "flight": "B"
+          "flight": "B",
+          "teeOverride": {
+            "name": "Signature",
+            "slopeRating": 125,
+            "courseRating": 69.4
+          }
         },
         "p27": {
           "paid": true,
@@ -5556,6 +5590,11 @@
             "name": "Sig",
             "slopeRating": 125,
             "courseRating": 69.4
+          },
+          "teeOverride": {
+            "name": "Signature",
+            "slopeRating": 125,
+            "courseRating": 69.4
           }
         },
         "p30": {
@@ -5572,7 +5611,12 @@
           "inSkins": true,
           "inIndividualNet": true,
           "inBestBall": true,
-          "flight": "B"
+          "flight": "B",
+          "teeOverride": {
+            "name": "Signature",
+            "slopeRating": 125,
+            "courseRating": 69.4
+          }
         },
         "p32": {
           "paid": true,
@@ -6560,7 +6604,15 @@
           4
         ]
       },
-      "locked": false
+      "locked": false,
+      "extraTees": [
+        {
+          "id": "xt-bb6nn",
+          "name": "Signature",
+          "slopeRating": 125,
+          "courseRating": 69.4
+        }
+      ]
     }
   ]
 }
